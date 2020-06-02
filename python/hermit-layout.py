@@ -29,7 +29,7 @@ def vec2_find_intersection( p0, t0, p1, t1, tolerance = 1 ):
     return (q1, k0, -k1)
 
 def vec2_rotate( vec, angle ):
-    th = angle / 180 * math.pi
+    th = angle * deg2rad
     co = math.cos( th )
     si = math.sin( th )
     nxvec = co * vec[0] - si * vec[1]
@@ -187,7 +187,7 @@ class keyboard_layout:
 
 def print_for_kicad( idx, prop ):
     angle = prop["r"]
-    th = angle / 180.0 * math.pi
+    th = angle * deg2rad
     co = math.cos( th )
     si = math.sin( th )
     w = prop["w"]
@@ -248,7 +248,7 @@ def make_kbd_hermit( path: str, unit, paper_size ):
     # Comma: the origin
     angle_Comm = -6
     org_Comm = vec2( 4.0, 3.6 )
-    org_Comm[1] += 30 / unit# yoffset
+    org_Comm[1] += 30 / unit# yoffset for A4 paper
 
     # parameters
     dx_Dot_L = -0.1
@@ -277,11 +277,11 @@ def make_kbd_hermit( path: str, unit, paper_size ):
 
     ## Pinky top
     # Scln(;)
-    angle_Dot_Scln = math.asin( -dx_Dot_L / (1 - dy_Scln) ) / math.pi * 180
+    angle_Dot_Scln = math.asin( -dx_Dot_L / (1 - dy_Scln) ) * rad2deg
     angle_PinkyTop = angle_Dot - angle_Dot_Scln
     tr_Dot = org_Dot + vec2( +0.5, -0.5 ) @ mat2_rot( angle_Dot )
     org_Scln = tr_Dot + vec2( +0.5, dy_Scln - 0.5) @ mat2_rot( angle_PinkyTop )
-    dx_Scln_P = dy_Scln * math.tan( angle_Dot_Scln / 180 * math.pi )
+    dx_Scln_P = dy_Scln * math.tan( angle_Dot_Scln * deg2rad )
     # Cln(:)
     org_Cln = org_Scln + vec2( +1, 0 ) @ mat2_rot( angle_PinkyTop )
 
@@ -292,15 +292,15 @@ def make_kbd_hermit( path: str, unit, paper_size ):
     lb_Cln = org_Cln - vec2( +0.5, -0.5 ) @ mat2_rot( angle_PinkyTop )
     Lt = np.linalg.norm( tr_Dot - lb_Cln )
     Lb = np.linalg.norm( br_Dot - lb_Cln )
-    angle_1 = math.acos( (1 + Lb * Lb - Lt * Lt ) / (2 * Lb)) / math.pi * 180
-    angle_2 = math.asin( 1 / Lb ) / math.pi * 180
+    angle_1 = math.acos( (1 + Lb * Lb - Lt * Lt ) / (2 * Lb)) * rad2deg
+    angle_2 = math.asin( 1 / Lb ) * rad2deg
     angle_Dot_Bsls = angle_1 - angle_2
     angle_PinkyBtm = angle_Dot + angle_Dot_Bsls
     org_Bsls = lb_Cln + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
     # Slsh(/)
     bl_Scln = org_Scln + vec2( -0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
     x, _, _ = vec2_find_intersection( br_Dot, vec2( 0, 1 ) @ mat2_rot( angle_Dot ), bl_Scln, vec2( -1, 0 ) @ mat2_rot( angle_PinkyBtm ) )
-    tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Bsls / 180 * math.pi ) * np.linalg.norm( x - br_Dot )
+    tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Bsls * deg2rad ) * np.linalg.norm( x - br_Dot )
     org_Slsh = tl_Slsh + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
 
     add_col( data, angle_Comm,  org_Comm, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm, col_C, xctr )
