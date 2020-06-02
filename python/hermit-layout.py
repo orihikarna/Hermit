@@ -84,10 +84,10 @@ class keyboard_layout:
         c = canvas.Canvas( path )
         size = landscape( A4 )
         c.setPageSize( size )
-        xoffset = size[0] / 2 - 30 * mm
+        xoffset = size[0] / 2
         yoffset = size[1] - 20 * mm
-        c.drawString( xoffset, yoffset, '150 x 150 mm' )
-        c.rect( xoffset, yoffset - 150 * mm, 150 * mm, 150 * mm, stroke = 1, fill = 0 )
+        c.drawString( xoffset, yoffset, '140 x 150 mm' )
+        c.rect( xoffset, yoffset - 150 * mm, 140 * mm, 150 * mm, stroke = 1, fill = 0 )
         for key in self.keys:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             px = x - rx + w / 2
@@ -207,52 +207,53 @@ def mat2_rot( deg ):
     s = np.sin( th )
     return np.array([[c, s], [-s, c]])
 
-def create_col_data( angle, org, dxs, names, ydir = -1, keyw = 1 ):
-    prop = collections.OrderedDict()
-    prop["r"] = angle
-    prop["rx"] = org[0]
-    prop["ry"] = org[1]
-    prop["y"] = -0.5
-    prop["x"] = -0.5
-    prop["w"] = keyw
-    row = [prop]
-    x, y = 0, 0
-    for idx, name in enumerate( names ):
-        row.append( { "x" : x, "y" : y } )
-        row.append( name )
-        x = -1 + dxs[min( idx, len( dxs ) - 1 )]
-        y = ydir
-    return row
+def add_col( data, angle, org, dxs, names1, names2, ydir = -1, keyw = 1 ):
+    for idx, names in enumerate( [names1, names2 ]):
+        xsign = +1 if idx == 0 else -1
+        prop = collections.OrderedDict()
+        prop["r"] = xsign * angle
+        prop["rx"] = xsign * org[0]
+        prop["ry"] = org[1]
+        prop["y"] = -0.5
+        prop["x"] = -0.5
+        prop["w"] = keyw
+        row = [prop]
+        x, y = 0, 0
+        for idx, name in enumerate( names ):
+            row.append( { "x" : x, "y" : y } )
+            row.append( name )
+            x = -1 + dxs[min( idx, len( dxs ) - 1 )] * xsign
+            y = ydir
+        data.append( row )
 
 def make_kbd_hermit( path: str ):
 
     data = []
     data.append( { "name" : "Hermit56", "author" : "orihikarna" } ) # meta
 
-    # finger columns
-    # col_n = []
-    # col_e = ["ESC", "Tab", "~\n^", "|\n¥"]
-    # col_1 = ["!\n1", "Q", "A", "Z"]
-    # col_2 = ['"\n2', "W", "S", "X"]
-    # col_3 = ["#\n3", "E", "D", "C"]
-    # col_4 = ["$\n4", "R", "F", "V"]
-    # col_5 = ["%\n5", "T", "G", "B"]
-    # col_l = ["{\n[", "BS\nDel"]
+    # Left hand
+    thumbs2 = ["Alt", "Ctrl", "Lower"]
+    col_Tab = ["|\n¥", "Shift", "Tab", "ESC"]
+    col_Z = ["Z", "A", "Q", "!\n1"]
+    col_X = ["X", "S", "W", "\n2"]
+    col_C = ["C", "D", "E", "#\n3"]
+    col_V = ["V", "F", "R", "$\n4"]
+    col_B = ["B", "G", "T", "%\n5"]
+    col_I2 = ["["]
 
-    col_I = ["["]
+    # Right hand
+    col_I1 = ["]"]
     col_N = ["N", "H", "Y", "^\n6"]
     col_M = ["M", "J", "U", "'\n7"]
     col_Comm = ["<\n,", "K", "I", "(\n8"]
     col_Dot  = [">\n.", "L", "O", ")\n9"]
     col_Scln = ["?\n/", "+\n;", "P", " \n0"]
     col_Cln  = ["|\n¥", "_\n\\", "*\n:", "=\n-"]
-    thumbs = ["Space", "Shift", "Raise"]
-
-    XYOffset = vec2( 0, 0 )
+    thumbs1 = ["Space", "Shift", "Raise"]
 
     # Comma: the origin
     angle_Comm = 0
-    org_Comm = vec2( 4.2, 3.6 )
+    org_Comm = vec2( 4.0, 3.6 )
 
     # parameters
     dx_Dot_L = -0.1
@@ -307,19 +308,18 @@ def make_kbd_hermit( path: str ):
     tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Bsls / 180 * math.pi ) * np.linalg.norm( x - br_Dot )
     org_Slsh = tl_Slsh + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
 
-    data.append( create_col_data( angle_Comm,  org_Comm + XYOffset, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm ) )
-    data.append( create_col_data( angle_Dot,   org_Dot  + XYOffset, [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot ) )
-    data.append( create_col_data( angle_Index, org_M    + XYOffset, [dx_M_J, -dx_M_J, dx_M_7], col_M ) )
+    add_col( data, angle_Comm,  org_Comm, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm, col_C )
+    add_col( data, angle_Dot,   org_Dot,  [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot, col_X )
 
     dxs_Index = [dx_M_J, -dx_M_J, dx_M_7, 0]
-    data.append( create_col_data( angle_Index, org_M + XYOffset, dxs_Index, col_M ) )
-    data.append( create_col_data( angle_Index, org_N + XYOffset, dxs_Index, col_N ) )
-    data.append( create_col_data( angle_Index, org_I + XYOffset, dxs_Index, col_I ) )
+    add_col( data, angle_Index, org_M, dxs_Index, col_M, col_V )
+    add_col( data, angle_Index, org_N, dxs_Index, col_N, col_B )
+    add_col( data, angle_Index, org_I, dxs_Index, col_I1, col_I2 )
 
-    data.append( create_col_data( angle_PinkyTop, org_Scln + XYOffset, [dx_Scln_P] * 3, col_Scln[1:] ) )
-    data.append( create_col_data( angle_PinkyTop, org_Cln  + XYOffset, [dx_Scln_P] * 2, col_Cln[2:] ) )
-    data.append( create_col_data( angle_PinkyBtm, org_Slsh + XYOffset, [dx_Scln_P] * 2, col_Scln[0:1] ) )
-    data.append( create_col_data( angle_PinkyBtm, org_Bsls + XYOffset, [0] * 2, col_Cln[1::-1], ydir = +1 ) )
+    add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P] * 3, col_Scln[1:], col_Z[1:] )
+    add_col( data,  angle_PinkyTop, org_Cln,  [dx_Scln_P] * 2, col_Cln[2:], col_Tab[2:] )
+    add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1] )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0] * 2, col_Cln[1::-1], col_Tab[1::-1], ydir = +1 )
 
     angle_Thmb = angle_Comm_Thmb + angle_Comm
     org_Thmb = org_Comm + delta_Comm_Thmb @ mat2_rot( angle_Comm )
@@ -327,8 +327,8 @@ def make_kbd_hermit( path: str ):
     angle = angle_Thmb
     org = org_Thmb
     keyw = 1.25
-    for idx, name in enumerate( thumbs ):
-        data.append( create_col_data( angle, org + XYOffset, [0], [name], ydir = -1, keyw = keyw ) )
+    for idx, name in enumerate( thumbs1 ):
+        add_col( data, angle, org, [0], [name], [thumbs2[idx]], ydir = -1, keyw = keyw )
         org += vec2( +keyw / 2 - dy_Thmb, +0.5 ) @ mat2_rot( angle )
         angle += dangles_Thmb[min( idx, len( dangles_Thmb ) - 1 )]
         org += vec2( -keyw / 2, +0.5 ) @ mat2_rot( angle )
