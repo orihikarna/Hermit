@@ -9,10 +9,38 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.lib.colors import red, black, white
 from reportlab.lib.units import mm
-from reportlab.lib.pagesizes import A4, landscape
 
 rad2deg = 180 / math.pi
 deg2rad = math.pi / 180
+
+def vec2( x, y ):
+    return np.array( [x, y] )
+
+def vec2_find_intersection( p0, t0, p1, t1, tolerance = 1 ):
+    A = vec2( t0, t1 )
+    R = np.linalg.inv( A )
+    B = p1 - p0
+    k0, k1 = B @ R
+    q0 =  k0 * t0 + p0
+    q1 = -k1 * t1 + p1
+    dq = np.linalg.norm( q0 - q1 )
+    if dq > 1e-3:
+        print( 'ERROR |q0 - q1| = {}'.format( dq ) )
+    return (q1, k0, -k1)
+
+def vec2_rotate( vec, angle ):
+    th = angle / 180 * math.pi
+    co = math.cos( th )
+    si = math.sin( th )
+    nxvec = co * vec[0] - si * vec[1]
+    nyvec = si * vec[0] + co * vec[1]
+    return (nxvec, nyvec)
+
+def mat2_rot( deg ):
+    th = deg / 180 * np.pi
+    c = np.cos( th )
+    s = np.sin( th )
+    return np.array([[c, s], [-s, c]])
 
 fontpath = "/System/Library/Fonts/Courier.dfont"
 
@@ -46,13 +74,13 @@ class keyboard_layout:
                     ps += ", {}={}".format( k, v )
             print( "key '{}' {}".format( key.name.replace( '\n', ',' ), ps[2:] ) )
 
-    def write_png( self, path: str, unit, board_size ):
-        # 2560 x 1600, 286mm x 179mm
-        w = board_size[0]#mm
-        h = board_size[1]#mm
+    def write_png( self, path: str, unit, thickness, paper_size, _yoffset ):
+        # 2560 x 1600, 286mm x 179mm, MacBook size
         scale = 2560.0 / 286.0 / 2
-        size = ( w * scale, h * scale )
+        size = scale * paper_size
         L = scale * unit
+        Th = scale * thickness * 2 / L
+        yoffset = scale * _yoffset
 
         font = ImageFont.truetype( fontpath, size = 24 )
         image = Image.new( 'RGBA', (math.ceil( size[0] ), math.ceil( size[1] )), ( 255, 255, 255 ) )
@@ -60,48 +88,40 @@ class keyboard_layout:
         for key in self.keys:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             pnts = []
-            for dx, dy in [(0, 0), (1, 0), (1, 1), (0, 1), (0.5, 0.5)]:
-                px = x - rx + w * dx
-                py = y - ry + h * dy
-                rad = r / 180.0 * math.pi
-                co = math.cos( rad )
-                si = math.sin( rad )
-                qx = co * px - si * py + rx
-                qy = si * px + co * py + ry
-                pnts.append( (L * qx, L * qy) )
+            for dx, dy in [vec2( 0, 0 ), vec2( 1, 0 ), vec2( 1, 1 ), vec2( 0, 1 ), vec2( 0.5, 0.5 )]:
+                px = x - rx + (w - Th) * dx
+                py = y - ry + (h - Th) * dy
+                q = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+                t = L * q + vec2( 0, yoffset )
+                pnts.append( (t[0], t[1]) )
             draw.polygon( pnts[:4], outline = ( 0, 0, 0 ) )
             w, h = draw.textsize( key.name, font )
             tx, ty = pnts[4]
             draw.text( (tx - w / 2, ty - h / 2), key.name, ( 0, 0, 0 ), font )
         image.save( path )
 
-    def write_pdf( self, path: str, unit, thickness ):
+    def write_pdf( self, path: str, unit, thickness, paper_size, _yoffset ):
         L = unit * mm
         Th = thickness * mm# cap thickness
 
         font = "HeiseiKakuGo-W5"
         pdfmetrics.registerFont( UnicodeCIDFont( font ) )
         c = canvas.Canvas( path )
-        size = landscape( A4 )
+        size = paper_size * mm
         c.setPageSize( size )
-        xoffset = size[0] / 2
-        yoffset = size[1] - 20 * mm
-        c.drawString( xoffset, yoffset, '140 x 150 mm' )
-        c.rect( xoffset, yoffset - 150 * mm, 140 * mm, 150 * mm, stroke = 1, fill = 0 )
+        yoffset = size[1] - _yoffset * mm
+        c.drawString( size[0] / 2, yoffset, '140 x 150 mm' )
+        c.rect( size[0] / 2, yoffset - 150 * mm, 140 * mm, 150 * mm, stroke = 1, fill = 0 )
         for key in self.keys:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             px = x - rx + w / 2
             py = y - ry + h / 2
-            rad = r * deg2rad
-            co = math.cos( rad )
-            si = math.sin( rad )
-            qx = co * px - si * py + rx
-            qy = si * px + co * py + ry
-            tx, ty = L * qx, L * qy
+            q = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+            t = L * q
             #
             c.saveState()
-            c.translate( xoffset + tx, yoffset - ty )
-            c.rotate( -key.r )
+            c.translate( t[0], yoffset - t[1] )
+            c.rotate( -r )
             c.setLineWidth( 1 )
             c.setStrokeColor( black )
             c.roundRect( -L * w / 2 + Th, -L * h / 2 + Th, L * w - 2 * Th, L * h - 2 * Th, unit / 5 * mm, stroke = 1, fill = 1 )
@@ -124,8 +144,8 @@ class keyboard_layout:
         data.append( self.meta )
         for key in self.keys:
             prop = collections.OrderedDict()
-            #prop['w'] = key.w
-            #prop['h'] = key.h
+            prop['w'] = key.w
+            prop['h'] = key.h
             prop['r'] = key.r
             prop['rx'] = key.rx
             prop['ry'] = key.ry
@@ -172,61 +192,37 @@ def print_for_kicad( idx, prop ):
     th = angle / 180.0 * math.pi
     co = math.cos( th )
     si = math.sin( th )
-    dx = prop["x"] + 0.5
-    dy = prop["y"] + 0.5
+    w = prop["w"]
+    h = prop["h"]
+    dx = prop["x"] + w / 2.0
+    dy = prop["y"] + h / 2.0
     cx = prop["rx"] + co * dx - si * dy
     cy = prop["ry"] + si * dx + co * dy
     print( "['TP{}', {:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}],".format( idx, cx, cy, angle, co, si ) )
 
-def vec2( x, y ):
-    return np.array( [x, y] )
-
-def vec2_find_intersection( p0, t0, p1, t1, tolerance = 1 ):
-    A = vec2( t0, t1 )
-    R = np.linalg.inv( A )
-    B = p1 - p0
-    k0, k1 = B @ R
-    q0 =  k0 * t0 + p0
-    q1 = -k1 * t1 + p1
-    dq = np.linalg.norm( q0 - q1 )
-    if dq > 1e-3:
-        print( 'ERROR |q0 - q1| = {}'.format( dq ) )
-    return (q1, k0, -k1)
-
-def vec2_rotate( vec, angle ):
-    th = angle / 180 * math.pi
-    co = math.cos( th )
-    si = math.sin( th )
-    nxvec = co * vec[0] - si * vec[1]
-    nyvec = si * vec[0] + co * vec[1]
-    return (nxvec, nyvec)
-
-def mat2_rot( deg ):
-    th = deg / 180 * np.pi
-    c = np.cos( th )
-    s = np.sin( th )
-    return np.array([[c, s], [-s, c]])
-
-def add_col( data, angle, org, dxs, names1, names2, ydir = -1, keyw = 1 ):
+def add_col( data, angle, org, dxs, names1, names2, xctr, ydir = -1, keyw = 1 ):
+    keyh = 1
     for idx, names in enumerate( [names1, names2 ]):
         xsign = +1 if idx == 0 else -1
         prop = collections.OrderedDict()
         prop["r"] = xsign * angle
-        prop["rx"] = xsign * org[0]
+        prop["rx"] = xsign * org[0] + xctr
         prop["ry"] = org[1]
-        prop["y"] = -0.5
-        prop["x"] = -0.5
+        prop["y"] = -keyh / 2
+        prop["x"] = -keyw / 2
         prop["w"] = keyw
         row = [prop]
         x, y = 0, 0
         for idx, name in enumerate( names ):
             row.append( { "x" : x, "y" : y } )
             row.append( name )
-            x = -1 + dxs[min( idx, len( dxs ) - 1 )] * xsign
-            y = ydir
+            x = -keyw + dxs[min( idx, len( dxs ) - 1 )] * xsign
+            y = keyh * ydir
         data.append( row )
 
-def make_kbd_hermit( path: str ):
+def make_kbd_hermit( path: str, unit ):
+
+    xctr = 294 / 2.0 / unit# A4 paper
 
     data = []
     data.append( { "name" : "Hermit56", "author" : "orihikarna" } ) # meta
@@ -252,7 +248,7 @@ def make_kbd_hermit( path: str ):
     thumbs1 = ["Space", "Shift", "Raise"]
 
     # Comma: the origin
-    angle_Comm = 0
+    angle_Comm = -6
     org_Comm = vec2( 4.0, 3.6 )
 
     # parameters
@@ -308,18 +304,18 @@ def make_kbd_hermit( path: str ):
     tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Bsls / 180 * math.pi ) * np.linalg.norm( x - br_Dot )
     org_Slsh = tl_Slsh + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
 
-    add_col( data, angle_Comm,  org_Comm, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm, col_C )
-    add_col( data, angle_Dot,   org_Dot,  [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot, col_X )
+    add_col( data, angle_Comm,  org_Comm, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm, col_C, xctr )
+    add_col( data, angle_Dot,   org_Dot,  [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot, col_X, xctr )
 
     dxs_Index = [dx_M_J, -dx_M_J, dx_M_7, 0]
-    add_col( data, angle_Index, org_M, dxs_Index, col_M, col_V )
-    add_col( data, angle_Index, org_N, dxs_Index, col_N, col_B )
-    add_col( data, angle_Index, org_I, dxs_Index, col_I1, col_I2 )
+    add_col( data, angle_Index, org_M, dxs_Index, col_M, col_V, xctr )
+    add_col( data, angle_Index, org_N, dxs_Index, col_N, col_B, xctr )
+    add_col( data, angle_Index, org_I, dxs_Index, col_I1, col_I2, xctr )
 
-    add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P] * 3, col_Scln[1:], col_Z[1:] )
-    add_col( data,  angle_PinkyTop, org_Cln,  [dx_Scln_P] * 2, col_Cln[2:], col_Tab[2:] )
-    add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1] )
-    add_col( data, angle_PinkyBtm, org_Bsls, [0] * 2, col_Cln[1::-1], col_Tab[1::-1], ydir = +1 )
+    add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P] * 3, col_Scln[1:], col_Z[1:], xctr )
+    add_col( data,  angle_PinkyTop, org_Cln,  [dx_Scln_P] * 2, col_Cln[2:], col_Tab[2:], xctr )
+    add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0] * 2, col_Cln[1::-1], col_Tab[1::-1], xctr, ydir = +1 )
 
     angle_Thmb = angle_Comm_Thmb + angle_Comm
     org_Thmb = org_Comm + delta_Comm_Thmb @ mat2_rot( angle_Comm )
@@ -328,7 +324,7 @@ def make_kbd_hermit( path: str ):
     org = org_Thmb
     keyw = 1.25
     for idx, name in enumerate( thumbs1 ):
-        add_col( data, angle, org, [0], [name], [thumbs2[idx]], ydir = -1, keyw = keyw )
+        add_col( data, angle, org, [0], [name], [thumbs2[idx]], xctr, ydir = -1, keyw = keyw )
         org += vec2( +keyw / 2 - dy_Thmb, +0.5 ) @ mat2_rot( angle )
         angle += dangles_Thmb[min( idx, len( dangles_Thmb ) - 1 )]
         org += vec2( -keyw / 2, +0.5 ) @ mat2_rot( angle )
@@ -345,8 +341,8 @@ if __name__=='__main__':
 
     # Hermit
     unit = 17.8
-    board_size = (315, 155)
-    data = make_kbd_hermit( dst_path )
+    paper_size = vec2( 294, 210 )
+    data = make_kbd_hermit( dst_path, unit )
 
     # write to json for keyboard layout editor
     with open( dst_path, 'w' ) as fout:
@@ -354,5 +350,7 @@ if __name__=='__main__':
 
     kbd = keyboard_layout.load( dst_path )
     # kbd.print()
-    kbd.write_png( dst_png, unit, board_size )
-    kbd.write_pdf( dst_pdf, unit, 0.3 )
+    thickness = 0.3#mm
+    yoffset = 30#mm
+    kbd.write_png( dst_png, unit, thickness, paper_size, yoffset )
+    kbd.write_pdf( dst_pdf, unit, thickness, paper_size, yoffset )
