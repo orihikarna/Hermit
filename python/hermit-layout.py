@@ -333,11 +333,11 @@ def make_kbd_hermit( path: str, unit ):
 
 if __name__=='__main__':
 
-    home_dir = os.path.expanduser( '~/' )
-    work_dir = os.path.join( home_dir, 'Downloads/' )
-    dst_path = work_dir + 'hermit-layout.json'
-    dst_png  = work_dir + 'hermit-layout.png'
-    dst_pdf  = work_dir + 'hermit-layout.pdf'
+    home_dir = os.path.expanduser( '~' )
+    work_dir = os.path.join( home_dir, 'Downloads' )
+    dst_path = os.path.join( work_dir + 'hermit-layout.json' )
+    dst_png  = os.path.join( work_dir + 'hermit-layout.png' )
+    dst_pdf  = os.path.join( work_dir + 'hermit-layout.pdf' )
 
     # Hermit
     unit = 17.8
