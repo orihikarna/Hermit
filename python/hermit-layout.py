@@ -79,7 +79,7 @@ class keyboard_layout:
         scale = 2560.0 / 286.0 / 2
         size = scale * paper_size
         L = scale * unit
-        Th = scale * thickness * 2 / L
+        Th = thickness / unit
 
         font = ImageFont.truetype( fontpath, size = 24 )
         image = Image.new( 'RGBA', (math.ceil( size[0] ), math.ceil( size[1] )), ( 255, 255, 255 ) )
@@ -88,15 +88,15 @@ class keyboard_layout:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             pnts = []
             for dx, dy in [vec2( 0, 0 ), vec2( 1, 0 ), vec2( 1, 1 ), vec2( 0, 1 ), vec2( 0.5, 0.5 )]:
-                px = x - rx + (w - Th) * dx
-                py = y - ry + (h - Th) * dy
+                px = x - rx + Th + (w - 2 * Th) * dx
+                py = y - ry + Th + (h - 2 * Th) * dy
                 q = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
                 t = L * q
                 pnts.append( (t[0], t[1]) )
             draw.polygon( pnts[:4], outline = ( 0, 0, 0 ) )
-            w, h = draw.textsize( key.name, font )
             tx, ty = pnts[4]
-            draw.text( (tx - w / 2, ty - h / 2), key.name, ( 0, 0, 0 ), font )
+            tw, th = draw.textsize( key.name, font )
+            draw.text( (tx - tw / 2, ty - th / 2), key.name, ( 0, 0, 0 ), font )
         image.save( path )
 
     def write_pdf( self, path: str, unit, thickness, paper_size ):
@@ -206,8 +206,8 @@ def add_col( data, angle, org, dxs, names1, names2, xctr, ydir = -1, keyw = 1 ):
         prop["r"] = xsign * angle
         prop["rx"] = xsign * org[0] + xctr
         prop["ry"] = org[1]
-        prop["y"] = -keyh / 2
-        prop["x"] = -keyw / 2
+        prop["y"] = -keyh / 2.0
+        prop["x"] = -keyw / 2.0
         prop["w"] = keyw
         row = [prop]
         x, y = 0, 0
@@ -218,7 +218,7 @@ def add_col( data, angle, org, dxs, names1, names2, xctr, ydir = -1, keyw = 1 ):
             y = keyh * ydir
         data.append( row )
 
-def make_kbd_hermit( path: str, unit, paper_size ):
+def make_kbd_hermit( path: str, unit, paper_size, prm_dx_Dot_L = -0.08 ):
 
     data = []
     data.append( { "name" : "Hermit56", "author" : "orihikarna" } ) # meta
@@ -251,13 +251,14 @@ def make_kbd_hermit( path: str, unit, paper_size ):
     org_Comm[1] += 30 / unit# yoffset for A4 paper
 
     # parameters
-    dx_Dot_L = -0.1
+    dx_Dot_L = prm_dx_Dot_L
     dx_Comm_K = dx_Dot_L * 2.0
     dy_Scln = 0.4
 
-    dangles_Thmb = (-16, -6)
-    angle_Comm_Thmb = 68
-    delta_Comm_Thmb = vec2( -1.3, 2.4 )
+    dangles_Thmb = (-14, -8)
+    angle_Index_Thmb = 79.3
+    #delta_Comm_Thmb = vec2( -1.3, 2.4 )
+    delta_M_Thmb = vec2( -0.66, 2.23 )
     dy_Thmb = -0.125
 
     # Index columns: M, N, I
@@ -316,8 +317,10 @@ def make_kbd_hermit( path: str, unit, paper_size ):
     add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
     add_col( data, angle_PinkyBtm, org_Bsls, [0] * 2, col_Cln[1::-1], col_Tab[1::-1], xctr, ydir = +1 )
 
-    angle_Thmb = angle_Comm_Thmb + angle_Comm
-    org_Thmb = org_Comm + delta_Comm_Thmb @ mat2_rot( angle_Comm )
+    #angle_Thmb = angle_Comm_Thmb + angle_Comm
+    angle_Thmb = angle_Index_Thmb + angle_Index
+    #org_Thmb = org_Comm + delta_Comm_Thmb @ mat2_rot( angle_Comm )
+    org_Thmb = org_M + delta_M_Thmb @ mat2_rot( angle_Index )
 
     angle = angle_Thmb
     org = org_Thmb
@@ -334,21 +337,24 @@ if __name__=='__main__':
 
     home_dir = os.path.expanduser( '~' )
     work_dir = os.path.join( home_dir, 'Downloads' )
-    dst_path = os.path.join( work_dir + 'hermit-layout.json' )
-    dst_png  = os.path.join( work_dir + 'hermit-layout.png' )
-    dst_pdf  = os.path.join( work_dir + 'hermit-layout.pdf' )
+    dst_path = os.path.join( work_dir, 'hermit-layout.json' )
+    dst_png_fmt  = os.path.join( work_dir, 'hermit-layout-{}.png' )
+    dst_pdf  = os.path.join( work_dir, 'hermit-layout.pdf' )
 
     # Hermit
     unit = 17.8
     paper_size = vec2( 294, 210 )
-    data = make_kbd_hermit( dst_path, unit, paper_size )
-
-    # write to json for keyboard layout editor
-    with open( dst_path, 'w' ) as fout:
-        json.dump( data, fout, indent = 4)
-
-    kbd = keyboard_layout.load( dst_path )
-    # kbd.print()
     thickness = 0.3#mm
-    kbd.write_png( dst_png, unit, thickness, paper_size )
-    kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
+
+    for i in [8]:#range( 30 ):
+        dx = -(i if i < 16 else 30 - i) / 100.
+        data = make_kbd_hermit( dst_path, unit, paper_size, dx )
+        # write to json for keyboard layout editor
+        with open( dst_path, 'w' ) as fout:
+            json.dump( data, fout, indent = 4 )
+
+        kbd = keyboard_layout.load( dst_path )
+        # kbd.print()
+        kbd.write_png( dst_png_fmt.format( i + 1 ), unit, thickness, paper_size )
+        kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
+        #break
