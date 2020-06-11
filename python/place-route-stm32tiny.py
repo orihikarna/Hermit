@@ -31,11 +31,10 @@ PCB_Offset = (0, 0)
 PCB_Width  = 1000
 PCB_Height =  700
 
-angle_reg = 45
-angle_uC  = 45
-angle_jp = 18.36
-offset_jp = 26
-
+#angle_reg = 45
+#angle_uC  = 45
+#angle_jp = 18.36
+#offset_jp = 26
 
 def makeZones( rect ):
     layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
@@ -51,115 +50,6 @@ def makeZones( rect ):
         #
         zones.append( zone )
         #polys.append( poly )
-
-
-def wire_uC_pins_simple( uC_pad_jpin, uC_angle_delta ):
-    uC = 'U1'
-    layer = kad.get_mod_layer( uC )
-    _, uC_angle = kad.get_mod_pos_angle( uC )
-
-    width = 20
-    angle_uC2 = uC_angle_delta - uC_angle 
-
-    # 両端点を列挙
-    lines = []
-    for uC_pad, j, pin in uC_pad_jpin:
-        pos_uC, net = kad.get_pad_pos_net( uC, uC_pad )
-        pos_jp, _   = kad.get_pad_pos_net( j, pin )
-        lines.append( (pos_uC, pos_jp, net) )
-
-    # 最後のピンから方向を決める
-    sign_x = +1 if pos_uC[0] < pos_jp[0] else -1
-    sign_y = +1 if pos_uC[1] < pos_jp[1] else -1
-
-    # 候補となる角度
-    angles = []
-    for angle in [angle_jp, 90, 120, 150]:
-        angles.append( (180 if sign_x > 0 else 0) + sign_x * sign_y * angle )
-
-    for pos_uC, pos_jp, net in lines:
-        pos_jp_offset = vec2.scale( offset_jp, (0, -sign_y), pos_jp )
-        # dir_jp2 との交点が間にあるか探す
-        pos_jp2 = None
-        angle_jp2 = None
-        for idx_dir, angle in enumerate( angles ):
-            pos_jp2 = pos_jp_offset if idx_dir == 0 else pos_jp
-            _, k_uC, k_jp = vec2.find_intersection( pos_uC, vec2.rotate( angle_uC2 ), pos_jp2, vec2.rotate( angle ) )
-            if k_uC > 30 and k_jp > 15:# OK 配線
-                angle_jp2 = angle
-                break
-        if angle_jp2 == None:
-            print( 'FATAL: cound not route' )
-            continue
-        kad.add_wire_directed( pos_uC, angle_uC2, pos_jp2, angle_jp2, net, layer, width, 15 )
-
-def wire_uC_pins():
-    uC_pad_jpin_angle = [
-        (90, [
-            ('9',  'J1', '8'),
-            ('10', 'J1', '7'),
-            ('11', 'J1', '6'),
-            ('12', 'J1', '5'),
-            ('13', 'J1', '4'),
-            ('14', 'J1', '3'),
-            ('15', 'J1', '2'),
-        ]),
-        (0, [
-            ('24', 'J2', '8'),
-            ('23', 'J2', '7'),
-            ('20', 'J2', '6'),
-            ('19', 'J2', '5'),
-            ('18', 'J2', '4'),
-            ('17', 'J2', '3'),
-        ]),
-        (-90, [
-            ('25', 'J2', '9'),
-            ('26', 'J2', '10'),
-            ('27', 'J2', '11'),
-            ('28', 'J2', '12'),
-            ('29', 'J2', '13'),
-            ('30', 'J2', '14'),
-        ]),
-        (-180, [
-            ('8', 'J1', '9'),
-            ('7', 'J1', '10'),
-            ('6', 'J1', '11'),
-            ('4', 'J1', '12'),
-            ('3', 'J1', '13'),
-            ('2', 'J1', '14'),
-        ]),
-    ]
-    for angle, uC_pad_jpin in uC_pad_jpin_angle:
-        wire_uC_pins_simple( uC_pad_jpin, angle )
-
-def get_pad_pos_angle_net( mod_name, pad_name ):
-    mod = kad.get_mod( mod_name )
-    pad = kad.get_pad( mod_name, pad_name )
-    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, pad.GetNet())
-
-def wire_mods2( tracks ):
-    for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
-        layer = kad.get_mod_layer( mod_a )
-        pos_a, angle_a, net_a = get_pad_pos_angle_net( mod_a, pad_a )
-        pos_b, angle_b, _     = get_pad_pos_angle_net( mod_b, pad_b )
-        __add_wire2( pos_a, pos_b, -angle_a, -angle_b, net_a, layer, width, prms )
-
-def __add_wire2( pos_a, pos_b, angle_a, angle_b, net, layer, width, prms ):
-    if type( prms ) == type( kad.Straight ) and prms == kad.Straight:
-        kad.add_wire_straight( [pos_a, pos_b], net, layer, width )
-    elif prms[0] == kad.Directed:
-        dangle_a, dangle_b, diag = prms[1:]
-        kad.add_wire_directed( pos_a, angle_a + dangle_a, pos_b, angle_b + dangle_b, net, layer, width, diag )
-    elif prms[0] == kad.OffsetDirected:
-        prms_a, prms_b, diag = prms[1:]
-        off_angle_a, off_len_a, dangle_a = prms_a
-        off_angle_b, off_len_b, dangle_b = prms_b
-        offset_a = vec2.scale( off_len_a, vec2.rotate( angle_a + off_angle_a ) )
-        offset_b = vec2.scale( off_len_b, vec2.rotate( angle_b + off_angle_b ) )
-        kad.add_wire_offset_directed( pos_a, angle_a + dangle_a, offset_a, pos_b, angle_b + dangle_b, offset_b, net, layer, width, diag )
-    elif prms[0] == kad.ZigZag:
-        dangle, diag = prms[1:]
-        kad.add_wire_zigzag( pos_a, pos_b, dangle + angle_a, net, layer, width, diag )
 
 def main():
     kad.removeDrawings()
@@ -207,10 +97,10 @@ def main():
         # NRST
         ('C9', (-120, -180), 180),
         # SW1 (BOOT0)
-        ('SW1', (550, -280), 90),
+        ('SW1', (550, -280), -90),
         ('R4', (250, -50), 90),
         # D1 (power)
-        (None, (530, 300), 0, [ ('D1', (0, 0), 0), ('R1', (0, 0), 180)  ] ),
+        (None, (530, 300), 0, [ ('D1', (0, 0), 180), ('R1', (0, 0), 0)  ] ),
         # D2, D3
         (None, (-250, -120), 0, [ ('D2', (0, 0), 90), ('R2', (0, 0), -90) ] ),
         (None, (-250,   50), 0, [ ('D3', (0, 0), 90), ('R3', (0, 0), -90) ] ),
@@ -221,35 +111,50 @@ def main():
     ###
 
     # mcu
-    wire_mods2( [
+    PH_OFFSET = 20
+    PH_ANGLE = 22
+    kad.wire_mods( [
         # pass caps
         ('C7', '1', 'C8', '1', 24, (Strt)),
         ('C7', '2', 'C8', '2', 24, (Strt)),
         # I2C pull-up
-        ('U2', '1', 'R6', '2', 24, (Dird2, (0, 0, 0), (45, 30, 45), 10)),
+        ('U2', '1', 'R6', '2', 24, (Dird2, (180, 8, 60), (90, 8, 210), 0)),
         ('R5', '2', 'R6', '2', 24, (Strt)),
         # Type-C CC
         ('R9', '2', 'R10', '2', 24, (Strt)),
         ### mcu
         # pass caps
-        ('U1', '1', 'C3', '1', 20, (Dird2, (-90, 30, 0), (0, 0, 0), 10)),
+        ('U1', '1', 'C3', '1', 20, (Dird2, (-90, 30,  0), (0, 0, 0), 5)),
         ('U1','32', 'C3', '2', 20, (Dird2, (180, 27, 90), (0, 0, -45), 5)),
-        ('U1','17', 'C5', '1', 20, (Dird2, (90, 30, 0), (0, 0, 0), 10)),
-        ('U1','16', 'C5', '2', 20, (Dird2, (0, 27, 90), (0, 0, -45), 5)),
+        ('U1','17', 'C5', '1', 20, (Dird2, ( 90, 30,  0), (0, 0, 0), 5)),
+        ('U1','16', 'C5', '2', 20, (Dird2, (  0, 27, 90), (0, 0, -45), 5)),
         # I/Os
-        ('U1', '8', 'J2', '2', 20, (Dird, 180, -30, 10)),# PA2
-        ('U1', '9', 'J2', '1', 20, (Dird, 180, -30, 10)),# PA3
-        # NRST
-        ('U1', '4', 'J2', '3', 20, (Dird, 180, -45, 10)),
-        ('C9', '1', 'J2', '3', 20, (Dird, 90, 45, 10)),
+        # J2 front
+        ('U1', '8', 'J2', '2', 20, (Dird2, (0, 0, 0), (0, -PH_OFFSET, 90 + PH_ANGLE), 5)),# PA2
+        ('U1', '9', 'J2', '1', 20, (Dird2, (0, 0, 0), (0, -PH_OFFSET, 90 + PH_ANGLE), 5)),# PA3
+        ('U1', '4', 'J2', '3', 20, (Dird2, (0, 0, 0), (0, -PH_OFFSET, 90 + PH_ANGLE), 5)),# NRST
+        ('U1', '1', 'J2', '4', 20, (Dird2, (0, 0, 0), (0, -PH_OFFSET, 90 + PH_ANGLE), 5)),# Vdd
+        # J2 back
+        ('C9', '1', 'J2', '3', 20, (Dird2, (0, 0, -90), (0, -PH_OFFSET, 90 - PH_ANGLE), 5)),# NRST
+        ('C7', '1', 'J2', '4', 20, (Dird2, (0, 0, -90), (0, -PH_OFFSET, 90 - PH_ANGLE), 5)),# Vdd
+        # J1 left
+        ('U1','19', 'J1', '1', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA9
+        ('U1','20', 'J1', '2', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA10
+        ('U1','23', 'J1', '3', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA13
+        ('U1','24', 'J1', '4', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA14
+        # J1 right
+        ('U1','26', 'J1', '5', 20, (Dird2, (-90, 35, -45), ( 45, 80, 0), 5)),# PB3
+        ('U1','27', 'J1', '6', 20, (Dird2, (-90, 55, -45), (  0,  0, 0), 5)),# PB4
+        ('U1','28', 'J1', '7', 20, (Dird2, (-90, 75, -45), (-45, 80, 0), 5)),# PB5
+        # I2C pull-up's
+        ('R5', '1', 'J1', '1', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA9
+        ('R6', '1', 'J1', '2', 20, (Dird2, (0, 0, 0), (0,  PH_OFFSET, 90 - PH_ANGLE), 5)),# PA10
         # BOOT0
-        ('SW1', '2', 'J2', '7', 20, (Dird, 90, 45, 5)),
+        #('SW1', '1', 'J2', '7', 20, (Dird, 90, 45, 5)),
         # LED D2&D3
         ('U1', '10', 'R2', '2', 20, (Dird, 90, 0, 10)),
         ('U1', '15', 'R3', '2', 20, (Dird, 90, 0, 10)),
-    ] )
-    # regulator
-    wire_mods2( [
+        ### regulator
         #('J3','B9', 'F1', '1', 24, (ZgZg, 90, 10)),
         ('J3','B9', 'F1', '1', 24, (Dird2, (90, 70, 0), (180, 0, 0), 10)),
         ('J3','B9', 'J2', '6', 24, (Dird2, (90, 70, 0), (150, 0, 150), 10)),
@@ -262,56 +167,26 @@ def main():
         ('U2', '2', 'C2', '1', 24, (Dird, -90, 0, 10)),
         #
         ('C6', '1', 'C2', '1', 24, (Dird, -90, 90, 10)),
-        #('C6', '1', 'C8', '1', 24, (Dird, -90, 0, 10)),
-
-        # ('U2', '1', 'U2', '5', 20, (Strt)),
-    #     ('L1', '1', 'U2', '1', 30, (Dird, 90 - angle_reg,    - angle_reg, 15)),
-    #     ('U2', '5', 'C1', '1', 30, (Dird,    - angle_reg, 90 - angle_reg, 15)),
-    #     ('U2', '2', 'C1', '2', 30, (Dird,    - angle_reg, 90 - angle_reg, 15)),
-    #     ('U2', '4', 'C2', '1', 30, (Dird,    - angle_reg, 90 - angle_reg, 15)),
-    #     ('U2', '2', 'C2', '2', 30, (Dird, 90 - angle_reg,    - angle_reg, 15)),
-    #     ('C1', '2', 'J2', '2', 20, (Dird2, (0, 0), (0, offset_jp), 180 - angle_reg, -angle_jp, 15)),
-    #     ('F1', '1', 'R1', '2', 20, (Dird2, vec2.scale( -10, vec2.rotate( 180 - angle_reg ) ), (0, 0), 105, -angle_jp, 15)),
     ] )
-    # # USB
-    # kad.wire_mods( [
-    #     ('J3', '1', 'F1', '1', 20, (Dird, 180, angle_reg, 5)),
-    # ] )
-    # # uc parts
-    # wire_uC_pins()
-    # kad.wire_mods( [
-    #     ('U1', '17', 'C3', '1', 20, (Strt)),
-    #     ('C4', '1',  'C3', '1', 30, (Strt)),
-    #     ('U1', '16', 'C3', '2', 20, (Strt)),
-    #     ('C4', '2',  'C3', '2', 30, (Strt)),
-    #     ('U1', '1',  'C5', '1', 20, (Strt)),
-    #     ('C6', '1',  'C5', '1', 30, (Strt)),
-    #     ('U1', '32', 'C5', '2', 20, (Strt)),
-    #     ('C6', '2',  'C5', '2', 30, (Strt)),
-    # ] )
+    # USB
+    kad.wire_mods( [
+        ('J3', 'A6', 'J3', 'B6', 12, (Dird2, (-90, 40, 0), (0, 0, -90), 5)),# DM
+        ('J3', 'A7', 'J3', 'B7', 12, (Dird2, (+90, 40, 0), (0, 0, +90), 5)),# DM
+        ('J3', 'B6', 'R8', '1', 12, (Dird2, (90, 50, 30), (+90, 20, 0), 5)),# DP
+        ('J3', 'A7', 'R7', '1', 12, (Dird2, (90, 64, 30), (-90, 20, 0), 5)),# DM
+    ] )
+    # USB: VBUS
+    # pos, angle = kad.get_mod_pos_angle( 'J3' )
+    # pos = vec2.add( pos, vec2.scale( -50, vec2.rotate( angle ) )
+    # kad.add_wire_directed( pos, angle, kad.get_pad_pos( 'J3', 'A9' ), angle - 90, net, layer, width, diag)
     # # SW1
     # kad.wire_mods( [
     #     ('C6', '1',  'SW1', '1', 20, (Dird2, (0, 0), (35, 0), 0, 90 - angle_jp, 15)),
     #     ('U1', '31', 'SW1', '2', 20, (Dird2, (0, 0), (98, 0), -90 - angle_uC, angle_jp, 20)),
     # ] )
-    # # SW2
+    # D1
     # kad.wire_mods( [
-    #     ('C9', '1', 'SW2', '1', 20, (Dird, -angle_jp, 0, 0)),
-    # ] )
-    # # D1
-    # kad.wire_mods( [
-    #     ('R1', '2', 'J2', '1', 20, (Dird2, (0, 0), (0, offset_jp), 105, -angle_jp, 15)),
-    # ] )
-    # # D2 & D3
-    # kad.wire_mods( [
-    #     ('R2', '2', 'J2', '13', 20, (Dird2, (0, 0), (0, offset_jp), 90, angle_jp, 15)),
-    #     ('R3', '2', 'J2', '14', 20, (Dird2, (0, 0), (0, offset_jp), 90, angle_jp, 15)),
-    # ] )
-    # # I2C pull-up's
-    # kad.wire_mods( [
-    #     ('R5', '2', 'R6', '2', 30, (Strt)),
-    #     ('R5', '1', 'J1', '14', 20, (Dird2, (0, 0), (0, -offset_jp), 90, -angle_jp, 15)),
-    #     ('R6', '1', 'J1', '13', 20, (Dird2, (0, 0), (0, -offset_jp), 90, -angle_jp, 15)),
+    #     ('R1', '2', 'J3', 'A9', 20, (Dird2, (0, 50, -90), (-90, 100, 10), 15)),# VBUS
     # ] )
 
 
@@ -321,7 +196,7 @@ def main():
 
     # pad vias
     via_pads = [
-        ('R1', '1'),
+        ('R1', '2'),
         ('R2', '1'),
         ('R3', '1'),
         ('C3', '1'),

@@ -186,6 +186,11 @@ def get_pad_pos_net( mod_name, pad_name ):
     pad = get_pad( mod_name, pad_name )
     return pnt.unit2mils( pad.GetPosition() ), pad.GetNet()
 
+def get_pad_pos_angle_net( mod_name, pad_name ):
+    mod = get_mod( mod_name )
+    pad = get_pad( mod_name, pad_name )
+    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, pad.GetNet())
+
 
 # wires
 def add_wire_straight( pnts, net, layer, width ):
@@ -236,50 +241,54 @@ def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, diag ):
     add_wire_directed( pos_a, angle, mid_pos, mid_angle, net, layer, width, diag )
     add_wire_directed( pos_b, angle, mid_pos, mid_angle, net, layer, width, diag )
 
-def __add_wire( pos_a, pos_b, net, layer, width, prms ):
+def __add_wire( pos_a, pos_b, angle_a, angle_b, net, layer, width, prms ):
     if type( prms ) == type( Straight ) and prms == Straight:
         add_wire_straight( [pos_a, pos_b], net, layer, width )
     elif prms[0] == Directed:
-        angle_a, angle_b, diag = prms[1:]
-        add_wire_directed( pos_a, angle_a, pos_b, angle_b, net, layer, width, diag )
+        dangle_a, dangle_b, diag = prms[1:]
+        add_wire_directed( pos_a, angle_a + dangle_a, pos_b, angle_b + dangle_b, net, layer, width, diag )
     elif prms[0] == OffsetDirected:
-        offset_a, offset_b, angle_a, angle_b, diag = prms[1:]
-        add_wire_offset_directed( pos_a, angle_a, offset_a, pos_b, angle_b, offset_b, net, layer, width, diag )
+        prms_a, prms_b, diag = prms[1:]
+        off_angle_a, off_len_a, dangle_a = prms_a
+        off_angle_b, off_len_b, dangle_b = prms_b
+        offset_a = vec2.scale( off_len_a, vec2.rotate( angle_a + off_angle_a ) )
+        offset_b = vec2.scale( off_len_b, vec2.rotate( angle_b + off_angle_b ) )
+        add_wire_offset_directed( pos_a, angle_a + dangle_a, offset_a, pos_b, angle_b + dangle_b, offset_b, net, layer, width, diag )
     elif prms[0] == ZigZag:
-        angle, diag = prms[1:]
-        add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, diag )
+        dangle, diag = prms[1:]
+        add_wire_zigzag( pos_a, pos_b, dangle + angle_a, net, layer, width, diag )
 
 def wire_mods( tracks ):
     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
         layer = get_mod_layer( mod_a )
-        pos_a, net_a = get_pad_pos_net( mod_a, pad_a )
-        pos_b, _     = get_pad_pos_net( mod_b, pad_b )
-        __add_wire( pos_a, pos_b, net_a, layer, width, prms )
+        pos_a, angle_a, net_a = get_pad_pos_angle_net( mod_a, pad_a )
+        pos_b, angle_b, _     = get_pad_pos_angle_net( mod_b, pad_b )
+        __add_wire( pos_a, pos_b, -angle_a, -angle_b, net_a, layer, width, prms )
 
-def wire_mods_layer( layer, tracks ):
-    for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
-        pos_a, net_a = get_pad_pos_net( mod_a, pad_a )
-        pos_b, _     = get_pad_pos_net( mod_b, pad_b )
-        __add_wire( pos_a, pos_b, net_a, layer, width, prms )
+# def wire_mods_layer( layer, tracks ):
+#     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
+#         pos_a, net_a = get_pad_pos_net( mod_a, pad_a )
+#         pos_b, _     = get_pad_pos_net( mod_b, pad_b )
+#         __add_wire( pos_a, pos_b, net_a, layer, width, prms )
 
-def wire_mods_to_via( pos_via, size_via, tracks ):
-    via = None
-    for mod_name, pad_name, width, prms in tracks:
-        layer = get_mod_layer( mod_name )
-        pos, net = get_pad_pos_net( mod_name, pad_name )
-        if via == None:
-            via = add_via( pos_via, net, size_via )
-        __add_wire( pos_via, pos, net, layer, width, prms )
-    return via
+# def wire_mods_to_via( pos_via, size_via, tracks ):
+#     via = None
+#     for mod_name, pad_name, width, prms in tracks:
+#         layer = get_mod_layer( mod_name )
+#         pos, net = get_pad_pos_net( mod_name, pad_name )
+#         if via == None:
+#             via = add_via( pos_via, net, size_via )
+#         __add_wire( pos_via, pos, net, layer, width, prms )
+#     return via
 
-def wire_mods_to_via_layer( pos_via, size_via, tracks ):
-    via = None
-    for mod_name, pad_name, width, layer, prms in tracks:
-        pos, net = get_pad_pos_net( mod_name, pad_name )
-        if via == None:
-            via = add_via( pos_via, net, size_via )
-        __add_wire( pos_via, pos, net, layer, width, prms )
-    return via
+# def wire_mods_to_via_layer( pos_via, size_via, tracks ):
+#     via = None
+#     for mod_name, pad_name, width, layer, prms in tracks:
+#         pos, net = get_pad_pos_net( mod_name, pad_name )
+#         if via == None:
+#             via = add_via( pos_via, net, size_via )
+#         __add_wire( pos_via, pos, net, layer, width, prms )
+#     return via
 
 
 # drawing
