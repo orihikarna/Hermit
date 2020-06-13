@@ -139,7 +139,7 @@ def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, diag ):
     mid_pos = vec2.scale( 0.5, vec2.add( pos_a, pos_b ) )
     _, ka1, _ = vec2.find_intersection( pos_a, vec2.rotate( - angle ), mid_pos, vec2.rotate( - angle + 45 ) )
     _, ka2, _ = vec2.find_intersection( pos_a, vec2.rotate( - angle ), mid_pos, vec2.rotate( - angle - 45 ) )
-    mid_angle = (- angle - 45) if abs( ka1 ) < abs( ka2 ) else (- angle + 45)
+    mid_angle = (angle - 45) if abs( ka1 ) < abs( ka2 ) else (angle + 45)
     add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, diag )
     add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, diag )
 
@@ -164,7 +164,7 @@ def wire_mods( tracks ):
             add_wire_offset_directed( prms2_a, prms2_b, net, layer, width, diag )
         elif prms[0] == ZigZag:
             dangle, diag = prms[1:]
-            add_wire_zigzag( pos_a, pos_b, - angle_a + dangle, net, layer, width, diag )
+            add_wire_zigzag( pos_a, pos_b, angle_a + dangle, net, layer, width, diag )
 ##
 
 # in mm
