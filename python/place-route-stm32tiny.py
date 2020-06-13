@@ -20,10 +20,12 @@ pcb = pcbnew.GetBoard()
 Strt  = kad.Straight # Straight
 Dird  = kad.Directed # Directed
 Dird2 = kad.OffsetDirected # Directed + Offsets
+Strt2 = 10
 ZgZg  = kad.ZigZag # ZigZag
 
 Straight  = kad.Straight # Straight
 Directed  = kad.Directed # Directed
+OffsetStraight = 10
 OffsetDirected = kad.OffsetDirected # Directed + Offsets
 ZigZag  = kad.ZigZag # ZigZag
 ##
@@ -91,57 +93,73 @@ def get_pad_pos_angle_net( mod_name, pad_name ):
 
 
 # wires
-def add_wire_straight( pnts, net, layer, width ):
+def add_wire_straight( pnts, net, layer, width, radius = 0 ):
+    rpnts = []
     for idx, curr in enumerate( pnts ):
-        if idx == 0:
+        if idx == 0 or idx + 1 == len( pnts ):# first or last
+            rpnts.append( curr )
             continue
         prev = pnts[idx-1]
+        next = pnts[idx+1]
+        vec_a = vec2.sub( prev, curr )
+        vec_b = vec2.sub( next, curr )
+        len_a = vec2.length( vec_a )
+        len_b = vec2.length( vec_b )
+        length = min( radius, len_a / 2, len_b / 2 )
+        if length < 1:
+            rpnts.append( curr )
+        else:
+            rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
+            rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
+    for idx, curr in enumerate( rpnts ):
+        if idx == 0:
+            continue
+        prev = rpnts[idx-1]
         if vec2.distance( prev, curr ) > 1:
             kad.add_track( prev, curr, net, layer, width )
 
-def add_wire_directed( prms_a, prms_b, net, layer, width, diag ):
+# params: (none)
+def add_wire_directed( prms_a, prms_b, net, layer, width, radius ):
     pos_a, angle_a = prms_a
     pos_b, angle_b = prms_b
     dir_a = vec2.rotate( - angle_a )
     dir_b = vec2.rotate( - angle_b )
-    xpos, ka, kb = vec2.find_intersection( pos_a, dir_a, pos_b, dir_b )
-    length = min( diag, abs( ka ), abs( kb ) )
-    pos_am = vec2.scale( -length * sign( ka ), dir_a, xpos )
-    pos_bm = vec2.scale( -length * sign( kb ), dir_b, xpos )
-    pnts = [pos_a, pos_am, pos_bm, pos_b]
-    add_wire_straight( pnts, net, layer, width )
+    xpos, _, _ = vec2.find_intersection( pos_a, dir_a, pos_b, dir_b )
+    pnts = [pos_a, xpos, pos_b]
+    add_wire_straight( pnts, net, layer, width, radius )
 
-def add_wire_offset_directed( prms_a, prms_b, net, layer, width, diag ):
+# params: pos, offset length, offset angle
+def add_wire_offset_straight( prms_a, prms_b, net, layer, width, radius ):
+    pos_a, off_len_a, off_angle_a = prms_a
+    pos_b, off_len_b, off_angle_b = prms_b
+    apos = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
+    bpos = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
+    pnts = [pos_a, apos, bpos, pos_b]
+    add_wire_straight( pnts, net, layer, width, radius )
+
+# params: pos, offset length, offset angle, direction angle
+def add_wire_offset_directed( prms_a, prms_b, net, layer, width, radius ):
     pos_a, off_len_a, off_angle_a, angle_a = prms_a
     pos_b, off_len_b, off_angle_b, angle_b = prms_b
     apos = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
     bpos = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
     dir_a = vec2.rotate( - angle_a )
     dir_b = vec2.rotate( - angle_b )
-    xpos, ka, kb = vec2.find_intersection( apos, dir_a, bpos, dir_b )
-    len_a = min( diag, abs( ka ) / 2, off_len_a )
-    len_b = min( diag, abs( kb ) / 2, off_len_b )
-    len_m = min( diag, abs( ka ) / 2, abs( kb ) / 2 )
-    pnts = []
-    pnts.append( pos_a )
-    if len_a > 1:
-        pnts.append( vec2.scale( -len_a, vec2.rotate( - off_angle_a ), apos ) )
-    pnts.append( vec2.scale(  len_a * sign( ka ), dir_a, apos ) )
-    pnts.append( vec2.scale( -len_m * sign( ka ), dir_a, xpos ) )
-    pnts.append( vec2.scale( -len_m * sign( kb ), dir_b, xpos ) )
-    pnts.append( vec2.scale(  len_b * sign( kb ), dir_b, bpos ) )
-    if len_b > 1:
-        pnts.append( vec2.scale( -len_b, vec2.rotate( - off_angle_b ), bpos ) )
-    pnts.append( pos_b )
-    add_wire_straight( pnts, net, layer, width )
+    xpos, _, _ = vec2.find_intersection( apos, dir_a, bpos, dir_b )
+    pnts = [pos_a, apos, xpos, bpos, pos_b]
+    add_wire_straight( pnts, net, layer, width, radius )
 
-def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, diag ):
+# params: parallel lines direction angle
+def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, radius ):
     mid_pos = vec2.scale( 0.5, vec2.add( pos_a, pos_b ) )
-    _, ka1, _ = vec2.find_intersection( pos_a, vec2.rotate( - angle ), mid_pos, vec2.rotate( - angle + 45 ) )
-    _, ka2, _ = vec2.find_intersection( pos_a, vec2.rotate( - angle ), mid_pos, vec2.rotate( - angle - 45 ) )
+    dir = vec2.rotate( - angle )
+    mid_dir1 = vec2.rotate( - angle + 45 )
+    mid_dir2 = vec2.rotate( - angle - 45 )
+    _, ka1, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir1 )
+    _, ka2, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir2 )
     mid_angle = (angle - 45) if abs( ka1 ) < abs( ka2 ) else (angle + 45)
-    add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, diag )
-    add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, diag )
+    add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
+    add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
 
 def wire_mods( tracks ):
     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
@@ -151,20 +169,27 @@ def wire_mods( tracks ):
         if type( prms ) == type( Straight ) and prms == Straight:
             add_wire_straight( [pos_a, pos_b], net, layer, width )
         elif prms[0] == Directed:
-            dangle_a, dangle_b, diag = prms[1:]
+            dangle_a, dangle_b, radius = prms[1:]
             prms_a = (pos_a, angle_a + dangle_a)
             prms_b = (pos_b, angle_b + dangle_b)
-            add_wire_directed( prms_a, prms_b, net, layer, width, diag )
+            add_wire_directed( prms_a, prms_b, net, layer, width, radius )
+        elif prms[0] == OffsetStraight:
+            prms_a, prms_b, radius = prms[1:]
+            off_len_a, off_angle_a = prms_a
+            off_len_b, off_angle_b = prms_b
+            prms2_a = (pos_a, off_len_a, angle_a + off_angle_a)
+            prms2_b = (pos_b, off_len_b, angle_b + off_angle_b)
+            add_wire_offset_straight( prms2_a, prms2_b, net, layer, width, radius )
         elif prms[0] == OffsetDirected:
-            prms_a, prms_b, diag = prms[1:]
+            prms_a, prms_b, radius = prms[1:]
             off_len_a, off_angle_a, dir_angle_a = prms_a
             off_len_b, off_angle_b, dir_angle_b = prms_b
             prms2_a = (pos_a, off_len_a, angle_a + off_angle_a, angle_a + dir_angle_a)
             prms2_b = (pos_b, off_len_b, angle_b + off_angle_b, angle_b + dir_angle_b)
-            add_wire_offset_directed( prms2_a, prms2_b, net, layer, width, diag )
+            add_wire_offset_directed( prms2_a, prms2_b, net, layer, width, radius )
         elif prms[0] == ZigZag:
-            dangle, diag = prms[1:]
-            add_wire_zigzag( pos_a, pos_b, angle_a + dangle, net, layer, width, diag )
+            dangle, radius = prms[1:]
+            add_wire_zigzag( pos_a, pos_b, angle_a + dangle, net, layer, width, radius )
 ##
 
 # in mm
@@ -255,24 +280,24 @@ def main():
     ### Wire mods
     ###
 
-    # mcu
     PH_OFFSET = 20
     PH_ANGLE = 22
+
     wire_mods( [
-        # pass caps
-        ('C7', '1', 'C8', '1', 24, (Strt)),
-        ('C7', '2', 'C8', '2', 24, (Strt)),
+        ### mcu
         # I2C pull-up
         ('U2', '1', 'R6', '2', 24, (Dird2, (8, 180, -60), (9, -90, 150), 0)),
         ('R5', '2', 'R6', '2', 24, (Strt)),
-        # Type-C CC
-        ('R9', '2', 'R10', '2', 24, (Strt)),
-        ### mcu
         # pass caps
         ('U1', '1', 'C3', '1', 20, (ZgZg, +90, 5)),
         ('U1','32', 'C3', '2', 20, (Dird2, ( 27, 180, -90), (0, 0, 45), 5)),
         ('U1','17', 'C5', '1', 20, (ZgZg, -90, 5)),
         ('U1','16', 'C5', '2', 20, (Dird2, ( 27,   0, -90), (0, 0, 45), 5)),
+        # pass caps: Vdda
+        ('U1', '5', 'C8', '1', 20, (Dird, 0, 0, 5)),
+        ('U1','32', 'C8', '2', 20, (Dird, 0, 0, 5)),
+        ('C7', '1', 'C8', '1', 24, (Strt)),
+        ('C7', '2', 'C8', '2', 24, (Strt)),
         # I/Os
         # J2 front
         ('U1', '8', 'J2', '2', 20, (Dird2, (0, 0, 0), (-PH_OFFSET, 0, - 90 - PH_ANGLE), 5)),# PA2
@@ -311,14 +336,16 @@ def main():
         ('U2', '3', 'C2', '2', 24, (Dird, 90, 0, 10)),
         ('U2', '2', 'C2', '1', 24, (Dird, 90, 0, 10)),
         #
-        ('C6', '1', 'C2', '1', 24, (Dird, 90, -90, 10)),
-    ] )
-    # USB
-    wire_mods( [
-        ('J3', 'A6', 'J3', 'B6', 12, (Dird2, (40, +90, 0), (0, 0, -90), 5)),# DM
-        ('J3', 'A7', 'J3', 'B7', 12, (Dird2, (40, -90, 0), (0, 0, +90), 5)),# DM
-        ('J3', 'B6', 'R8', '1', 12, (Dird2, (50, -90, -30), (20, -90, 0), 5)),# DP
-        ('J3', 'A7', 'R7', '1', 12, (Dird2, (64, -90, -30), (20, +90, 0), 5)),# DM
+        ('C6', '1', 'C2', '1', 24, (Dird2, (20, 180, 90), (0, 0, -90), 10)),
+        ('C6', '1', 'C8', '1', 24, (Dird2, (20, 180, 90), (15, -90, 0), 10)),
+        ### USB
+        # Type-C CC
+        ('R9', '2', 'R10', '2', 24, (Strt)),
+        # DM/DP
+        ('J3', 'A6', 'J3', 'B6', 12, (Strt2, (40, +90), (40, +90), 9)),# DP
+        ('J3', 'A7', 'J3', 'B7', 12, (Strt2, (40, -90), (40, -90), 9)),# DM
+        ('J3', 'B6', 'R8', '1', 12, (Dird2, (33, -90, -40), (20, -90, 0), 5)),# DP
+        ('J3', 'A7', 'R7', '1', 12, (Dird2, (47, -90, -40), (20, +90, 0), 5)),# DM
     ] )
     # USB: VBUS
     # pos, angle = kad.get_mod_pos_angle( 'J3' )
@@ -344,10 +371,10 @@ def main():
         ('R1', '2'),
         ('R2', '1'),
         ('R3', '1'),
-        ('C3', '1'),
-        ('C3', '2'),
-        ('C5', '1'),
-        ('C5', '2'),
+        ('C2', '2'),
+        ('C3', '1'), ('C3', '2'),
+        ('C5', '1'), ('C5', '2'),
+        ('C8', '1'), ('C8', '2'),
     ]
     for mod_name, pad_name in via_pads:
         pos, net = kad.get_pad_pos_net( mod_name, pad_name )
