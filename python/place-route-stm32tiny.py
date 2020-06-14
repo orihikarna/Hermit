@@ -18,16 +18,10 @@ pcb = pcbnew.GetBoard()
 
 # alias
 Strt  = kad.Straight # Straight
-Dird  = kad.Directed # Directed
-Dird2 = kad.OffsetDirected # Directed + Offsets
-Strt2 = 10
+Strt2 = kad.OffsetStraight
+Dird  = kad.OffsetDirected # Directed + Offsets
 ZgZg  = kad.ZigZag # ZigZag
 
-Straight  = kad.Straight # Straight
-Directed  = kad.Directed # Directed
-OffsetStraight = 10
-OffsetDirected = kad.OffsetDirected # Directed + Offsets
-ZigZag  = kad.ZigZag # ZigZag
 ##
 def sign( v ):
     if v > 0:
@@ -55,17 +49,6 @@ def set_mod_pos_angle( mod_name, pos, angle ):
     mod.SetOrientation( 10 * angle )
     return mod
 
-# mods
-def move_mods( base_pos, base_angle, mods ):
-    mrot = mat2.rotate( base_angle )
-    for vals in mods:
-        name, pos, angle = vals[:3]
-        npos = vec2.add( base_pos, vec2.mult( mrot, pos ) )
-        nangle = base_angle + angle
-        if name == None:
-            move_mods( npos, nangle, vals[3] )
-        else:
-            set_mod_pos_angle( name, npos, nangle )
 
 # pad
 def get_pad( mod_name, pad_name ):
@@ -91,143 +74,24 @@ def get_pad_pos_angle_net( mod_name, pad_name ):
 #     offset = vec2.scale( offset_length, vec2.rotate( angle + offset_angle ) )
 #     return vec2.add( pos, offset ), angle + dangle
 
-
-# wires
-def add_wire_straight( pnts, net, layer, width, radius = 0 ):
-    rpnts = []
-    for idx, curr in enumerate( pnts ):
-        if idx == 0 or idx + 1 == len( pnts ):# first or last
-            rpnts.append( curr )
-            continue
-        prev = pnts[idx-1]
-        next = pnts[idx+1]
-        vec_a = vec2.sub( prev, curr )
-        vec_b = vec2.sub( next, curr )
-        len_a = vec2.length( vec_a )
-        len_b = vec2.length( vec_b )
-        length = min( radius, len_a / 2, len_b / 2 )
-        if length < 1:
-            rpnts.append( curr )
+def wire_mods_to_via( offset_vec, size_via, tracks ):
+    for idx, track in enumerate( tracks ):
+        mod_name, pad_name, width, prms = track[:4]
+        if len( track ) > 4:
+            layer = pcb.GetLayerID( track[4] )
         else:
-            rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
-            rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
-    for idx, curr in enumerate( rpnts ):
+            layer = get_mod_layer( mod_name )
+        pos, angle, net = get_pad_pos_angle_net( mod_name, pad_name )
         if idx == 0:
-            continue
-        prev = rpnts[idx-1]
-        if vec2.distance( prev, curr ) > 1:
-            kad.add_track( prev, curr, net, layer, width )
+            angle_via = angle
+            pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
+            via = kad.add_via( pos_via, net, size_via )
+        kad.__add_wire( pos_via, angle_via, pos, angle, net, layer, width, prms )
+    return via
 
-# params: (none)
-def add_wire_directed( prms_a, prms_b, net, layer, width, radius ):
-    pos_a, angle_a = prms_a
-    pos_b, angle_b = prms_b
-    dir_a = vec2.rotate( - angle_a )
-    dir_b = vec2.rotate( - angle_b )
-    xpos, _, _ = vec2.find_intersection( pos_a, dir_a, pos_b, dir_b )
-    pnts = [pos_a, xpos, pos_b]
-    add_wire_straight( pnts, net, layer, width, radius )
+def get_via_pos_net( via ):
+    return pnt.unit2mils( via.GetPosition() ), via.GetNet()
 
-# params: pos, (offset length, offset angle) x n
-def add_wire_offsets_straight( prms_a, prms_b, net, layer, width, radius ):
-    pos_a, offsets_a = prms_a
-    pos_b, offsets_b = prms_b
-    pnts_a = [pos_a]
-    pnts_b = [pos_b]
-    for off_len_a, off_angle_a in offsets_a:
-        pos_a = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
-        pnts_a.append( pos_a )
-    for off_len_b, off_angle_b in offsets_b:
-        pos_b = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
-        pnts_b.append( pos_b )
-    pnts = pnts_a
-    for pnt_b in reversed( pnts_b ):
-        pnts.append( pnt_b )
-    add_wire_straight( pnts, net, layer, width, radius )
-
-# params: pos, (offset length, offset angle) x n, direction angle
-def add_wire_offsets_directed( prms_a, prms_b, net, layer, width, radius ):
-    # pos_a, off_len_a, off_angle_a, angle_a = prms_a
-    # pos_b, off_len_b, off_angle_b, angle_b = prms_b
-    pos_a, offsets_a, angle_a = prms_a
-    pos_b, offsets_b, angle_b = prms_b
-    pnts_a = [pos_a]
-    pnts_b = [pos_b]
-    for off_len_a, off_angle_a in offsets_a:
-        pos_a = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
-        pnts_a.append( pos_a )
-    for off_len_b, off_angle_b in offsets_b:
-        pos_b = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
-        pnts_b.append( pos_b )
-    # apos = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
-    # bpos = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
-    apos = pnts_a[-1]
-    bpos = pnts_b[-1]
-    dir_a = vec2.rotate( - angle_a )
-    dir_b = vec2.rotate( - angle_b )
-    xpos, _, _ = vec2.find_intersection( apos, dir_a, bpos, dir_b )
-    # pnts = [pos_a, apos, xpos, bpos, pos_b]
-    pnts = pnts_a
-    pnts.append( xpos )
-    for pnt_b in reversed( pnts_b ):
-        pnts.append( pnt_b )
-    add_wire_straight( pnts, net, layer, width, radius )
-
-# params: parallel lines direction angle
-def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, radius ):
-    mid_pos = vec2.scale( 0.5, vec2.add( pos_a, pos_b ) )
-    dir = vec2.rotate( - angle )
-    mid_dir1 = vec2.rotate( - angle + 45 )
-    mid_dir2 = vec2.rotate( - angle - 45 )
-    _, ka1, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir1 )
-    _, ka2, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir2 )
-    mid_angle = (angle - 45) if abs( ka1 ) < abs( ka2 ) else (angle + 45)
-    add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
-    add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
-
-def wire_mods( tracks ):
-    for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
-        layer = get_mod_layer( mod_a )
-        pos_a, angle_a, net = get_pad_pos_angle_net( mod_a, pad_a )
-        pos_b, angle_b, _   = get_pad_pos_angle_net( mod_b, pad_b )
-        if type( prms ) == type( Straight ) and prms == Straight:
-            add_wire_straight( [pos_a, pos_b], net, layer, width )
-        elif prms[0] == Directed:
-            dangle_a, dangle_b, radius = prms[1:]
-            prms_a = (pos_a, angle_a + dangle_a)
-            prms_b = (pos_b, angle_b + dangle_b)
-            add_wire_directed( prms_a, prms_b, net, layer, width, radius )
-        elif prms[0] == OffsetStraight:
-            prms_a, prms_b, radius = prms[1:]
-            offsets_a = []
-            offsets_b = []
-            for off_len_a, off_angle_a in prms_a:
-                offsets_a.append( (off_len_a, angle_a + off_angle_a) )
-            for off_len_b, off_angle_b in prms_b:
-                offsets_b.append( (off_len_b, angle_b + off_angle_b) )
-            add_wire_offsets_straight( (pos_a, offsets_a), (pos_b, offsets_b), net, layer, width, radius )
-        elif prms[0] == OffsetDirected:
-            prms_a, prms_b, radius = prms[1:]
-            # off_len_a, off_angle_a, dir_angle_a = prms_a
-            # off_len_b, off_angle_b, dir_angle_b = prms_b
-            # prms2_a = (pos_a, off_len_a, angle_a + off_angle_a, angle_a + dir_angle_a)
-            # prms2_b = (pos_b, off_len_b, angle_b + off_angle_b, angle_b + dir_angle_b)
-            # off_len_a, off_angle_a, dir_angle_a = prms_a
-            # off_len_b, off_angle_b, dir_angle_b = prms_b
-            dir_angle_a = prms_a[1]
-            dir_angle_b = prms_b[1]
-            offsets_a = []
-            offsets_b = []
-            for off_len_a, off_angle_a in prms_a[0]:
-                offsets_a.append( (off_len_a, angle_a + off_angle_a) )
-            for off_len_b, off_angle_b in prms_b[0]:
-                offsets_b.append( (off_len_b, angle_b + off_angle_b) )
-            prms2_a = (pos_a, offsets_a, angle_a + dir_angle_a)
-            prms2_b = (pos_b, offsets_b, angle_b + dir_angle_b)
-            add_wire_offsets_directed( prms2_a, prms2_b, net, layer, width, radius )
-        elif prms[0] == ZigZag:
-            dangle, radius = prms[1:]
-            add_wire_zigzag( pos_a, pos_b, angle_a + dangle, net, layer, width, radius )
 ##
 
 # in mm
@@ -236,13 +100,8 @@ VIA_Size = [(1.0, 0.6), (0.8, 0.5), (0.7, 0.4)]
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Offset = (0, 0)
-PCB_Width  = 1000
-PCB_Height =  700
-
-#angle_reg = 45
-#angle_uC  = 45
-#angle_jp = 18.36
-#offset_jp = 26
+PCB_Width  = 985
+PCB_Height = 700
 
 def makeZones( rect ):
     layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
@@ -271,6 +130,8 @@ def main():
     #kad.add_text( (2370, 1045), 0, 'STM32F042K6\nBreakOut\n20/06/30', 'F.SilkS', (0.95, 0.95), 6,
     #    pcbnew.GR_TEXT_HJUSTIFY_RIGHT, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
 
+    angle_mcu = -94
+
     ###
     ### Set mod positios
     ###
@@ -279,133 +140,110 @@ def main():
         ('J1', (-220, +300), 90),
         ('J2', (-220, -300), 90),
         # USB connector
-        (None, (580, 0), 0, [
+        (None, (580, 30), 0, [
             ('J3', (0,  0), -90),
-            ('R9',  (-40, -40), 0),
-            ('R10', (-40, +40), 0),
+            ('R4',  (-40, -80), 0),# BOOT0 pull-down
+            ('R9',  (-40,   0), 0),
+            ('R10', (-40, +80), 0),
         ] ),
         # mcu
-        ('U1', (0, 0), -90),
+        ('U1', (0, 0), angle_mcu),
         # pass caps
-        (None, ( 222, -185),   0, [ ('C3', (0, 0), 0), ('C4', (0, 0), 0) ] ),
-        (None, (-222,  185), 180, [ ('C5', (0, 0), 0), ('C6', (0, 0), 0) ] ),
-        (None, (  60, -185),   0, [ ('C7', (0, 0), 0), ('C8', (0, 75), 0) ] ),
-        # USB DM/DP
-        (None, (160, 120), 0, [ ('R7', (0, 0), 180), ('R8', (0, 75), 180) ] ),
-        # I2C pull-up's
-        (None, (-100, 155), 0, [ ('R5', (0, 0), 90), ('R6', (75, 0), 90) ] ),
-        # regulators
-        (None, (0, 0), 0, [
-            ('U2', (   0,  7), 90),
-            ('C1', ( 100,  0), 90),
-            ('C2', (-100,  0), 90),
-            ('L1', ( 175,  0), 90),
-            ('F1', ( 222, -110), 180),
-        ] ),
+        (None, ( 250, -150),   0, [ ('C3', (0, 0), -90), ('C4', (0, 0), -90) ] ),
+        (None, (-250,  150), 180, [ ('C5', (0, 0), -90), ('C6', (0, 0), -90) ] ),
+        # Vdda pass caps
+        (None, ( 100, -150),   0, [ ('C7', (0, 0), -90), ('C8', (75, 0), -90) ] ),
         # NRST
-        ('C9', (-120, -180), 180),
-        # SW1 (BOOT0)
-        ('SW1', (550, -280), -90),
-        ('R4', (250, -50), 90),
-        # D1 (power)
-        (None, (530, 300), 0, [ ('D1', (0, 0), 180), ('R1', (0, 0), 0)  ] ),
+        ('C9', (-80, -185), 180),
         # D2, D3
-        (None, (-250, -120), 0, [ ('D2', (0, 0), 90), ('R2', (0, 0), -90) ] ),
-        (None, (-250,   50), 0, [ ('D3', (0, 0), 90), ('R3', (0, 0), -90) ] ),
+        (None, (-250, -150), 0, [ ('D2', (0, 0), 90), ('R2', (0, 0), -90) ] ),
+        (None, (-250,    0), 0, [ ('D3', (0, 0), 90), ('R3', (0, 0), -90) ] ),
+        # USB DM/DP
+        (None, ( 160, 120), 0, [ ('R7', (0, 0), 180), ('R8', (0, 75), 180) ] ),
+        # I2C pull-up's
+        (None, (-120, 155), 0, [ ('R5', (0, 0), 90), ('R6', (75, 0), 90) ] ),
+        # regulators
+        (None, (-10, 0), 0, [
+            ('U2', (   0,  7), 90),
+            ('C1', ( 110,  0), 90),
+            ('C2', (-110,  0), 90),
+            ('L1', ( 185,  0), 90),
+            ('F1', ( 260,  0), 90),
+        ] ),
+        # BOOT0 (SW1)
+        ('SW1', (540, -280), -90),
+        # D1 (power)
+        (None, (530, 300), 0, [ ('D1', (0, 0), 0), ('R1', (0, 0), 0)  ] ),
     ] )
 
     ###
     ### Wire mods
     ###
-
     PH_OFFSET = 20
     PH_ANGLE = 22
 
-    wire_mods( [
+    kad.wire_mods( [
         ### mcu
         # I2C pull-up
-        ('U2', '1', 'R6', '2', 24, (Dird2, ([(8, 180)], -60), ([(9, -90)], 150), 0)),
+        ('U2', '1', 'R6', '2', 24, (Dird, ([(8, 180)], -60), ([(9, -90)], 150), 0)),
         ('R5', '2', 'R6', '2', 24, (Strt)),
         # pass caps
         ('U1', '1', 'C3', '1', 20, (ZgZg, +90, 5)),
-        ('U1','32', 'C3', '2', 20, (Dird2, ([(-27, 0)], -90), ([], 45), 5)),
+        ('U1','32', 'C3', '2', 20, (Dird, ([(-27, 0)], -90), ([], 45), 5)),
         ('U1','17', 'C5', '1', 20, (ZgZg, -90, 5)),
-        ('U1','16', 'C5', '2', 20, (Dird2, ([(+27, 0)], -90), ([], 45), 5)),
+        ('U1','16', 'C5', '2', 20, (Dird, ([(+27, 0)], -90), ([], 45), 5)),
         # pass caps: Vdda
-        ('U1', '5', 'C8', '1', 20, (Dird, 0, 0, 5)),
-        ('U1','32', 'C8', '2', 20, (Dird, 0, 0, 5)),
         ('C7', '1', 'C8', '1', 24, (Strt)),
         ('C7', '2', 'C8', '2', 24, (Strt)),
         # I/Os
         # J2 front
-        ('U1', '8', 'J2', '2', 20, (Dird2, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# PA2
-        ('U1', '9', 'J2', '1', 20, (Dird2, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# PA3
-        ('U1', '4', 'J2', '3', 20, (Dird2, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# NRST
-        ('U1', '1', 'J2', '4', 20, (Dird2, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# Vdd
+        ('U1', '9', 'J2', '1', 20, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# PA3
+        ('U1', '8', 'J2', '2', 20, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 - PH_ANGLE), 5)),# PA2
+        ('U1', '7', 'J2', '3', 20, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA1
+        ('U1', '4', 'J2', '4', 20, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# NRST
+        ('U1', '1', 'J2', '5', 20, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# Vdd
         # J2 back
-        ('C9', '1', 'J2', '3', 20, (Dird2, ([], 90), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# NRST
-        ('C7', '1', 'J2', '4', 20, (Dird2, ([], 90), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# Vdd
+        ('C9', '1', 'J2', '4', 20, (Dird, ([], 90), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# NRST
+        ('C8', '1', 'J2', '5', 24, (Dird, ([], 0), ([(-PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# Vdd
         # J1 left
-        ('U1','19', 'J1', '1', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA9
-        ('U1','20', 'J1', '2', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA10
-        ('U1','23', 'J1', '3', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA13
-        ('U1','24', 'J1', '4', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA14
+        ('U1','19', 'J1', '1', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA9
+        ('U1','20', 'J1', '2', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA10
+        ('U1','23', 'J1', '3', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA13
+        ('U1','24', 'J1', '4', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA14
         # J1 right
-        ('U1','26', 'J1', '5', 20, (Dird2, ([(35, 90)], 45), ([(PH_OFFSET, 0), ( 40, - 90 + PH_ANGLE)], 0), 15)),# PB3
-        ('U1','27', 'J1', '6', 20, (Dird2, ([(55, 90)], 45), ([(PH_OFFSET, 0), ( 30, 90 - PH_ANGLE)], 0), 15)),# PB4
-        ('U1','28', 'J1', '7', 20, (Dird2, ([(75, 90)], 45), ([(PH_OFFSET, 0), (100, 90 - PH_ANGLE)], 0), 15)),# PB5
+        ('U1','26', 'J1', '5', 20, (Dird, ([(35, 90)], 45), ([(PH_OFFSET, 0), ( 40, - 90 + PH_ANGLE)], 0), 10)),# PB3
+        ('U1','27', 'J1', '6', 20, (Dird, ([(55, 90)], 45), ([(PH_OFFSET, 0), ( 30, 90 - PH_ANGLE)], 0), 10)),# PB4
+        ('U1','28', 'J1', '7', 20, (Dird, ([(75, 90)], 45), ([(PH_OFFSET, 0), (100, 90 - PH_ANGLE)], 0), 10)),# PB5
         # I2C pull-up's
-        ('R5', '1', 'J1', '1', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA9
-        ('R6', '1', 'J1', '2', 20, (Dird2, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA10
-        # BOOT0
-        #('SW1', '1', 'J2', '7', 20, (Dird, 90, 45, 5)),
-        # LED D2&D3
-        ('U1', '10', 'R2', '2', 20, (Dird, 90, 0, 10)),
-        ('U1', '15', 'R3', '2', 20, (Dird, 90, 0, 10)),
+        ('R5', '1', 'J1', '1', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA9
+        ('R6', '1', 'J1', '2', 20, (Dird, ([], 0), ([(PH_OFFSET, 0)], - 90 + PH_ANGLE), 5)),# PA10
+        # LED D2,D3
+        ('U1', '10', 'R2', '2', 20, (Dird, ([], 90), ([], 0), 10)),
+        ('U1', '15', 'R3', '2', 20, (Dird, ([], 90), ([], 0), 10)),
+        ('C6', '2', 'D3', '1', 20, (Dird, ([], 90), ([], 0), 10)),# Gnd
+        # NRST
+        ('C9', '2', 'D2', '1', 20, (Dird, ([], 0), ([(50, -90)], 0), 30)),# Gnd
+        ('C9', '2', 'D3', '1', 20, (Dird, ([], 0), ([(50, -90)], 0), 30)),# Gnd
         ### regulator
-        #('J3','B9', 'F1', '1', 24, (ZgZg, 90, 10)),
-        ('J3','B9', 'F1', '1', 24, (Dird2, ([(70, -90)], 0), ([],   0), 10)),
-        ('J3','B9', 'J2', '6', 24, (Dird2, ([(70, -90)], 0), ([], 210), 10)),
-        ('F1', '2', 'L1', '2', 24, (Dird, 90, -90, 10)),
+        ('F1', '2', 'L1', '2', 24, (Dird, ([], 0), ([], -90), 10)),
         ('C1', '1', 'L1', '1', 24, (Strt)),
-        ('C1', '2', 'L1', '2', 24, (Strt)),
-        ('U2', '1', 'C1', '1', 24, (Dird, 90, 0, 10)),
-        ('U2', '3', 'C1', '2', 24, (Dird, 90, 0, 10)),
-        ('U2', '3', 'C2', '2', 24, (Dird, 90, 0, 10)),
-        ('U2', '2', 'C2', '1', 24, (Dird, 90, 0, 10)),
+        ('U2', '1', 'C1', '1', 24, (Dird, ([], 90), ([], 0), 10)),
+        ('U2', '3', 'C1', '2', 24, (Dird, ([], 90), ([], 0), 10)),
+        ('U2', '3', 'C2', '2', 24, (Dird, ([], 90), ([], 0), 10)),
+        ('U2', '2', 'C2', '1', 24, (Dird, ([], 90), ([], 0), 10)),
         #
-        ('C6', '1', 'C2', '1', 24, (Dird2, ([(-20, 0)], 90), ([], -90), 10)),
-        ('C6', '1', 'C8', '1', 24, (Dird2, ([(-20, 0)], 90), ([(15, -90)], 0), 10)),
+        ('C6', '1', 'C2', '1', 20, (Dird, ([(50, -90)], 0), ([], -90), 30)),# Vcc
+        # SW1
+        ('SW1', '1', 'J2', '7', 20, (Dird, ([], 90), ([], 0), 5)),# VBUS
         ### USB
         # Type-C CC
         ('R9', '2', 'R10', '2', 24, (Strt)),
-        # VBUS
-        ('J3', 'A9', 'J3', 'B9', 14.8, (Strt2, [(19.9, 90), (40, 122), (30, 150)], [(19.9, 90), (40, 58), (30, 30)], 0)),
         # DM/DP
-        ('J3', 'A6', 'J3', 'B6', 12, (Strt2, [(40, +90)], [(40, +90)], 9)),# DP
-        ('J3', 'A7', 'J3', 'B7', 12, (Strt2, [(40, -90)], [(40, -90)], 9)),# DM
-        # ('J3', 'B6', 'R8', '1', 12, (Dird2, (33, -90, -40), (20, -90, 0), 5)),# DP
-        # ('J3', 'A7', 'R7', '1', 12, (Dird2, (47, -90, -40), (20, +90, 0), 5)),# DM
-        ('J3', 'B6', 'R8', '1', 12, (Strt2, [(36, -90)], [(20, -90), (40, 180)], 5)),# DP
-        ('J3', 'A7', 'R7', '1', 12, (Strt2, [(50, -90)], [(20, +90), (40, 180)], 5)),# DM
+        ('J3', 'A6', 'J3', 'B6', 11.72, (Strt2, [(40, +90)], [(40, +90)], 9)),# DP
+        ('J3', 'A7', 'J3', 'B7', 11.72, (Strt2, [(40, -90)], [(40, -90)], 9)),# DM
+        ('J3', 'B6', 'R8',  '1', 11.72, (Strt2, [(56, -90)], [(20, -90), (40, 180)], 5)),# DP
+        ('J3', 'A7', 'R7',  '1', 11.72, (Strt2, [(70, -90)], [(20, +90), (40, 180)], 5)),# DM
     ] )
-    # USB: VBUS
-    # pos_a, angle_a, net_a = kad.get_pad_pos_angle_net( 'J3', 'A9' )
-    # pos_b, angle_b, net_b = kad.get_pad_pos_angle_net( 'J3', 'B9' )
-    # pos, angle = kad.get_mod_pos_angle( 'J3' )
-    # mid_pos = vec2.scale( -50, vec2.rotate( - angle ), pos )
-    # add_wire_directed( (mid_pos, angle, , angle - 90, net_a, layer, 20, 5 )
-
-    # # SW1
-    # kad.wire_mods( [
-    #     ('C6', '1',  'SW1', '1', 20, (Dird2, (0, 0), (35, 0), 0, 90 - angle_jp, 15)),
-    #     ('U1', '31', 'SW1', '2', 20, (Dird2, (0, 0), (98, 0), -90 - angle_uC, angle_jp, 20)),
-    # ] )
-    # D1
-    # kad.wire_mods( [
-    #     ('R1', '2', 'J3', 'A9', 20, (Dird2, (0, 50, -90), (-90, 100, 10), 15)),# VBUS
-    # ] )
-
 
     ###
     ### VIA
@@ -416,105 +254,64 @@ def main():
         ('R1', '2'),
         ('R2', '1'),
         ('R3', '1'),
-        ('C2', '2'),
         ('C3', '1'), ('C3', '2'),
         ('C5', '1'), ('C5', '2'),
-        ('C8', '1'), ('C8', '2'),
     ]
     for mod_name, pad_name in via_pads:
         pos, net = kad.get_pad_pos_net( mod_name, pad_name )
         kad.add_via( pos, net, VIA_Size[1] )
 
-    # # BOOT0
-    # pos_via = vec2.scale( 86, vec2.rotate( -90 - angle_uC ), kad.get_pad_pos( 'U1', '31' ) )
-    # pos_via = vec2.add( pos_via, (-1, 0) )
-    # via_boot0 = kad.wire_mods_to_via( pos_via, VIA_Size[2], [
-    #     #('U1', '31', 10, (Dird, 0, 90 - angle_uC, 15)),
-    #     ('R4', '2', 20, (Dird, -angle_uC, angle_uC, 15)),
-    # ] )
-    # # VCC1
-    # pos_via = vec2.scale( 55, vec2.rotate( 90 ), kad.get_pad_pos( 'C5', '1' ) )
-    # via_vcc1 = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('U1', '1', 23, (Dird, - 135 - angle_uC, - 180 - angle_uC, 15)),
-    #     ('C5', '1', 30, (Dird, -45, 90, 15)),
-    #     ('R6', '2', 30, (Dird, 90, 0, 15)),
-    # ] )
-    # # GND1
-    # pos_via = vec2.scale( -55, vec2.rotate( 90 ), kad.get_pad_pos( 'C5', '2' ) )
-    # via_gnd1 = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('U1', '32', 23, (Dird, -135 - angle_uC, 90 - angle_uC, 15)),
-    #     ('C5', '2',  30, (Dird, -45, 90, 15)),
-    # ] )
-    # # VCCA
-    # pos_via = vec2.scale( -60, vec2.rotate( 180 - angle_uC ), kad.get_pad_pos( 'U1', '5' ) )
-    # via_vcca = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('U1', '5',  23, (Strt)),
-    #     ('U1', '1',  23, (Dird2, (0, 0), vec2.scale( 45, vec2.rotate( -angle_uC ) ), - 90 - angle_uC, 0, 10)),
-    #     ('U1', '17', 23, (Dird, 0, - angle_uC, 10)),
-    #     ('C7', '1',  30, (Dird, - angle_uC, 90 - angle_uC, 10)),
-    #     ('C8', '1',  30, (Strt)),
-    # ] )
-    # # VCC reg
-    # pos_via = (1980, 760)
-    # via_vcc_reg = kad.wire_mods_to_via( pos_via, VIA_Size[2], [
-    #     ('J2', '3',  20, (Dird2, (0, 0), (0, offset_jp), 0, -angle_jp, 10)),
-    #     ('U2', '4',  20, (Dird, 0, 180 - angle_reg, 10)),
-    # ] )
-    # # NRST
-    # pos_r6, _ = kad.get_mod_pos_angle( 'R6' )
-    # pos_via, _, _ = vec2.find_intersection( pos_r6, vec2.rotate( 0 ), kad.get_pad_pos( 'U1', '4' ), vec2.rotate( -angle_uC ) )
-    # pos_via = vec2.add( pos_via, (1, 0) )
-    # via_nrst = kad.wire_mods_to_via( pos_via, VIA_Size[2], [
-    #     ('U1', '4', 20, (Dird, 90, - angle_uC , 15) ),
-    #     ('C9', '1', 15, (Dird, 0, -45, 15)),
-    # ] )
-    # # D1
-    # pos_via = vec2.scale( 50, vec2.rotate( 0 ), kad.get_pad_pos( 'D1', '2' ) )
-    # via_d1 = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('D1', '2', 20, (Strt)),
-    #     ('R1', '1', 20, (Strt)),
-    # ] )
-    # # D2 & D3
-    # pos_via = vec2.scale( 50, vec2.rotate( 90 ), kad.get_pad_pos( 'D2', '2' ) )
-    # via_d2 = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('D2', '2', 20, (Strt)),
-    #     ('R2', '1', 20, (Strt)),
-    # ] )
-    # pos_via = vec2.scale( 50, vec2.rotate( 90 ), kad.get_pad_pos( 'D3', '2' ) )
-    # via_d3 = kad.wire_mods_to_via( pos_via, VIA_Size[1], [
-    #     ('D3', '2', 20, (Strt)),
-    #     ('R3', '1', 20, (Strt)),
-    # ] )
-    # # D+/- <--> U1
-    # pos_via = vec2.scale( 85, vec2.rotate( 180 - angle_uC ), kad.get_pad_pos( 'U1', '22' ) )
-    # via_dp = kad.wire_mods_to_via( pos_via, VIA_Size[2], [
-    #     ('U1', '22', 20, (Strt)),
-    #     ('R8', '2',  20, (Dird2,
-    #         vec2.scale( 20, vec2.rotate( 180 - angle_uC ) ),
-    #         vec2.scale( +10, vec2.rotate( - angle_reg ) ),
-    #         90, 90 - angle_reg, 15 )),
-    # ] )
-    # pos_via = vec2.scale( 60, vec2.rotate( 180 - angle_uC ), kad.get_pad_pos( 'U1', '21' ) )
-    # pos_via = vec2.add( pos_via, (0, 1) )
-    # via_dn = kad.wire_mods_to_via( pos_via, VIA_Size[2], [
-    #     ('U1', '21', 20, (Dird, 0, - angle_uC, 15 )),
-    #     ('R7', '2',  20, (Dird2,
-    #         vec2.scale( 20, vec2.rotate( 180 - angle_uC ) ),
-    #         vec2.scale( -10, vec2.rotate( - angle_reg ) ),
-    #         90, 90 - angle_reg, 15 )),
-    # ] )
-    # # D+/- <--> J3
-    # via_dp2 = kad.wire_mods_to_via( (1830, 1225), VIA_Size[2], [
-    #     ('R8', '1', 15.5, (Dird2, (0, 0), vec2.scale( +20, vec2.rotate( - angle_reg ) ), 0, 90 - angle_reg, 15 )),
-    #     ('J3', '3', 15.5, (Dird2, (0, 0), (-48, 0), 0, 180 - angle_reg, 5 )),
-    # ] )
-    # via_dn2 = kad.wire_mods_to_via( (1830, 1200), VIA_Size[2], [
-    #     ('R7', '1', 15.5, (Dird2, (0, 0), vec2.scale( -20, vec2.rotate( - angle_reg ) ), 0, 90 - angle_reg, 15 )),
-    #     ('J3', '2', 15.5, (Dird2, (0, 0), (-60, 0), 0, 180 - angle_reg, 5 )),
-    # ] )
-    # pcb.Delete( via_vcc_reg )
-    # pcb.Delete( via_dp2 )
-    # pcb.Delete( via_dn2 )
+    # Vcc
+    wire_mods_to_via( (70, 0), VIA_Size[1], [
+        ('U1', '5', 20, (Dird, ([], 90), ([], 0), 5)),
+        ('C2', '1', 20, (Dird, ([], -angle_mcu), ([(50, +90)], 0), 5)),
+        ('C7', '1', 20, (Dird, ([], -angle_mcu), ([(50, -90)], 0), 5)),
+    ] )
+    # Gnd: U2
+    wire_mods_to_via( (0, +45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
+    wire_mods_to_via( (0, -45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
+    # Gnd: D1
+    wire_mods_to_via( (15, -95), VIA_Size[0], [ ('D1', '1', 20, (Dird, ([], 0), ([], 90), 5)) ] )
+    # USB DM/DP
+    wire_mods_to_via( (-55, -30), VIA_Size[2], [
+        ('U1', '21', 20, (Dird, ([], 90), ([], 0), 5)),
+        ('R7',  '2', 20, (Dird, ([], 0), ([], 0), 5)),
+    ] )
+    wire_mods_to_via( (55, 5), VIA_Size[2], [
+        ('U1', '22', 20, (Dird, ([], 90), ([], 0), 5)),
+        ('R8',  '2', 20, (Dird, ([], 0), ([], 0), 5)),
+    ] )
+    # J3: CC
+    wire_mods_to_via( (20, -55), VIA_Size[2], [
+        ('J3', 'A5', 11.72, (Dird, ([], 45), ([], 90), 5)),
+        ('R9',  '1', 16, (Dird, ([], 45), ([], 0), 5)),
+    ] )
+    wire_mods_to_via( (5, -55), VIA_Size[2], [
+        ('J3', 'B5', 11.72, (Dird, ([], 45), ([], 90), 5)),
+        ('R10', '1', 16, (Dird, ([], 45), ([], 0), 5)),
+    ] )
+    # J3: VBUS
+    via_a = wire_mods_to_via( (0, 50), VIA_Size[1], [
+        ('J3', 'A4', 20, (Strt)),
+        ('J2',  '7', 20, (Dird, ([(80, 180)], 135), ([], 0), 5), 'F.Cu'),
+        ('F1',  '1', 24, (Dird, ([], 0), ([], 128), 5))
+    ] )
+    via_b = wire_mods_to_via( (0, 50), VIA_Size[1], [
+        ('J3', 'B4', 20, (Strt)),
+        ('R1',  '1', 20, (Dird, ([], 0), ([(60, 90)], 0), 15)),
+    ] )
+    pos_a, net = get_via_pos_net( via_a )
+    pos_b, _   = get_via_pos_net( via_b )
+    kad.add_wire_straight( [pos_a, pos_b], net, pcb.GetLayerID( 'F.Cu' ), 24 )
+    # SW1: BOOT0
+    wire_mods_to_via( (60, 280), VIA_Size[2], [
+        ('SW1', '2', 16, (Dird, ([], 90), ([(130, -90)], 0), 15)),
+        ('U1', '31', 16, (Dird, ([(60, -45)], 0), ([], 90), 15)),
+    ] )
+    wire_mods_to_via( (25, 130), VIA_Size[2], [
+        ('SW1', '2', 16, (Dird, ([], 90), ([(130, -90)], 0), 15)),
+        ('R4',  '1', 16, (Dird, ([], 0), ([], 0), 15)),
+    ] )
 
     # # GND Vias
     # GND = pcb.FindNet( 'GND' )
