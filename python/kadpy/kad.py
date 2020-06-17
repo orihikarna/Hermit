@@ -261,14 +261,14 @@ def add_wire_offsets_directed( prms_a, prms_b, net, layer, width, radius ):
     add_wire_straight( pnts, net, layer, width, radius )
 
 # params: parallel lines direction angle
-def add_wire_zigzag( pos_a, pos_b, angle, net, layer, width, radius ):
+def add_wire_zigzag( pos_a, pos_b, angle, delta_angle, net, layer, width, radius ):
     mid_pos = vec2.scale( 0.5, vec2.add( pos_a, pos_b ) )
     dir = vec2.rotate( - angle )
-    mid_dir1 = vec2.rotate( - angle + 45 )
-    mid_dir2 = vec2.rotate( - angle - 45 )
+    mid_dir1 = vec2.rotate( - angle + delta_angle )
+    mid_dir2 = vec2.rotate( - angle - delta_angle )
     _, ka1, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir1 )
     _, ka2, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir2 )
-    mid_angle = (angle - 45) if abs( ka1 ) < abs( ka2 ) else (angle + 45)
+    mid_angle = (angle - delta_angle) if abs( ka1 ) < abs( ka2 ) else (angle + delta_angle)
     add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
     add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
 
@@ -300,8 +300,8 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
         prms2_b = (pos_b, offsets_b, angle_b + dir_angle_b)
         add_wire_offsets_directed( prms2_a, prms2_b, net, layer, width, radius )
     elif prms[0] == ZigZag:
-        dangle, radius = prms[1:]
-        add_wire_zigzag( pos_a, pos_b, angle_a + dangle, net, layer, width, radius )
+        dangle, delta_angle, radius = prms[1:]
+        add_wire_zigzag( pos_a, pos_b, angle_a + dangle, delta_angle, net, layer, width, radius )
 
 def wire_mods( tracks ):
     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
