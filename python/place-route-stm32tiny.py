@@ -22,6 +22,11 @@ Strt2 = kad.OffsetStraight
 Dird  = kad.OffsetDirected # Directed + Offsets
 ZgZg  = kad.ZigZag # ZigZag
 
+Straight  = kad.Straight # Straight
+OffsetStraight = kad.OffsetStraight
+OffsetDirected  = kad.OffsetDirected # Directed + Offsets
+ZigZag  = kad.ZigZag # ZigZag
+
 ##
 def sign( v ):
     if v > 0:
@@ -63,10 +68,11 @@ def get_pad_pos_net( mod_name, pad_name ):
     pad = get_pad( mod_name, pad_name )
     return pnt.unit2mils( pad.GetPosition() ), pad.GetNet()
 
-def get_pad_pos_angle_net( mod_name, pad_name ):
+def get_pad_pos_angle_layer_net( mod_name, pad_name ):
     mod = get_mod( mod_name )
     pad = get_pad( mod_name, pad_name )
-    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, pad.GetNet())
+    layer = get_mod_layer( mod_name )
+    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, layer, pad.GetNet())
 
 # def get_pos_angle_from_pad( mod_name, pad_name, prms ):
 #     pos, angle, _ = get_pad_pos_angle_net( mod_name, pad_name )
@@ -74,19 +80,148 @@ def get_pad_pos_angle_net( mod_name, pad_name ):
 #     offset = vec2.scale( offset_length, vec2.rotate( angle + offset_angle ) )
 #     return vec2.add( pos, offset ), angle + dangle
 
+
+# wires
+def add_wire_straight( pnts, net, layer, width, radius = 0 ):
+    rpnts = []
+    for idx, curr in enumerate( pnts ):
+        if idx == 0 or idx + 1 == len( pnts ):# first or last
+            rpnts.append( curr )
+            continue
+        prev = pnts[idx-1]
+        next = pnts[idx+1]
+        vec_a = vec2.sub( prev, curr )
+        vec_b = vec2.sub( next, curr )
+        len_a = vec2.length( vec_a )
+        len_b = vec2.length( vec_b )
+        length = min( radius
+            , len_a / 2 if idx - 1 > 0 else len_a
+            , len_b / 2 if idx + 1 < len( pnts ) - 1 else len_b
+        )
+        if length < 1:
+            rpnts.append( curr )
+        else:
+            rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
+            rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
+    for idx, curr in enumerate( rpnts ):
+        if idx == 0:
+            continue
+        prev = rpnts[idx-1]
+        if vec2.distance( prev, curr ) > 1:
+            kad.add_track( prev, curr, net, layer, width )
+
+# params: pos, (offset length, offset angle) x n
+def add_wire_offsets_straight( prms_a, prms_b, net, layer, width, radius ):
+    pos_a, offsets_a = prms_a
+    pos_b, offsets_b = prms_b
+    pnts_a = [pos_a]
+    pnts_b = [pos_b]
+    for off_len_a, off_angle_a in offsets_a:
+        pos_a = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
+        pnts_a.append( pos_a )
+    for off_len_b, off_angle_b in offsets_b:
+        pos_b = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
+        pnts_b.append( pos_b )
+    pnts = pnts_a
+    for pnt_b in reversed( pnts_b ):
+        pnts.append( pnt_b )
+    add_wire_straight( pnts, net, layer, width, radius )
+
+# params: pos, angle
+def add_wire_directed( prms_a, prms_b, net, layer, width, radius ):
+    pos_a, angle_a = prms_a
+    pos_b, angle_b = prms_b
+    dir_a = vec2.rotate( - angle_a )
+    dir_b = vec2.rotate( - angle_b )
+    xpos, _, _ = vec2.find_intersection( pos_a, dir_a, pos_b, dir_b )
+    pnts = [pos_a, xpos, pos_b]
+    add_wire_straight( pnts, net, layer, width, radius )
+
+# params: pos, (offset length, offset angle) x n, direction angle
+def add_wire_offsets_directed( prms_a, prms_b, net, layer, width, radius ):
+    pos_a, offsets_a, angle_a = prms_a
+    pos_b, offsets_b, angle_b = prms_b
+    pnts_a = [pos_a]
+    pnts_b = [pos_b]
+    for off_len_a, off_angle_a in offsets_a:
+        pos_a = vec2.scale( off_len_a, vec2.rotate( - off_angle_a ), pos_a )
+        pnts_a.append( pos_a )
+    for off_len_b, off_angle_b in offsets_b:
+        pos_b = vec2.scale( off_len_b, vec2.rotate( - off_angle_b ), pos_b )
+        pnts_b.append( pos_b )
+    apos = pnts_a[-1]
+    bpos = pnts_b[-1]
+    dir_a = vec2.rotate( - angle_a )
+    dir_b = vec2.rotate( - angle_b )
+    xpos, _, _ = vec2.find_intersection( apos, dir_a, bpos, dir_b )
+    pnts = pnts_a
+    pnts.append( xpos )
+    for pnt_b in reversed( pnts_b ):
+        pnts.append( pnt_b )
+    add_wire_straight( pnts, net, layer, width, radius )
+
+# params: parallel lines direction angle
+def add_wire_zigzag( pos_a, pos_b, angle, delta_angle, net, layer, width, radius ):
+    mid_pos = vec2.scale( 0.5, vec2.add( pos_a, pos_b ) )
+    dir = vec2.rotate( - angle )
+    mid_dir1 = vec2.rotate( - angle + delta_angle )
+    mid_dir2 = vec2.rotate( - angle - delta_angle )
+    _, ka1, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir1 )
+    _, ka2, _ = vec2.find_intersection( pos_a, dir, mid_pos, mid_dir2 )
+    mid_angle = (angle - delta_angle) if abs( ka1 ) < abs( ka2 ) else (angle + delta_angle)
+    add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
+    add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
+
+def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
+    if type( prms ) == type( Straight ) and prms == Straight:
+        add_wire_straight( [pos_a, pos_b], net, layer, width )
+    elif prms[0] == OffsetStraight:
+        prms_a, prms_b, radius = prms[1:]
+        offsets_a = []
+        offsets_b = []
+        for off_len_a, off_angle_a in prms_a:
+            offsets_a.append( (off_len_a, angle_a + off_angle_a) )
+        for off_len_b, off_angle_b in prms_b:
+            offsets_b.append( (off_len_b, angle_b + off_angle_b) )
+        prms2_a = (pos_a, offsets_a)
+        prms2_b = (pos_b, offsets_b)
+        add_wire_offsets_straight( prms2_a, prms2_b, net, layer, width, radius )
+    elif prms[0] == OffsetDirected:
+        prms_a, prms_b, radius = prms[1:]
+        offsets_a = []
+        offsets_b = []
+        for off_len_a, off_angle_a in prms_a[0]:
+            offsets_a.append( (off_len_a, angle_a + off_angle_a) )
+        for off_len_b, off_angle_b in prms_b[0]:
+            offsets_b.append( (off_len_b, angle_b + off_angle_b) )
+        dir_angle_a = prms_a[1]
+        dir_angle_b = prms_b[1]
+        prms2_a = (pos_a, offsets_a, angle_a + dir_angle_a)
+        prms2_b = (pos_b, offsets_b, angle_b + dir_angle_b)
+        add_wire_offsets_directed( prms2_a, prms2_b, net, layer, width, radius )
+    elif prms[0] == ZigZag:
+        dangle, delta_angle, radius = prms[1:]
+        add_wire_zigzag( pos_a, pos_b, angle_a + dangle, delta_angle, net, layer, width, radius )
+
+def wire_mods( tracks ):
+    for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
+        pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
+        pos_b, angle_b, _,     _   = get_pad_pos_angle_layer_net( mod_b, pad_b )
+        layer = get_mod_layer( mod_a )
+        __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms )
+
+
 def wire_mods_to_via( offset_vec, size_via, tracks ):
     for idx, track in enumerate( tracks ):
         mod_name, pad_name, width, prms = track[:4]
+        pos, angle, layer, net = get_pad_pos_angle_layer_net( mod_name, pad_name )
         if len( track ) > 4:
             layer = pcb.GetLayerID( track[4] )
-        else:
-            layer = get_mod_layer( mod_name )
-        pos, angle, net = get_pad_pos_angle_net( mod_name, pad_name )
         if idx == 0:
             angle_via = angle
             pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
             via = kad.add_via( pos_via, net, size_via )
-        kad.__add_wire( pos_via, angle_via, pos, angle, net, layer, width, prms )
+        __add_wire( pos_via, angle_via, pos, angle, net, layer, width, prms )
     return via
 
 def get_via_pos_net( via ):
@@ -174,8 +309,8 @@ def main():
         ('SW1', (525, -275), -90),
         # D1/D2
         (None, (575, 230), 0, [
-            (None, (0,  0), 180, [ ('D1', (0, 0), 0), ('R1', (0, 0), 0) ] ),
-            (None, (0, 75), 180, [ ('D2', (0, 0), 0), ('R2', (0, 0), 0) ] ),
+            (None, (0,  0), 0, [ ('D1', (0, 0), 0), ('R1', (0, 0), 0) ] ),
+            (None, (0, 75), 0, [ ('D2', (0, 0), 0), ('R2', (0, 0), 0) ] ),
         ] )
     ] )
 
@@ -200,8 +335,8 @@ def main():
         ### pin headers
         # J3
         ('U1', '13', 'J3', '3', 20, (Dird, ([], 90), ([], -45), 5)),# PA7
-        ('U1', '12', 'J3', '2', 20, (Dird, ([], 90), ([(25, -90)], -45), 5)),# PA6
-        ('U1', '11', 'J3', '1', 20, (Dird, ([], 90), ([(80, -45), (80, -90)], -45), 5)),# PA5
+        ('U1', '12', 'J3', '2', 20, (Dird, ([], 90), ([(25, -90)], -45), 0)),# PA6
+        ('U1', '11', 'J3', '1', 20, (Dird, ([], 90), ([(75, -45), (80, -90)], -45), 0)),# PA5
         # J2 front
         ('U1', '9', 'J2', '1', 20, (Dird, ([], 0), ([], +45), 5)),# PA3
         ('U1', '8', 'J2', '2', 20, (Dird, ([], 0), ([], +45), 5)),# PA2
@@ -220,9 +355,9 @@ def main():
         ('U1','23', 'J1', '4', 20, (Dird, ([], 0), ([], -45), 5)),# PA13
         ('U1','24', 'J1', '5', 20, (Dird, ([], 0), ([], +45), 5)),# PA14
         # J1 right
-        ('U1','26', 'J1', '6', 20, (Dird, ([( 50, 90)], 0), ([], 45), 0)),# PB3
-        ('U1','27', 'J1', '7', 20, (Dird, ([( 80, 90)], 0), ([], 45), 5)),# PB4
-        ('U1','28', 'J1', '8', 20, (Dird, ([(110, 90)], 0), ([(80, 45), (56, 90)], 45), 5)),# PB5
+        ('U1','26', 'J1', '6', 20, (Dird, ([( 40, 90), (14, 45)], 0), ([], 45), 0)),# PB3
+        ('U1','27', 'J1', '7', 20, (Dird, ([( 60, 90), (28, 45)], 0), ([], 45), 0)),# PB4
+        ('U1','28', 'J1', '8', 20, (Dird, ([( 80, 90), (42, 45)], 0), ([(80, 45), (56, 90)], 45), 0)),# PB5
         # NRST <--> C6
         ('C9', '2', 'C6', '2', 16, (Dird, ([], 0), ([(20, -90)], 0), 10)),# Gnd
         # I2C pull-up
@@ -231,7 +366,6 @@ def main():
         ('R6', '2', 'U2', '1', 24, (ZgZg, 0, 60, 5)),# 5V
         ('R5', '2', 'J1', '1', 24, (Dird, ([(50, 90)], 0), ([(80, -45), (40, -90)], -45), 10)),# 5V
         ### regulator
-        #('F1', '2', 'L1', '2', 24, (Dird, ([], 0), ([], -90), 10)),
         ('F1', '2', 'L1', '2', 24, (ZgZg, 0, 54, 10)),
         ('C1', '1', 'L1', '1', 24, (Strt)),
         ('U2', '1', 'C1', '1', 24, (Dird, ([], 90), ([], 0), 10)),
@@ -241,21 +375,21 @@ def main():
         # pass cap C6 <--> C1
         ('C1', '2', 'C7', '2', 24, (ZgZg, 0, 60, 5)),# Vcc
         ### USB
-        # Gnd C4, J2
-        ('J4', 'A1', 'C4', '2', 20, (ZgZg, 90, 45, 5)),
+        # Gnd <--> J2, C4
         ('J4', 'A1', 'J2', '6', 20, (Dird, ([(50, -90)], 0), ([], +45), 5)),
+        ('J4', 'A1', 'C4', '2', 20, (Dird, ([], -90), ([], 0), 5)),
         # VBUS A4 <--> B4
-        ('J4', 'A4', 'J4', 'B4', 12, (Strt2,
-            [(25, 90), (15,  60), (40, 90), (50,  45)],
-            [(25, 90), (15, 120), (40, 90), (50, 135)], 5)),
+        # ('J4', 'A4', 'J4', 'B4', 12, (Strt2,
+        #     [(-2.4, 0), (15, 90), (24,  60), (40, 90), (40,  45)],
+        #     [(+2.4, 0), (15, 90), (24, 120), (40, 90), (40, 135)], 5)),
         # DM/DP
         ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(38, +90)], [(38, +90)], 9)),# DP
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(38, -90)], [(38, -90)], 9)),# DM
         # DM/DP <--> R7, R8
-        ('J4', 'A7', 'R7',  '1', 11.72, (Dird, ([(100, -90), (0, -45), (80, 0), (0, -45), (20, -90), (0, -45), (45, 0)], -45), ([(20, +90)], 0), 0)),# DM
-        ('J4', 'B6', 'R8',  '1', 11.72, (Dird, ([( 80, -90), (0, -45), (80, 0), (0, -45), (20, -90), (0, -45), (60, 0)], -45), ([(20, -90)], 0), 0)),# DP
+        ('J4', 'A7', 'R7',  '1', 11.72, (Dird, ([(103, -90), (75, 0), (20, -90)], 0), ([(21, +90)], 0), 10)),# DM
+        ('J4', 'B6', 'R8',  '1', 11.72, (Dird, ([( 81, -90), (75, 0), (20, -90)], 0), ([(21, -90)], 0), 10)),# DP
         ### BOOT0: mcu <--> R4
-        ('U1', '31', 'R4', '1', 16, (Dird, ([(40, 90), (20, 45), (40, 90), (35, 135)], 90), ([], 90), 0)),
+        ('U1', '31', 'R4', '1', 16, (Dird, ([(50, 90), (20, 0), (65, 90), (-50, 0), (80, 90), (20, 0)], 90), ([], 90), 30)),
         ### Led2
         ('C5', '2', 'L2', '2', 16, (Dird, ([], 90), ([], 90), 5)),# Gnd
         ('L2', '4', 'J1', '1', 16, (Dird, ([], 90), ([], 45), 5)),# 5V
@@ -267,8 +401,8 @@ def main():
 
     # pad vias
     via_pads = [
-        ('R1', '1'),
-        ('R2', '1'),
+        ('R1', '2'),
+        ('R2', '2'),
         ('C3', '1'), ('C3', '2'),
         ('C5', '1'), ('C5', '2'),
     ]
@@ -283,11 +417,17 @@ def main():
         ('C6', '1', 20, (Dird, ([], -angle_mcu), ([(48, -90)], 0), 5)),
         ('C7', '1', 20, (Dird, ([], -angle_mcu), ([], 90), 5)),
     ] )
+    # Gnd: C3
+    wire_mods_to_via( (-40, -80), VIA_Size[1], [ ('C3', '2', 24, (ZgZg, 90, 60, 0)) ] )
     # Gnd: U2
     wire_mods_to_via( (0, +45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
     wire_mods_to_via( (0, -45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
     # Gnd: R10
-    wire_mods_to_via( (-30, 65), VIA_Size[0], [ ('R10', '2', 20, (Dird, ([], 0), ([], 90), 5)) ] )
+    wire_mods_to_via( (-30, 65), VIA_Size[0], [
+         ('R10', '2', 20, (Dird, ([], 0), ([], 90), 5)),
+         ('J4', 'B1', 20, (Dird, ([(90, 180)], -90), ([(50, -90), (85, 0)], 90), 5)),# Gnd
+         ('D1', '1', 20, (Dird, ([], 0), ([(50, 135)], 90), 5)),# Gnd
+    ] )
     # USB DM/DP <--> mcu
     wire_mods_to_via( (-55, -26), VIA_Size[2], [
         ('U1', '21', 20, (Dird, ([], 90), ([], 0), 5)),
@@ -298,13 +438,13 @@ def main():
         ('R8',  '2', 20, (Dird, ([], 0), ([], 0), 5)),
     ] )
     # J4: VBUS
-    via_a = wire_mods_to_via( (30, 50), VIA_Size[1], [
-        ('J4', 'A4', 23.6, (Dird, ([], 0), ([], 90), 0)),
-        ('F1',  '1', 23.6, (Dird, ([], -30), ([],  0), 0)),
+    via_a = wire_mods_to_via( (+30, 49), VIA_Size[1], [
+        ('J4', 'A4', 23.5, (Dird, ([], 0), ([], 90), 0)),
+        ('F1',  '1', 23.5, (Dird, ([], -30), ([], 0), 0)),
     ] )
-    via_b = wire_mods_to_via( (-30, 50), VIA_Size[1], [
-        ('J4', 'B4', 23.6, (Dird, ([], 0), ([], 90), 0)),
-        #('F1',  '1', 23.6, (Dird, ([], -30), ([],  0), 0)),
+    via_b = wire_mods_to_via( (-30, 49), VIA_Size[1], [
+        ('J4', 'B4', 23.5, (Dird, ([], 0), ([], 90), 0)),
+        ('R1', '1', 16, (Dird, ([], 0), ([(20, 90)], 0), 40)),
     ] )
     layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
     pos_a, net = get_via_pos_net( via_a )
@@ -319,72 +459,74 @@ def main():
         ('J4', 'B5', 11.72, (Dird, ([], -50), ([], 90), 0)),
         ('R10', '1', 16, (Dird, ([], 45), ([], 0), 5)),
     ] )
-    # J4 VBUS <--> D1
-    # wire_mods_to_via( (30, -90), VIA_Size[2], [
-    #     ('J4', 'B4', 16, (Dird, ([], 90), ([(25, +90), (15, +120), (40, +90), (20, 45)], 0), 5)),
-    #     ('R1',  '1', 16, (Dird, ([], 0), ([], 135), 5)),
-    # ] )
     # SW1: BOOT0 <--> pull-down
     wire_mods_to_via( (0, 125), VIA_Size[2], [
         ('SW1', '2', 16, (Dird, ([], 90), ([(130, -90)], 0), 15)),
         ('R4',  '1', 16, (Dird, ([], 0), ([], 0), 15)),
     ] )
     # mcu <--> D2
-    wire_mods_to_via( (340, 60), VIA_Size[2], [
-        ('D2',  '2', 20, (Dird, ([], 0), ([], 135), 5)),
-        ('U1', '25', 20, (Dird, ([], 0), ([], 0), 5)),# PA15
+    via_a = wire_mods_to_via( (135, 0), VIA_Size[1], [
+        ('U1', '25', 20, (Dird, ([], 90), ([], 0), 0)),# PA15
+        #('D2',  '2', 20, (Dird, ([], 90), ([], 90), 100)),
     ] )
-    # L2 PB1 <--> L2
+    via_b = wire_mods_to_via( (-60, -60), VIA_Size[1], [
+        ('R2', '1', 20, (Dird, ([], 90), ([], 0), 100)),
+    ] )
+    layer_B_Cu = pcb.GetLayerID( 'B.Cu' )
+    pos_a, net = get_via_pos_net( via_a )
+    pos_b, _   = get_via_pos_net( via_b )
+    kad.add_wire_offsets_directed( (pos_a, [], 90), (pos_b, [], 0), net, layer_B_Cu, 20, 5 )
+    # L2 <--> PB1
     wire_mods_to_via( (25, -65), VIA_Size[2], [
         ('L2',  '3', 16, (Dird, ([], 0), ([], 90), 5)),
         ('U1', '15', 16, (ZgZg, 0, 15, 5)),
     ] )
 
-    # # GND Vias
-    # GND = pcb.FindNet( 'GND' )
-    # pos_gnds = []
-    # pos_gnds.append( (vec2.find_intersection(
-    #     kad.get_pad_pos( 'U1', '23' ), vec2.rotate( 180 - angle_uC ),
-    #     kad.get_pad_pos( 'U1', '29' ), vec2.rotate(  90 - angle_uC ) )[0], 1) )
-    # for pos_gnd, size_idx in pos_gnds:
-    #     kad.add_via( pos_gnd, GND, VIA_Size[size_idx] )
-
-    # ###
-    # ### Ref
-    # ###
-    # for mod in pcb.GetModules():
-    #     pos = pnt.unit2mils( mod.GetPosition() )
-    #     angle = mod.GetOrientation() / 10
-    #     ref = mod.Reference()
-    #     ref.SetTextSize( pcbnew.wxSizeMM( 1, 1 ) )
-    #     ref.SetThickness( pcbnew.FromMils( 7 ) )
-    #     name = ref.GetText()
-    #     if name[0] in ['C', 'R', 'D']:
-    #         if name == 'C1':
-    #             sign = -1 if name in ['F1'] else +1
-    #             pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
-    #             ref.SetTextAngle( 0 * 10 )
-    #         else:
-    #             sign = -1 if name in ['D1', 'R2', 'R3', 'R4', 'C1'] else +1
-    #             pos_ref = vec2.scale( sign * 95, vec2.rotate( -angle ), pos )
-    #             ref.SetTextAngle( - sign * 90 * 10 )
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-    #         ref.SetKeepUpright( False )
-    #     if name[0] in ['L', 'F']:
-    #         sign = -1 if name in ['F1'] else +1
-    #         pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-    #         ref.SetTextAngle( 0 * 10 )
-    #     if name in ['J1', 'J2', 'SW1', 'SW2']:
-    #         ref.SetVisible( False )
-    #     if name in ['J4']:
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos ) ) )
-    #     if name in ['U1']:
-    #         pos_ref = vec2.scale( 120, vec2.rotate( 135 + angle ), pos )
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-    #     if name in ['U2']:
-    #         pos_ref = vec2.scale( 75, vec2.rotate( 90 - angle ), pos )
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
+    ###
+    ### Ref
+    ###
+    for mod in pcb.GetModules():
+        pos = pnt.unit2mils( mod.GetPosition() )
+        angle = mod.GetOrientation() / 10
+        ref = mod.Reference()
+        ref.SetTextSize( pcbnew.wxSizeMM( 1, 1 ) )
+        ref.SetThickness( pcbnew.FromMils( 7 ) )
+        name = ref.GetText()
+        if name[0] in ['C', 'R', 'D']:
+            if name == 'C1':
+                sign = -1 if name in ['F1'] else +1
+                pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
+                ref.SetTextAngle( 0 * 10 )
+            elif name in ['C3', 'C5']:
+                pos_ref = vec2.scale( -60, vec2.rotate( - 90 - angle ), pos )
+                ref.SetTextAngle( 180 * 10 )
+            elif name in ['R1', 'R2']:
+                pos_ref = vec2.scale( -115, vec2.rotate( - angle ), pos )
+                ref.SetTextAngle( 180 * 10 )
+            elif name in ['R4', 'R9', 'R10']:
+                pos_ref = vec2.scale( -115, vec2.rotate( - angle ), pos )
+                ref.SetTextAngle( 180 * 10 )
+            else:
+                sign = -1 if name in ['D1', 'R2', 'R3', 'R4', 'R9', 'R10', 'C1'] else +1
+                pos_ref = vec2.scale( sign * 95, vec2.rotate( -angle ), pos )
+                ref.SetTextAngle( - sign * 90 * 10 )
+            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
+            ref.SetKeepUpright( False )
+        if name[0] in ['L', 'F']:
+            sign = -1 if name in ['F1'] else +1
+            pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
+            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
+            ref.SetTextAngle( 0 * 10 )
+        if name in ['J1', 'J2', 'J3', 'SW1', 'D2', 'R2']:
+            ref.SetVisible( False )
+        if name in ['J4']:
+            ref.SetPosition( pnt.mils2unit( vec2.round( pos ) ) )
+        if name in ['U1']:
+            pos_ref = vec2.scale( 120, vec2.rotate( 135 + angle ), pos )
+            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
+        if name in ['U2']:
+            pos_ref = vec2.scale( 75, vec2.rotate( 90 - angle ), pos )
+            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
 
     # refs = [ ('J2', [
     #         ('1', '5V'),
