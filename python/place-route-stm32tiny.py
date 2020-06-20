@@ -253,7 +253,7 @@ VIA_Size = [(1.1, 0.6), (0.9, 0.5), (0.8, 0.4)]
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Offset = (0, 0)
-PCB_Width  = 950
+PCB_Width  = 960
 PCB_Height = 700
 
 def makeZones( rect ):
@@ -294,7 +294,7 @@ def main():
         # USB connector
         (None, (580, -5), 0, [
             ('J4', (0, 0), -90),
-            (None, (0, -27.5), 0, [
+            (None, (0, 0), 0, [
                 ('R3', (-20, -75), 0),# BOOT0 pull-down
                 ('R8', (-20,   0), 0),
                 ('R9', (-20, +75), 0),
@@ -359,11 +359,10 @@ def main():
         ('U1', '4', 'J2', '3', 20, (Dird, 0, ([(80, -135), (20, -90)], +45))),# NRST
         ('U1', '3', 'J2', '4', 20, (Dird, 0, +45)),# PF1
         ('U1', '2', 'J2', '5', 20, (Dird, 0, -45)),# PF0
-        ('C3', '1', 'J2', '7', 24, (ZgZg, 0, 90, 5)),# Vcc
+        ('C3', '1', 'J2', '7', 24, (ZgZg, 0, 70, 5)),# Vcc
         ('SW1','1', 'J2', '7', 16, (Dird, 90, +45)),# Vcc
         # J2 back
         ('C9', '1', 'J2', '3', 20, (Dird, 90, 45)),# NRST
-        ('J4','A1', 'J2', '6', 23.5, (Dird, ([(55, -90)], 0), ([(15, 0)], +45))),# Gnd
         # J1 left back (I2C pull-up's)
         ('R4', '1', 'J1', '2', 20, (Dird, 0, -45)),# PA9
         ('R5', '1', 'J1', '3', 20, (Dird, 0, -45)),# PA10
@@ -403,10 +402,8 @@ def main():
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(38, -90)], [(38, -90)], 9)),# DM
         ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(38, +90)], [(38, +90)], 9)),# DP
         # DM/DP <--> R6, R7
-        ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(106, -90), (75, 0), (20, -90)], 0), ([(26, +90)], 0), 10)),# DM
-        ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([( 84, -90), (75, 0), (20, -90)], 0), ([(26, -90)], 0), 10)),# DP
-        # Gnd: A1 <--> C4
-        ('J4', 'A1', 'C4', '2', 23.5, (Dird, -90, 0, 25)),
+        ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(108, -90), (75, 0), (20, -90)], 0), ([(26, +90)], 0), 10)),# DM
+        ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([( 86, -90), (75, 0), (20, -90)], 0), ([(26, -90)], 0), 10)),# DP
         # Gnd: B1 <--> D1
         ('J4', 'B1', 'D1', '1', 23.5, (Dird, ([(50, -90), (85, 0)], 90), 135)),
         # Gnd: USB CC/BOOT0
@@ -422,6 +419,8 @@ def main():
     ###
     ### VIA
     ###
+    layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
+    layer_B_Cu = pcb.GetLayerID( 'B.Cu' )
 
     # pad vias
     via_pads = [
@@ -439,68 +438,74 @@ def main():
         ('C2', '1', 24, (Dird, 90, ([(48, 90), (0, 0)], 0), 25)),
         ('C7', '1', 24, (Dird, 90, 90)),
     ] )
-    # Gnd: C3
-    wire_mods_to_via( (-40, -62), VIA_Size[1], [ ('C3', '2', 24, (ZgZg, 90, 60, 0)) ] )
+    # Gnd: C3, J4/A1, J2/6
+    wire_mods_to_via( (-40, -60), VIA_Size[1], [
+        ('C3', '2', 24, (ZgZg, 90, 60)),
+        ('C4', '2', 24, (ZgZg, 90, 60)),
+        ('J4', 'A1', 23.5, (Dird, 0, 90, 25)),
+        ('J2', '6', 24, (Dird, 0, ([(15, 0)], 45), 0), 'B.Cu'),
+    ] )
     # Gnd: U2
     wire_mods_to_via( (0, +45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
     wire_mods_to_via( (0, -45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
-    # Gnd: R9
-    wire_mods_to_via( (-30, 65), VIA_Size[0], [
-         ('R9', '2', 24, (Dird, 0, 90)),
-         ('D1', '1', 24, (Dird, 0, ([(25, 135)], 90))),# Gnd
+    # Gnd: R3
+    wire_mods_to_via( (-78, -60), VIA_Size[1], [
+         ('R3', '2', 24, (Dird, ([(7, -90)], 0), 90, 30)),
+    ] )
+    # Gnd: R9, D1
+    wire_mods_to_via( (-78, +60), VIA_Size[1], [
+         ('R9', '2', 24, (Dird, ([(7, +90)], 0), 90, 30)),
+         ('D1', '1', 24, (Dird, 90, 0, 30)),
     ] )
     # USB DM/DP <--> mcu
     wire_mods_to_via( (-55, -26), VIA_Size[2], [
-        ('U1', '21', 20, (Dird, ([], 90), ([], 0), 5)),
-        ('R6',  '2', 20, (Dird, ([], 0), ([], 0), 5)),
+        ('U1', '21', 20, (Dird, 90, 0, 5)),
+        ('R6',  '2', 20, (Dird, 0,  0, 5)),
     ] )
     wire_mods_to_via( (55, 4), VIA_Size[2], [
-        ('U1', '22', 20, (Dird, ([], 90), ([], 0), 5)),
-        ('R7',  '2', 20, (Dird, ([], 0), ([], 0), 5)),
+        ('U1', '22', 20, (Dird, 90, 0, 5)),
+        ('R7',  '2', 20, (Dird, 0,  0, 5)),
     ] )
-    # J4: VBUS
-    via_a = wire_mods_to_via( (+30, 49), VIA_Size[1], [
-        ('J4', 'A4', 23.5, (Dird, ([], 0), ([], 90), 0)),
-        ('F1',  '1', 23.5, (Dird, ([], -30), ([], 0), 0)),
+    # J4/A4,B4 VBUS
+    via_a = wire_mods_to_via( (-60, 0), VIA_Size[1], [
+        ('F1',  '1', 24, (Dird, -30, 0)),
+        ('J4', 'A4', 23.5, (Dird, 90, 90, 30)),
     ] )
-    via_b = wire_mods_to_via( (-30, 49), VIA_Size[1], [
-        ('J4', 'B4', 23.5, (Dird, ([], 0), ([], 90), 0)),
-        ('R1', '1', 16, (Dird, ([], 0), ([(20, 90)], 0), 40)),
+    via_b = wire_mods_to_via( (-30, 52), VIA_Size[1], [
+        ('J4', 'B4', 23.5, (Dird, 0, 90)),
+        ('R1', '1',  20, (Dird, 0, ([(22, 90)], 0), 30)),
     ] )
-    layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
-    layer_B_Cu = pcb.GetLayerID( 'B.Cu' )
     pos_a, net = get_via_pos_net( via_a )
     pos_b, _   = get_via_pos_net( via_b )
-    kad.add_wire_straight( [pos_a, pos_b], net, layer_F_Cu, 23.6, 5 )
+    kad.add_wire_zigzag( pos_a, pos_b, 90, 45, net, layer_F_Cu, 24, 5 )
     # J4: CC
-    wire_mods_to_via( (35, -70), VIA_Size[2], [
-        ('J4', 'A5', 11.72, (Dird, ([], 50), ([], 90), 0)),
-        ('R8',  '1', 16, (Dird, -45, 0, 5)),
+    wire_mods_to_via( (+22, -64), VIA_Size[2], [
+        ('J4', 'A5', 11.72, (Dird, 0, ([(29, 90)], +60), 3)),
+        ('R8',  '1', 16, (Dird, 90, 90, 25)),
     ] )
-    wire_mods_to_via( (-35, -70), VIA_Size[2], [
-        ('J4', 'B5', 11.72, (Dird, ([], -50), ([], 90), 3)),
-        ('R9', '1', 16, (Dird, 45, 0, 5)),
+    wire_mods_to_via( (-22, -64), VIA_Size[2], [
+        ('J4', 'B5', 11.72, (Dird, 0, ([(29, 90)], -60), 3)),
+        ('R9',  '1', 16, (Dird, 90, 90, 25)),
     ] )
-    # SW1: BOOT0 <--> pull-down
-    wire_mods_to_via( (0, 125), VIA_Size[2], [
-        ('SW1', '2', 16, (Dird, ([], 90), ([(130, -90)], 0), 15)),
-        ('R3',  '1', 16, (Dird, ([], 0), ([], 0), 15)),
+    # SW1: BOOT0 <--> R3 pull-down
+    wire_mods_to_via( (0, 128), VIA_Size[2], [
+        ('SW1', '2', 16, (Dird, 90, ([(130, -90)], 0), 15)),
+        ('R3',  '1', 16, (Dird, 0, 0, 15)),
     ] )
-    # mcu <--> D2
+    # mcu PA15 <--> R2
     via_a = wire_mods_to_via( (135, 0), VIA_Size[1], [
-        ('U1', '25', 20, (Dird, ([], 90), ([], 0), 0)),# PA15
-        #('D2',  '2', 20, (Dird, ([], 90), ([], 90), 100)),
+        ('U1', '25', 20, (Dird, 90, 0)),# PA15
     ] )
     via_b = wire_mods_to_via( (-60, -60), VIA_Size[1], [
-        ('R2', '1', 20, (Dird, ([], 90), ([], 0), 100)),
+        ('R2', '1', 20, (Dird, 90, 0, 100)),
     ] )
     pos_a, net = get_via_pos_net( via_a )
     pos_b, _   = get_via_pos_net( via_b )
-    kad.add_wire_offsets_directed( (pos_a, [], 90), (pos_b, [], 0), net, layer_B_Cu, 20, 5 )
+    kad.add_wire_offsets_directed( (pos_a, [], 0), (pos_b, [], 90), net, layer_B_Cu, 20, 0 )
     # D3 <--> PB1
-    wire_mods_to_via( (25, -65), VIA_Size[2], [
-        ('D3',  '3', 16, (Dird, ([], 0), ([], 90), 5)),
-        ('U1', '15', 16, (ZgZg, 0, 15, 5)),
+    wire_mods_to_via( (40, -65), VIA_Size[2], [
+        ('D3',  '3', 16, (Dird, 0, ([(10, 0)], 90), 10)),
+        ('U1', '15', 16, (ZgZg, 0, 15)),
     ] )
 
     ###
