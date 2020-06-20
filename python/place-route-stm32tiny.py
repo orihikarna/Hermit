@@ -89,13 +89,36 @@ def add_wire_straight( pnts, net, layer, width, radius = 0 ):
         if length < 1:
             rpnts.append( curr )
         else:
-            rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
-            rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
+            if False and abs( vec2.dot( vec_a, vec_b ) ) < len_a * len_b * 0.001:
+                # bezier circle
+                num_divs = 15
+                cef = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
+                bpnts = []
+                bpnts.append( vec2.scale( length / len_a,       vec_a, curr ) )
+                bpnts.append( vec2.scale( length / len_a * cef, vec_a, curr ) )
+                bpnts.append( vec2.scale( length / len_b * cef, vec_b, curr ) )
+                bpnts.append( vec2.scale( length / len_b,       vec_b, curr ) )
+                num_pnts = len( bpnts )
+                tmp = [(0, 0) for n in range( num_pnts )]
+                rpnts.append( bpnts[0] )
+                for i in range( 1, num_divs ):
+                    t = float( i ) / num_divs
+                    s = 1 - t
+                    for n in range( num_pnts ):
+                        tmp[n] = bpnts[n]
+                    for L in range( num_pnts - 1, 0, -1 ):
+                        for n in range( L ):
+                            tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
+                    rpnts.append( tmp[0] )
+                rpnts.append( bpnts[-1] )
+            else:
+                rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
+                rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
     for idx, curr in enumerate( rpnts ):
         if idx == 0:
             continue
         prev = rpnts[idx-1]
-        if vec2.distance( prev, curr ) > 1:
+        if vec2.distance( prev, curr ) > 0.01:
             kad.add_track( prev, curr, net, layer, width )
 
 # params: pos, (offset length, offset angle) x n
@@ -159,28 +182,6 @@ def add_wire_zigzag( pos_a, pos_b, angle, delta_angle, net, layer, width, radius
     mid_angle = (angle - delta_angle) if abs( ka1 ) < abs( ka2 ) else (angle + delta_angle)
     add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
     add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
-
-def add_wire_bezier( pnts, num_divs, net, layer, width, debug = False ):
-    num_pnts = len( pnts )
-    tmp = [(0, 0) for n in range( num_pnts )]
-    curv = [pnts[0]]
-    for i in range( 1, num_divs ):
-        t = float( i ) / num_divs
-        s = 1 - t
-        for n in range( num_pnts ):
-            tmp[n] = pnts[n]
-        for L in range( num_pnts - 1, 0, -1 ):
-            for n in range( L ):
-                tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
-        curv.append( tmp[0] )
-    curv.append( pnts[-1] )
-    for idx, pnt in enumerate( curv ):
-        if idx == 0:
-            continue
-        kad.add_line( curv[idx-1], pnt, layer, width )
-    if debug:# debug
-        for pnt in pnts:
-            kad.add_arc( pnt, vec2.add( pnt, (20, 0) ), 360, 'F.Fab', 4 )
 
 def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
     if type( prms ) == type( Straight ) and prms == Straight:
@@ -292,12 +293,12 @@ def main():
         ('J2', (-250, -300), 90),
         ('J3', (-250, -200),  0),
         # USB connector
-        (None, (580, -5), 0, [
+        (None, (590, -5), 0, [
             ('J4', (0, 0), -90),
-            (None, (0, 0), 0, [
-                ('R3', (-20, -75), 0),# BOOT0 pull-down
-                ('R8', (-20,   0), 0),
-                ('R9', (-20, +75), 0),
+            (None, (-30, 0), 0, [
+                ('R3', (0, -75), 0),# BOOT0 pull-down
+                ('R8', (0,   0), 0),
+                ('R9', (0, +75), 0),
             ] ),
         ] ),
         # BOOT0 (SW1)
@@ -359,7 +360,7 @@ def main():
         ('U1', '4', 'J2', '3', 20, (Dird, 0, ([(80, -135), (20, -90)], +45))),# NRST
         ('U1', '3', 'J2', '4', 20, (Dird, 0, +45)),# PF1
         ('U1', '2', 'J2', '5', 20, (Dird, 0, -45)),# PF0
-        ('C3', '1', 'J2', '7', 24, (ZgZg, 0, 70, 5)),# Vcc
+        ('C3', '1', 'J2', '7', 24, (Dird, 135, 0)),# Vcc
         ('SW1','1', 'J2', '7', 16, (Dird, 90, +45)),# Vcc
         # J2 back
         ('C9', '1', 'J2', '3', 20, (Dird, 90, 45)),# NRST
@@ -402,15 +403,15 @@ def main():
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(38, -90)], [(38, -90)], 9)),# DM
         ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(38, +90)], [(38, +90)], 9)),# DP
         # DM/DP <--> R6, R7
-        ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(108, -90), (75, 0), (20, -90)], 0), ([(26, +90)], 0), 10)),# DM
-        ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([( 86, -90), (75, 0), (20, -90)], 0), ([(26, -90)], 0), 10)),# DP
+        ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(118, -90), (75, 0), (20, -90)], 0), ([(26, +90)], 0), 10)),# DM
+        ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([( 96, -90), (75, 0), (20, -90)], 0), ([(26, -90)], 0), 10)),# DP
         # Gnd: B1 <--> D1
-        ('J4', 'B1', 'D1', '1', 23.5, (Dird, ([(50, -90), (85, 0)], 90), 135)),
+        ('J4', 'B1', 'D1', '1', 23.5, (Dird, ([(58, -90), (85, 0)], 90), 135)),
         # Gnd: USB CC/BOOT0
         ('R8', '2', 'R9', '2', 20, (Strt)),
         ('R8', '2', 'R3', '2', 20, (Strt)),
         ### BOOT0: mcu <--> R3
-        ('U1', '31', 'R3', '1', 16, (Dird, ([(50, 90), (10, 0), (70, 90), (-30, 0), (60, 90), (10, 0)], 90), 90, 30)),
+        ('U1', '31', 'R3', '1', 16, (Dird, ([(50, 90), (10, 0), (65, 90), (-10, 0)], 90), 90, 30)),
         ### D3
         ('C5', '2', 'D3', '2', 20, (Dird, 90, ([(10, 0)], 90))),# Gnd
         ('D3', '4', 'J1', '1', 20, (Dird, ([(10, 0)], 90), 90)),# 5V
@@ -439,9 +440,9 @@ def main():
         ('C7', '1', 24, (Dird, 90, 90)),
     ] )
     # Gnd: C3, J4/A1, J2/6
-    wire_mods_to_via( (-40, -60), VIA_Size[1], [
-        ('C3', '2', 24, (ZgZg, 90, 60)),
-        ('C4', '2', 24, (ZgZg, 90, 60)),
+    wire_mods_to_via( (-40, -65), VIA_Size[0], [
+        ('C3', '2', 24, (Dird, -45, 90)),
+        ('C4', '2', 24, (Dird, -45, 90)),
         ('J4', 'A1', 23.5, (Dird, 0, 90, 25)),
         ('J2', '6', 24, (Dird, 0, ([(15, 0)], 45), 0), 'B.Cu'),
     ] )
@@ -467,11 +468,11 @@ def main():
         ('R7',  '2', 20, (Dird, 0,  0, 5)),
     ] )
     # J4/A4,B4 VBUS
-    via_a = wire_mods_to_via( (-60, 0), VIA_Size[1], [
+    via_a = wire_mods_to_via( (-70, 0), VIA_Size[1], [
         ('F1',  '1', 24, (Dird, -30, 0)),
         ('J4', 'A4', 23.5, (Dird, 90, 90, 30)),
     ] )
-    via_b = wire_mods_to_via( (-30, 52), VIA_Size[1], [
+    via_b = wire_mods_to_via( (-25, 58), VIA_Size[1], [
         ('J4', 'B4', 23.5, (Dird, 0, 90)),
         ('R1', '1',  20, (Dird, 0, ([(22, 90)], 0), 30)),
     ] )
@@ -511,102 +512,84 @@ def main():
     ###
     ### Ref
     ###
-    for mod in pcb.GetModules():
-        pos = pnt.unit2mils( mod.GetPosition() )
-        angle = mod.GetOrientation() / 10
+    refs = [
+        ('C1', 115, 30,  90),
+        ('C2', 100,  0,  90),
+        ('C3', -60, 90, 180),
+        ('C4',  60, 90, 180),
+        ('C5', -60, 90, 180),
+        ('C6', -70, 60, 180),
+        ('C7',  90,  0,  90),
+        ('C8',  90,  0,  90),
+        ('C9', -90,  0,  90),
+        ('R1', -15, 0, 0),
+        ('R2', -15, 0, 0),
+        ('R4',  70, 60, 180),
+        ('R5', -70,120, 180),
+        ('R6', -100, 0, -90),
+        ('R7', -100, 0, -90),
+        ('L1',  100, 0,  90),
+        ('F1', -100, 0, -90),
+        ('R3', -100, 0, 0),
+        ('R8', -100, 0, 0),
+        ('R9', -100, 0, 0),
+        ('U1', 120, 135, 0),
+        ('U2', 0, 0, -90),
+        ('D1', 15, 0, 0),
+        ('D2', 15, 0, 0),
+        ('D3', 70, 90, 90),
+        ('SW1', 0, 0, -90),
+        ('J1', 0, 0, None),
+        ('J2', 0, 0, None),
+        ('J3', 0, 0, None),
+    ]
+    for mod_name, offset_length, offset_angle, text_angle in refs:
+        mod = kad.get_mod( mod_name )
+        pos, angle = kad.get_mod_pos_angle( mod_name )
         ref = mod.Reference()
-        ref.SetTextSize( pcbnew.wxSizeMM( 1, 1 ) )
-        ref.SetThickness( pcbnew.FromMils( 7 ) )
-        name = ref.GetText()
-        if name[0] in ['C', 'R', 'D']:
-            if name == 'C1':
-                sign = -1 if name in ['F1'] else +1
-                pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
-                ref.SetTextAngle( 0 * 10 )
-            elif name in ['C3', 'C5']:
-                pos_ref = vec2.scale( -60, vec2.rotate( - 90 - angle ), pos )
-                ref.SetTextAngle( 180 * 10 )
-            elif name in ['R1', 'R2']:
-                pos_ref = vec2.scale( -115, vec2.rotate( - angle ), pos )
-                ref.SetTextAngle( 180 * 10 )
-            elif name in ['R3', 'R8', 'R9']:
-                pos_ref = vec2.scale( -115, vec2.rotate( - angle ), pos )
-                ref.SetTextAngle( 180 * 10 )
-            else:
-                sign = -1 if name in ['D1', 'R2', 'R3', 'R3', 'R8', 'R9', 'C1'] else +1
-                pos_ref = vec2.scale( sign * 95, vec2.rotate( -angle ), pos )
-                ref.SetTextAngle( - sign * 90 * 10 )
-            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-            ref.SetKeepUpright( False )
-        if name[0] in ['L', 'F']:
-            sign = -1 if name in ['F1'] else +1
-            pos_ref = vec2.scale( sign * 60, vec2.rotate( 90 - angle ), pos )
-            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-            ref.SetTextAngle( 0 * 10 )
-        if name in ['J1', 'J2', 'J3', 'SW1', 'D2', 'R2']:
+        if text_angle == None:
             ref.SetVisible( False )
-        if name in ['J4']:
-            ref.SetPosition( pnt.mils2unit( vec2.round( pos ) ) )
-        if name in ['U1']:
-            pos_ref = vec2.scale( 120, vec2.rotate( 135 + angle ), pos )
+        else:
+            ref.SetTextSize( pcbnew.wxSizeMM( 0.9, 0.9 ) )
+            ref.SetThickness( pcbnew.FromMils( 7 ) )
+            pos_ref = vec2.scale( offset_length, vec2.rotate( - (offset_angle + angle) ), pos )
             ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-        if name in ['U2']:
-            pos_ref = vec2.scale( 75, vec2.rotate( 90 - angle ), pos )
-            ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
+            ref.SetTextAngle( text_angle * 10 )
+            ref.SetKeepUpright( False )
 
-    # refs = [ ('J2', [
-    #         ('1', '5V'),
-    #         ('2', 'GND'),
-    #         ('3', '3V3'),
-    #         ('4', 'A8'),
-    #         ('5', 'TX\nA9'),
-    #         ('6', 'RX\nA10'),
-    #         ('7', 'DIO\nA13'),
-    #         ('8', 'CLK\nA14'),
-    #         ('9', 'A15'),
-    #         ('10', 'B3'),
-    #         ('11', 'B4'),
-    #         ('12', 'B5'),
-    #         ('13', 'B6'),
-    #         ('14', 'B7'),
-    #     ] ), ('J1', [
-    #         ('1', 'GND'),
-    #         ('2', 'B1'),
-    #         ('3', 'B0'),
-    #         ('4', 'A7'),
-    #         ('5', 'A6'),
-    #         ('6', 'A5'),
-    #         ('7', 'A4'),
-    #         ('8', 'A3'),
-    #         ('9', 'A2'),
-    #         ('10', 'A1'),
-    #         ('11', 'A0'),
-    #         ('12', 'nRST'),
-    #         ('13', 'SCL\nF1'),
-    #         ('14', 'SDA\nF0'),
-    #     ] ),
-    # ]
-    # for mod, pads in refs:
-    #     for pad, text in pads:
-    #         sign = +1 if mod == 'J2' else -1
-    #         pos = kad.get_pad_pos( mod, pad )
-    #         pos = vec2.scale( sign * 42, vec2.rotate( 90 ), pos )
-    #         if pad == '13':
-    #             pos = vec2.add( pos, (12, 0) )
-    #         if pad == '14':
-    #             pos = vec2.add( pos, (24, 0) )
-    #         for layer in ('F.SilkS', 'B.SilkS'):
-    #             kad.add_text( pos, 90 + sign * 90, text, layer, (0.85, 0.65), 6,
-    #                 pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_BOTTOM  )
-
-    # refs = [
-    #     ('SW1', 'BOOT0', (0.55, 0.7)),
-    #     ('SW2', 'RST',   (0.9, 0.7)),
-    # ]
-    # for mod, text, size in refs:
-    #     pos = kad.get_mod_pos_angle( mod )[0]
-    #     for layer in ('F.SilkS', 'B.SilkS'):
-    #         kad.add_text( pos, 90, text, layer, size, 6 )
+    refs = [ ('J3', 180, -90, [
+            ('1', 'A5', 'SCK'),
+            ('2', 'A6', 'MI'),
+            ('3', 'A7', 'MO'),
+        ] ), ('J2', 90, 0, [
+            ('1', 'A3', 'RX'),
+            ('2', 'A2', 'TX'),
+            ('3', '', 'NRST'),
+            ('4', '', 'F1'),
+            ('5', '', 'F0'),
+            ('6', '', 'GND'),
+            ('7', '', '3V3'),
+        ] ), ('J1', -90, 180, [
+            ('1', '', '5V'),
+            ('2', 'A9',  'SCL'),
+            ('3', 'A10', 'SDA'),
+            ('4', 'A13', 'DIO'),
+            ('5', 'A14', 'CLK'),
+            ('6', 'B3', 'SCK'),
+            ('7', 'B4', 'MI'),
+            ('8', 'B5', 'MO'),
+        ] ),
+    ]
+    for mod, angle1, angle2, pads in refs:
+        for pad, text1, text2 in pads:
+            pos = kad.get_pad_pos( mod, pad )
+            for idx, layer in enumerate( ['F.SilkS', 'B.SilkS'] ):
+                pos1 = vec2.scale( 50, vec2.rotate( - 90 + angle1 ), pos )
+                pos2 = vec2.scale( [70, 60][idx], vec2.rotate( 90 + angle2 ), pos )
+                kad.add_text( pos1, angle1, text1, layer, (0.85, 0.65), 6,
+                    pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
+                kad.add_text( pos2, angle2, text2, layer, (0.85, 0.65), 6,
+                    pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
 
     pcbnew.Refresh()
 
