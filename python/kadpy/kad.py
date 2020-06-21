@@ -133,6 +133,9 @@ def add_via( pos, net, size ):# size [mm]
     pcb.Add( via )
     return via
 
+def get_via_pos_net( via ):
+    return pnt.unit2mils( via.GetPosition() ), via.GetNet()
+
 
 # mod
 def get_mod( mod_name ):
@@ -178,11 +181,11 @@ def get_pad_pos_net( mod_name, pad_name ):
     pad = get_pad( mod_name, pad_name )
     return pnt.unit2mils( pad.GetPosition() ), pad.GetNet()
 
-def get_pad_pos_angle_net( mod_name, pad_name ):
+def get_pad_pos_angle_layer_net( mod_name, pad_name ):
     mod = get_mod( mod_name )
     pad = get_pad( mod_name, pad_name )
-    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, pad.GetNet())
-
+    layer = get_mod_layer( mod_name )
+    return (pnt.unit2mils( pad.GetPosition() ), mod.GetOrientation() / 10, layer, pad.GetNet())
 
 # wires
 def add_wire_straight( pnts, net, layer, width, radius = 0 ):
@@ -197,17 +200,42 @@ def add_wire_straight( pnts, net, layer, width, radius = 0 ):
         vec_b = vec2.sub( next, curr )
         len_a = vec2.length( vec_a )
         len_b = vec2.length( vec_b )
-        length = min( radius, len_a / 2, len_b / 2 )
+        length = min( radius,
+            len_a / 2 if idx - 1 > 0 else len_a,
+            len_b / 2 if idx + 1 < len( pnts ) - 1 else len_b )
         if length < 1:
             rpnts.append( curr )
         else:
-            rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
-            rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
+            if False and abs( vec2.dot( vec_a, vec_b ) ) < len_a * len_b * 0.001:
+                # bezier circle
+                num_divs = 15
+                cef = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
+                bpnts = []
+                bpnts.append( vec2.scale( length / len_a,       vec_a, curr ) )
+                bpnts.append( vec2.scale( length / len_a * cef, vec_a, curr ) )
+                bpnts.append( vec2.scale( length / len_b * cef, vec_b, curr ) )
+                bpnts.append( vec2.scale( length / len_b,       vec_b, curr ) )
+                num_pnts = len( bpnts )
+                tmp = [(0, 0) for n in range( num_pnts )]
+                rpnts.append( bpnts[0] )
+                for i in range( 1, num_divs ):
+                    t = float( i ) / num_divs
+                    s = 1 - t
+                    for n in range( num_pnts ):
+                        tmp[n] = bpnts[n]
+                    for L in range( num_pnts - 1, 0, -1 ):
+                        for n in range( L ):
+                            tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
+                    rpnts.append( tmp[0] )
+                rpnts.append( bpnts[-1] )
+            else:
+                rpnts.append( vec2.scale( length / len_a, vec_a, curr ) )
+                rpnts.append( vec2.scale( length / len_b, vec_b, curr ) )
     for idx, curr in enumerate( rpnts ):
         if idx == 0:
             continue
         prev = rpnts[idx-1]
-        if vec2.distance( prev, curr ) > 1:
+        if vec2.distance( prev, curr ) > 0.01:
             add_track( prev, curr, net, layer, width )
 
 # params: pos, (offset length, offset angle) x n
@@ -287,53 +315,49 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
         prms2_b = (pos_b, offsets_b)
         add_wire_offsets_straight( prms2_a, prms2_b, net, layer, width, radius )
     elif prms[0] == OffsetDirected:
-        prms_a, prms_b, radius = prms[1:]
+        prms_a, prms_b = prms[1:3]
+        radius = prms[3] if len( prms ) > 3 else 0
         offsets_a = []
         offsets_b = []
-        for off_len_a, off_angle_a in prms_a[0]:
-            offsets_a.append( (off_len_a, angle_a + off_angle_a) )
-        for off_len_b, off_angle_b in prms_b[0]:
-            offsets_b.append( (off_len_b, angle_b + off_angle_b) )
-        dir_angle_a = prms_a[1]
-        dir_angle_b = prms_b[1]
+        if type( prms_a ) == type( () ):# tuple
+            for off_len_a, off_angle_a in prms_a[0]:
+                offsets_a.append( (off_len_a, angle_a + off_angle_a) )
+            dir_angle_a = prms_a[1]
+        else:
+            dir_angle_a = prms_a
+        if type( prms_b ) == type( () ):# tuple
+            for off_len_b, off_angle_b in prms_b[0]:
+                offsets_b.append( (off_len_b, angle_b + off_angle_b) )
+            dir_angle_b = prms_b[1]
+        else:
+            dir_angle_b = prms_b
         prms2_a = (pos_a, offsets_a, angle_a + dir_angle_a)
         prms2_b = (pos_b, offsets_b, angle_b + dir_angle_b)
         add_wire_offsets_directed( prms2_a, prms2_b, net, layer, width, radius )
     elif prms[0] == ZigZag:
-        dangle, delta_angle, radius = prms[1:]
+        dangle, delta_angle = prms[1:3]
+        radius = prms[3] if len( prms ) > 3 else 0
         add_wire_zigzag( pos_a, pos_b, angle_a + dangle, delta_angle, net, layer, width, radius )
 
 def wire_mods( tracks ):
     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
+        pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
+        pos_b, angle_b, _,     _   = get_pad_pos_angle_layer_net( mod_b, pad_b )
         layer = get_mod_layer( mod_a )
-        pos_a, angle_a, net = get_pad_pos_angle_net( mod_a, pad_a )
-        pos_b, angle_b, _   = get_pad_pos_angle_net( mod_b, pad_b )
         __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms )
 
-# def wire_mods_layer( layer, tracks ):
-#     for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
-#         pos_a, net_a = get_pad_pos_net( mod_a, pad_a )
-#         pos_b, _     = get_pad_pos_net( mod_b, pad_b )
-#         __add_wire( pos_a, pos_b, net_a, layer, width, prms )
-
-# def wire_mods_to_via( pos_via, size_via, tracks ):
-#     via = None
-#     for mod_name, pad_name, width, prms in tracks:
-#         layer = get_mod_layer( mod_name )
-#         pos, net = get_pad_pos_net( mod_name, pad_name )
-#         if via == None:
-#             via = add_via( pos_via, net, size_via )
-#         __add_wire( pos_via, pos, net, layer, width, prms )
-#     return via
-
-# def wire_mods_to_via_layer( pos_via, size_via, tracks ):
-#     via = None
-#     for mod_name, pad_name, width, layer, prms in tracks:
-#         pos, net = get_pad_pos_net( mod_name, pad_name )
-#         if via == None:
-#             via = add_via( pos_via, net, size_via )
-#         __add_wire( pos_via, pos, net, layer, width, prms )
-#     return via
+def wire_mods_to_via( offset_vec, size_via, tracks ):
+    for idx, track in enumerate( tracks ):
+        mod_name, pad_name, width, prms = track[:4]
+        pos, angle, layer, net = get_pad_pos_angle_layer_net( mod_name, pad_name )
+        if len( track ) > 4:
+            layer = pcb.GetLayerID( track[4] )
+        if idx == 0:
+            angle_via = angle
+            pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
+            via = add_via( pos_via, net, size_via )
+        __add_wire( pos_via, angle_via, pos, angle, net, layer, width, prms )
+    return via
 
 
 # drawing
