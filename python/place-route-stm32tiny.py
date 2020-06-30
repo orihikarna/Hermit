@@ -197,19 +197,21 @@ def drawEdgeCuts():
     # USB
     pos, _ = kad.get_mod_pos_angle( 'J4' )
     corners.append( [((W+16, pos[1] - 180),   0), Round, [12]] )
-    corners.append( [((W+32, pos[1]      ),  90), Round, [12]] )
+    corners.append( [((W+42, pos[1]      ),  90), Round, [12]] )
     corners.append( [((W+16, pos[1] + 180), 180), Round, [12]] )
-    corners.append( [((W, H-100), 90), Round, [10]] )
+    corners.append( [((W,    H-100),         90), Round, [12]] )
     ### bottom
     corners.append( [((W/2, H), 180), Round, [40]] )
     ### left
-    corners.append( [((0, H - 100), -90), Round, [40]] )
-    if False:# LED
+    corners.append( [((0, H - 50), -90), Round, [40]] )
+    if True:# LED (80mils in 200mils = 60mils each on above and below)
         pos, _ = kad.get_mod_pos_angle( 'D3' )
-        corners.append( [((-10, pos[1] + 60), 180), Round, [9]] )
-        corners.append( [((-20, pos[1]     ), -90), Round, [9]] )
-        corners.append( [((-10, pos[1] - 60),   0), Round, [9]] )
-        corners.append( [((0, 100), -90), Round, [9]] )
+        corners.append( [((-20, pos[1] + 70), -117), BezierRound, [9]] )
+        corners.append( [((-10, pos[1] + 40),    0), BezierRound, [9]] )
+        corners.append( [((  0, pos[1]     ),  -90), Round, [9]] )
+        corners.append( [((-10, pos[1] - 40),  180), Round, [9]] )
+        corners.append( [((-20, pos[1] - 70),  -63), BezierRound, [9]] )
+        corners.append( [((0, 50), -90), BezierRound, [9]] )
     # draw
     draw_closed_corners( corners, layer, width )
 
@@ -252,7 +254,7 @@ def main():
         ('J2', (-250, -300), 90),
         ('J3', (-250, -200),  0),
         # USB connector
-        (None, (590, -5), 0, [
+        (None, (600, -5), 0, [
             ('J4', (0, 0), -90),
             (None, (-30, 0), 0, [
                 ('R3', (0, -75), 0),# BOOT0 pull-down
@@ -272,10 +274,12 @@ def main():
             ('U1', (0, 0), -90),
             # pass caps
             (None, ( 245, -155), -90, [ ('C3', (0, 0), 0), ('C4', (0, 0), 0) ] ),
-            (None, (-245,  155), +90, [ ('C5', (0, 0), 0), ('C6', (0, 0), 0), ('D3', (0, -64), -90) ] ),
+            (None, (-245,  155), +90, [ ('C5', (0, 0), 0), ('C6', (0, 0), 0) ] ),
             # Vcca pass caps
             (None, ( 100, -115), 0, [ ('C7', (0, 0), 0), ('C8', (0, -75), 0) ] ),
         ] ),
+        # D3
+        ('D3', (-280, 150), 0),
         # NRST
         ('C9', (-80, -190), 180),
         # USB DM/DP
