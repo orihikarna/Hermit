@@ -22,165 +22,17 @@ Strt2 = kad.OffsetStraight
 Dird  = kad.OffsetDirected # Directed + Offsets
 ZgZg  = kad.ZigZag # ZigZag
 
+Round = kad.Round
+BezierRound = kad.BezierRound
 ##
-# corner types
-Line   = 0
-Linear = 1
-Bezier = 2
-BezierRound  = 3
-Round  = 4
-
-def add_bezier( pnts, num_divs, layer, width, debug = False ):
-    num_pnts = len( pnts )
-    tmp = [(0, 0) for n in range( num_pnts )]
-    curv = [pnts[0]]
-    for i in range( 1, num_divs ):
-        t = float( i ) / num_divs
-        s = 1 - t
-        for n in range( num_pnts ):
-            tmp[n] = pnts[n]
-        for L in range( num_pnts - 1, 0, -1 ):
-            for n in range( L ):
-                tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
-        curv.append( tmp[0] )
-    curv.append( pnts[-1] )
-    for idx, pnt in enumerate( curv ):
-        if idx == 0:
-            continue
-        kad.add_line( curv[idx-1], pnt, layer, width )
-    if debug:# debug
-        for pnt in pnts:
-            kad.add_arc( pnt, vec2.add( pnt, (20, 0) ), 360, 'F.Fab', 4 )
-
-def is_supported_round_angle( angle ):
-    # integer?
-    if angle - round( angle ) != 0:
-        return False
-    # multiple of 90?
-    deg = int( angle )
-    if (deg % 90) != 0:
-        return False
-    return True
-
-def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
-    apos, aangle = a
-    bpos, bangle = b
-    avec = vec2.rotate( aangle )
-    bvec = vec2.rotate( bangle + 180 )
-    if cnr_type != Bezier and abs( vec2.dot( avec, bvec ) ) > 0.999:
-        cnr_type = Line
-        #print( avec, bvec )
-    if cnr_type == Line:
-        kad.add_line( apos, bpos, layer, width )
-    elif cnr_type == Linear:
-        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
-        if cnr_data == None:
-            kad.add_line( apos, xpos, layer, width )
-            kad.add_line( bpos, xpos, layer, width )
-        else:
-            delta = cnr_data[0]
-            #print( delta, alen, xpos )
-            amid = vec2.scale( alen - delta, avec, apos )
-            bmid = vec2.scale( blen - delta, bvec, bpos )
-            kad.add_line( apos, amid, layer, width )
-            kad.add_line( bpos, bmid, layer, width )
-            kad.add_line( amid, bmid, layer, width )
-    elif cnr_type == Bezier:
-        num_data = len( cnr_data )
-        alen = cnr_data[0]
-        blen = cnr_data[-2]
-        ndivs = cnr_data[-1]
-        apos2 = vec2.scale( alen, avec, apos )
-        bpos2 = vec2.scale( blen, bvec, bpos )
-        pnts = [apos, apos2]
-        if num_data > 3:
-            for pt in cnr_data[1:num_data-2]:
-                pnts.append( pt )
-        pnts.append( bpos2 )
-        pnts.append( bpos )
-        add_bezier( pnts, ndivs, layer, width )
-    elif cnr_type == BezierRound:
-        radius = cnr_data[0]
-        _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
-        debug = False
-        if alen <= radius:
-            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( alen, radius, apos ) )
-            debug = True
-        if blen <= radius:
-            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( blen, radius, bpos ) )
-            debug = True
-        amid = vec2.scale( alen - radius, avec, apos )
-        bmid = vec2.scale( blen - radius, bvec, bpos )
-        kad.add_line( apos, amid, layer, width )
-        kad.add_line( bpos, bmid, layer, width )
-        angle = vec2.angle( avec, bvec )
-        if angle < 0:
-            #angle += 360
-            angle *= -1
-        ndivs = int( round( angle / 4.5 ) )
-        #print( 'BezierRound: angle = {}, ndivs = {}'.format( angle, ndivs ) )
-        coeff = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
-        #print( 'coeff = {}'.format( coeff ) )
-        actrl = vec2.scale( alen + (coeff - 1) * radius, avec, apos )
-        bctrl = vec2.scale( blen + (coeff - 1) * radius, bvec, bpos )
-        pnts = [amid, actrl, bctrl, bmid]
-        add_bezier( pnts, ndivs, layer, width, debug )
-    elif cnr_type == Round:
-        radius = cnr_data[0]
-        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
-        # print( 'Round: radius = {}'.format( radius ) )
-        debug = False
-        if not is_supported_round_angle( aangle ):
-            print( 'Round: warning aangle = {}'.format( aangle ) )
-            debug = True
-        if not is_supported_round_angle( bangle ):
-            print( 'Round: warning bangle = {}'.format( bangle ) )
-            debug = True
-        if alen < radius:
-            print( 'Round: alen < radius, {} < {}'.format( alen, radius ) )
-            debug = True
-        if blen < radius:
-            print( 'Round: blen < radius, {} < {}'.format( blen, radius ) )
-            debug = True
-        if debug:
-            kad.add_arc( xpos, vec2.add( xpos, (10, 0) ), 360, layer, width )
-            return b
-        angle = vec2.angle( avec, bvec )
-        angle = math.ceil( angle * 10 ) / 10
-        tangent = math.tan( abs( angle ) / 2 / 180 * math.pi )
-        side_len = radius / tangent
-        # print( 'angle = {}, radius = {}, side_len = {}, tangent = {}'.format( angle, radius, side_len, tangent ) )
-
-        amid = vec2.scale( -side_len, avec, xpos )
-        bmid = vec2.scale( -side_len, bvec, xpos )
-        kad.add_line( apos, amid, layer, width )
-        kad.add_line( bpos, bmid, layer, width )
-
-        aperp = (-avec[1], avec[0])
-        if angle >= 0:
-            ctr = vec2.scale( -radius, aperp, amid )
-            kad.add_arc2( ctr, bmid, amid, 180 - angle, layer, width )
-        else:
-            ctr = vec2.scale( +radius, aperp, amid )
-            kad.add_arc2( ctr, amid, bmid, 180 + angle, layer, width )
-    return b
-
-def draw_closed_corners( corners, layer, width ):
-    a = corners[-1][0]
-    for (b, cnr_type, cnr_data) in corners:
-        a = draw_corner( cnr_type, a, cnr_data, b, layer, width )
-        #break
-
-
 
 # in mm
-VIA_Size = [(1.1, 0.6), (0.9, 0.5), (0.8, 0.4)]
+VIA_Size = [(1.1, 0.6), (0.9, 0.5), (0.8, 0.4), (0.6, 0.3)]
 
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Width  = 960
 PCB_Height = 700
-
 
 
 def drawEdgeCuts():
@@ -197,7 +49,7 @@ def drawEdgeCuts():
     # USB
     pos, _ = kad.get_mod_pos_angle( 'J4' )
     corners.append( [((W+16, pos[1] - 180),   0), Round, [12]] )
-    corners.append( [((W+42, pos[1]      ),  90), Round, [12]] )
+    corners.append( [((W+38, pos[1]      ),  90), Round, [12]] )
     corners.append( [((W+16, pos[1] + 180), 180), Round, [12]] )
     corners.append( [((W,    H-100),         90), Round, [12]] )
     ### bottom
@@ -213,7 +65,7 @@ def drawEdgeCuts():
         corners.append( [((-20, pos[1] - 70),  -63), BezierRound, [9]] )
         corners.append( [((0, 50), -90), BezierRound, [9]] )
     # draw
-    draw_closed_corners( corners, layer, width )
+    kad.draw_closed_corners( corners, layer, width )
 
 
 def makeZones( rect ):
@@ -254,9 +106,9 @@ def main():
         ('J2', (-250, -300), 90),
         ('J3', (-250, -200),  0),
         # USB connector
-        (None, (600, -5), 0, [
+        (None, (595, -5), 0, [
             ('J4', (0, 0), -90),
-            (None, (-30, 0), 0, [
+            (None, (-40, -25), 0, [
                 ('R3', (0, -75), 0),# BOOT0 pull-down
                 ('R8', (0,   0), 0),
                 ('R9', (0, +75), 0),
@@ -351,7 +203,7 @@ def main():
         # Vcc: C2 <--> C6
         ('C2', '1', 'C6', '1', 24, (Dird, ([(48, 90), (0, 0)], 0), -90, 25)),
         ### NRST C9
-        ('C9', '2', 'C6', '2', 16, (Dird, 0, ([(15, -90)], 0), 25)),# Gnd
+        ('C9', '2', 'C6', '2', 16, (Dird, 0, ([(18, -90)], 0), 25)),# Gnd
         ### I2C pull-up's
         ('R4', '2', 'R5', '2', 24, (Strt)),# 5V
         # 5V: regulator <--> I2C <--> J1
@@ -359,12 +211,15 @@ def main():
         ('R4', '2', 'J1', '1', 24, (Dird, ([(50, 90)], 0), ([(56, 0)], -90), 25)),# 5V
         ### J4 (USB)
         # VBUS A4 <--> B4
-        ('J4', 'A4', 'J4', 'B4', 12.4, (Strt2,
-            [(-3.1, 0), (15, 90), (24,  60), (40, 90), (40,  45)],
-            [(+3.1, 0), (15, 90), (24, 120), (40, 90), (40, 135)], 5)),
+        # ('J4', 'A4', 'J4', 'B4', 12.4, (Strt2,
+        #     [(-3.1, 0), (15, 90), (24,  60), (40, 90), (40,  45)],
+        #     [(+3.1, 0), (15, 90), (24, 120), (40, 90), (40, 135)], 5)),
+        ('J4', 'A4', 'J4', 'B4', 20, (Strt2,
+            [(-1, 0), (32, 90), (12,  60), (30, 90), (40,  45)],
+            [(+1, 0), (32, 90), (12, 120), (30, 90), (40, 135)], 5)),
         # DM/DP
-        ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(38, -90)], [(38, -90)], 9)),# DM
-        ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(38, +90)], [(38, +90)], 9)),# DP
+        ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(48, -90)], [(48, -90)], 9)),# DM
+        ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(48, +90)], [(48, +90)], 9)),# DP
         # DM/DP <--> R6, R7
         ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(118, -90), (75, 0), (20, -90)], 0), ([(26, +90)], 0), 10)),# DM
         ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([( 96, -90), (75, 0), (20, -90)], 0), ([(26, -90)], 0), 10)),# DP
@@ -374,7 +229,7 @@ def main():
         ('R8', '2', 'R9', '2', 20, (Strt)),
         ('R8', '2', 'R3', '2', 20, (Strt)),
         ### BOOT0: mcu <--> R3
-        ('U1', '31', 'R3', '1', 16, (Dird, ([(50, 90), (10, 0), (65, 90), (-10, 0)], 90), 90, 30)),
+        ('U1', '31', 'R3', '1', 16, (Dird, ([(50, 90), (10, 0), (60, 90), (-10, 0)], 90), 90, 30)),
         ### D3
         ('C5', '2', 'D3', '2', 20, (Dird, 90, ([(10, 0)], 90))),# Gnd
         ('D3', '4', 'J1', '1', 20, (Dird, ([(10, 0)], 90), 90)),# 5V
@@ -412,15 +267,6 @@ def main():
     # Gnd: U2
     kad.wire_mods_to_via( (0, +45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
     kad.wire_mods_to_via( (0, -45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
-    # Gnd: R3
-    kad.wire_mods_to_via( (-78, -60), VIA_Size[1], [
-         ('R3', '2', 24, (Dird, ([(7, -90)], 0), 90, 30)),
-    ] )
-    # Gnd: R9, D1
-    kad.wire_mods_to_via( (-78, +60), VIA_Size[1], [
-         ('R9', '2', 24, (Dird, ([(7, +90)], 0), 90, 30)),
-         ('D1', '1', 24, (Dird, 90, 0, 30)),
-    ] )
     # USB DM/DP <--> mcu
     kad.wire_mods_to_via( (-55, -26), VIA_Size[2], [
         ('U1', '21', 20, (Dird, 90, 0, 5)),
@@ -431,11 +277,11 @@ def main():
         ('R7',  '2', 20, (Dird, 0,  0, 5)),
     ] )
     # J4/A4,B4 VBUS
-    via_a = kad.wire_mods_to_via( (-70, 0), VIA_Size[1], [
+    via_a = kad.wire_mods_to_via( (-55, 0), VIA_Size[1], [
         ('F1',  '1', 24, (Dird, -30, 0)),
         ('J4', 'A4', 23.5, (Dird, 90, 90, 30)),
     ] )
-    via_b = kad.wire_mods_to_via( (-25, 58), VIA_Size[1], [
+    via_b = kad.wire_mods_to_via( (-23, 59), VIA_Size[1], [
         ('J4', 'B4', 23.5, (Dird, 0, 90)),
         ('R1', '1',  20, (Dird, 0, ([(22, 90)], 0), 30)),
     ] )
@@ -444,15 +290,15 @@ def main():
     kad.add_wire_zigzag( pos_a, pos_b, 90, 45, net, layer_F_Cu, 24, 5 )
     # J4: CC
     kad.wire_mods_to_via( (+22, -64), VIA_Size[2], [
-        ('J4', 'A5', 11.72, (Dird, 0, ([(29, 90)], +60), 3)),
+        ('J4', 'A5', 11.72, (Dird, 0, ([(39, 90)], +60), 3)),
         ('R8',  '1', 16, (Dird, 90, 90, 25)),
     ] )
     kad.wire_mods_to_via( (-22, -64), VIA_Size[2], [
-        ('J4', 'B5', 11.72, (Dird, 0, ([(29, 90)], -60), 3)),
+        ('J4', 'B5', 11.72, (Dird, 0, ([(39, 90)], -60), 3)),
         ('R9',  '1', 16, (Dird, 90, 90, 25)),
     ] )
     # SW1: BOOT0 <--> R3 pull-down
-    kad.wire_mods_to_via( (0, 128), VIA_Size[2], [
+    kad.wire_mods_to_via( (0, 120), VIA_Size[2], [
         ('SW1', '2', 16, (Dird, 90, ([(130, -90)], 0), 15)),
         ('R3',  '1', 16, (Dird, 0, 0, 15)),
     ] )
@@ -469,7 +315,7 @@ def main():
     # D3 <--> PB1
     kad.wire_mods_to_via( (40, -65), VIA_Size[2], [
         ('D3',  '3', 16, (Dird, 0, ([(10, 0)], 90), 10)),
-        ('U1', '15', 16, (ZgZg, 0, 15)),
+        ('U1', '15', 16, (ZgZg, 0, 40)),
     ] )
 
     ###

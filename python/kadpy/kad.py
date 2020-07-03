@@ -1,3 +1,4 @@
+import math
 import pcbnew
 import pnt
 import vec2
@@ -5,10 +6,20 @@ import mat2
 
 pcb = pcbnew.GetBoard()
 
+# wire types
 Straight = 0
 OffsetStraight = 1
 OffsetDirected = 2
 ZigZag = 3
+
+
+# draw corner types
+Line   = 0
+Linear = 1
+Bezier = 2
+BezierRound  = 3
+Round  = 4
+
 
 def sign( v ):
     if v > 0:
@@ -402,6 +413,151 @@ def drawRect( pnts, layer, R = 75, width = 2 ):
         for idx, a in enumerate( pnts ):
             b = pnts[idx-1]
             add_line( a, b, layer, width )
+
+
+# edge.cut drawing
+def is_supported_round_angle( angle ):
+    # integer?
+    if angle - round( angle ) != 0:
+        return False
+    # multiple of 90?
+    deg = int( angle )
+    if (deg % 90) != 0:
+        return False
+    return True
+
+def add_draw_bezier( pnts, num_divs, layer, width, debug = False ):
+    num_pnts = len( pnts )
+    tmp = [(0, 0) for n in range( num_pnts )]
+    curv = [pnts[0]]
+    for i in range( 1, num_divs ):
+        t = float( i ) / num_divs
+        s = 1 - t
+        for n in range( num_pnts ):
+            tmp[n] = pnts[n]
+        for L in range( num_pnts - 1, 0, -1 ):
+            for n in range( L ):
+                tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
+        curv.append( tmp[0] )
+    curv.append( pnts[-1] )
+    for idx, pnt in enumerate( curv ):
+        if idx == 0:
+            continue
+        add_line( curv[idx-1], pnt, layer, width )
+    if debug:# debug
+        for pnt in pnts:
+            add_arc( pnt, vec2.add( pnt, (20, 0) ), 360, 'F.Fab', 4 )
+
+def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
+    apos, aangle = a
+    bpos, bangle = b
+    avec = vec2.rotate( aangle )
+    bvec = vec2.rotate( bangle + 180 )
+    if cnr_type != Bezier and abs( vec2.dot( avec, bvec ) ) > 0.999:
+        cnr_type = Line
+        #print( avec, bvec )
+    if cnr_type == Line:
+        add_line( apos, bpos, layer, width )
+    elif cnr_type == Linear:
+        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+        if cnr_data == None:
+            add_line( apos, xpos, layer, width )
+            add_line( bpos, xpos, layer, width )
+        else:
+            delta = cnr_data[0]
+            #print( delta, alen, xpos )
+            amid = vec2.scale( alen - delta, avec, apos )
+            bmid = vec2.scale( blen - delta, bvec, bpos )
+            add_line( apos, amid, layer, width )
+            add_line( bpos, bmid, layer, width )
+            add_line( amid, bmid, layer, width )
+    elif cnr_type == Bezier:
+        num_data = len( cnr_data )
+        alen = cnr_data[0]
+        blen = cnr_data[-2]
+        ndivs = cnr_data[-1]
+        apos2 = vec2.scale( alen, avec, apos )
+        bpos2 = vec2.scale( blen, bvec, bpos )
+        pnts = [apos, apos2]
+        if num_data > 3:
+            for pt in cnr_data[1:num_data-2]:
+                pnts.append( pt )
+        pnts.append( bpos2 )
+        pnts.append( bpos )
+        add_draw_bezier( pnts, ndivs, layer, width )
+    elif cnr_type == BezierRound:
+        radius = cnr_data[0]
+        _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+        debug = False
+        if alen <= radius:
+            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( alen, radius, apos ) )
+            debug = True
+        if blen <= radius:
+            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( blen, radius, bpos ) )
+            debug = True
+        amid = vec2.scale( alen - radius, avec, apos )
+        bmid = vec2.scale( blen - radius, bvec, bpos )
+        add_line( apos, amid, layer, width )
+        add_line( bpos, bmid, layer, width )
+        angle = vec2.angle( avec, bvec )
+        if angle < 0:
+            #angle += 360
+            angle *= -1
+        ndivs = int( round( angle / 4.5 ) )
+        #print( 'BezierRound: angle = {}, ndivs = {}'.format( angle, ndivs ) )
+        coeff = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
+        #print( 'coeff = {}'.format( coeff ) )
+        actrl = vec2.scale( alen + (coeff - 1) * radius, avec, apos )
+        bctrl = vec2.scale( blen + (coeff - 1) * radius, bvec, bpos )
+        pnts = [amid, actrl, bctrl, bmid]
+        add_draw_bezier( pnts, ndivs, layer, width, debug )
+    elif cnr_type == Round:
+        radius = cnr_data[0]
+        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+        # print( 'Round: radius = {}'.format( radius ) )
+        debug = False
+        if not is_supported_round_angle( aangle ):
+            print( 'Round: warning aangle = {}'.format( aangle ) )
+            debug = True
+        if not is_supported_round_angle( bangle ):
+            print( 'Round: warning bangle = {}'.format( bangle ) )
+            debug = True
+        if alen < radius:
+            print( 'Round: alen < radius, {} < {}'.format( alen, radius ) )
+            debug = True
+        if blen < radius:
+            print( 'Round: blen < radius, {} < {}'.format( blen, radius ) )
+            debug = True
+        if debug:
+            kad.add_arc( xpos, vec2.add( xpos, (10, 0) ), 360, layer, width )
+            return b
+        angle = vec2.angle( avec, bvec )
+        angle = math.ceil( angle * 10 ) / 10
+        tangent = math.tan( abs( angle ) / 2 / 180 * math.pi )
+        side_len = radius / tangent
+        # print( 'angle = {}, radius = {}, side_len = {}, tangent = {}'.format( angle, radius, side_len, tangent ) )
+
+        amid = vec2.scale( -side_len, avec, xpos )
+        bmid = vec2.scale( -side_len, bvec, xpos )
+        add_line( apos, amid, layer, width )
+        add_line( bpos, bmid, layer, width )
+
+        aperp = (-avec[1], avec[0])
+        if angle >= 0:
+            ctr = vec2.scale( -radius, aperp, amid )
+            add_arc2( ctr, bmid, amid, 180 - angle, layer, width )
+        else:
+            ctr = vec2.scale( +radius, aperp, amid )
+            add_arc2( ctr, amid, bmid, 180 + angle, layer, width )
+    return b
+
+def draw_closed_corners( corners, layer, width ):
+    a = corners[-1][0]
+    for (b, cnr_type, cnr_data) in corners:
+        a = draw_corner( cnr_type, a, cnr_data, b, layer, width )
+        #break
+
+
 
 # zones
 def add_zone( rect, layer, idx = 0, net_name = 'GND' ):
