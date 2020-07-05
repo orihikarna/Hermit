@@ -75,21 +75,20 @@ def drawEdgeCuts():
     # draw
     kad.draw_closed_corners( corners, layer, width )
 
+def add_zone( net_name, layer_name, rect, zones ):
+    layer = pcb.GetLayerID( layer_name )
+    zone, poly = kad.add_zone( rect, layer, len( zones ), net_name )
+    zone.SetZoneClearance( pcbnew.FromMils( 12 ) )
+    #zone.SetMinThickness( pcbnew.FromMils( 10 ) )
+    #zone.SetThermalReliefGap( pcbnew.FromMils( 12 ) )
+    #zone.SetThermalReliefCopperBridge( pcbnew.FromMils( 24 ) )
+    zone.Hatch()
+    #
+    zones.append( zone )
+    #polys.append( poly )
 
-def makeZones( rect ):
-    layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
-    layer_B_Cu = pcb.GetLayerID( 'B.Cu' )
-    zones = []
-    for layer in [layer_F_Cu, layer_B_Cu]:
-        zone, poly = kad.add_zone( rect, layer, len( zones ) )
-        zone.SetZoneClearance( pcbnew.FromMils( 12 ) )
-        #zone.SetMinThickness( pcbnew.FromMils( 10 ) )
-        #zone.SetThermalReliefGap( pcbnew.FromMils( 12 ) )
-        #zone.SetThermalReliefCopperBridge( pcbnew.FromMils( 24 ) )
-        zone.Hatch()
-        #
-        zones.append( zone )
-        #polys.append( poly )
+def make_rect( size, offset = (0, 0) ):
+    return map( lambda pt: vec2.add( (size[0] * pt[0], size[1] * pt[1]), offset ), FourCorners )
 
 def main():
     kad.removeDrawings()
@@ -99,8 +98,10 @@ def main():
     #kad.drawRect( PCB_Rect, 'Edge.Cuts', R = 40 )
     drawEdgeCuts()
 
-    Zone_Rect = map( lambda pt: ((PCB_Width + 50) * pt[0], (PCB_Height) * pt[1]), FourCorners )
-    makeZones( Zone_Rect )
+    zones = []
+    add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height) ), zones )
+    add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width - 500, PCB_Height), (500, 0)), zones )
+    add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (100, 100)), zones )
 
     kad.add_text( (470, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200621', 'F.SilkS', (0.9, 0.9), 6,
         pcbnew.GR_TEXT_HJUSTIFY_LEFT, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
@@ -170,15 +171,16 @@ def main():
         ('C7', '1', 'C8', '1', 24, (Strt)),
         ('C7', '2', 'C8', '2', 24, (Strt)),
         # Vcc <--> Vcca
-        ('C4', '1', 'C8', '1', 24, (Dird, 0, ([(50, 90)], 0), 5)),# Vcc
+        ('C4', '1', 'C8', '1', 24, (Dird, ([(46, 180)], 90), 90, 5)),# Vcc
+        ('C4', '1', 'C2', '1', 24, (Dird, ([(46, 180)], 90), ([(50, 90)], 0), 5)),# Vcc
         ('C4', '2', 'C7', '2', 24, (Dird, 0, 0)),
         # Vcc <--> Vcc
-        ('U1', '1', 'U1', '17', 20, (Dird, ([(32, 0), (75, -45)], 90), ([(32, 180), (110, 135), (120, 180)], 135))),# Vcc
+        ('U1', '1', 'U1', '17', 20, (Dird, ([(32, 0), (80, -45), (80, -90)], 135), ([(32, 180), (80, 135)], 180))),# Vcc
         ### pin headers
         # J3
         ('U1', '13', 'J3', '3', 20, (Dird, 90, -45)),# PA7
-        ('U1', '12', 'J3', '2', 20, (Dird, 90, ([(20, -90)], -45))),# PA6
-        ('U1', '11', 'J3', '1', 20, (Dird, 90, ([(20, -90), (80, -45), (56, -90)], -45))),# PA5
+        ('U1', '12', 'J3', '2', 20, (Dird, -90, ([(27, -90)], -45))),# PA6
+        ('U1', '11', 'J3', '1', 20, (Dird, ([(31, -90)], 45), ([(25, -90), (75, -45)], -90))),# PA5
         # J2 front
         ('U1', '9', 'J2', '1', 20, (Dird, 0, +45)),# PA3
         ('U1', '8', 'J2', '2', 20, (Dird, 0, +45)),# PA2
@@ -207,13 +209,11 @@ def main():
         ('U2', '3', 'C2', '2', 24, (Dird, 90, 0)),# Gnd
         ('U2', '2', 'C2', '1', 24, (Dird, 90, 0)),# Vcc
         # VBUS <--> F1
-        ('J4', 'A4', 'F1', '1', 24, (Dird, 90, ([(30, 180)], 60))),
+        ('J4', 'A4', 'F1', '1', 24, (Dird, ([(55, -90), (30, 0)], 90), ([(50, 180)], 90), 0)),
         # Gnd: J4/A1 <--> C4
         ('J4', 'A1', 'C4', '2', 24, (Dird, 90, -45)),
         # Gnd: C1 <--> C7
         ('C1', '2', 'C7', '2', 24, (ZgZg, 90, 70)),
-        # Vcc: C2 <--> C8
-        ('C2', '1', 'C8', '1', 24, (Dird, ([(50, 90)], 0), 0, 25)),
         # Vcc: C2 <--> C6
         ('C2', '1', 'C6', '1', 24, (Dird, ([(25, 90)], 0), -90, 25)),
         ### NRST C9
@@ -221,7 +221,7 @@ def main():
         ### I2C pull-up's
         ('R4', '2', 'R5', '2', 24, (Strt)),# 5V
         # 5V: regulator <--> I2C <--> J1
-        ('R5', '2', 'U2', '1', 24, (ZgZg, 0, 60)),# 5V
+        ('R5', '2', 'U2', '1', 24, (Dird, 0, 90)),# 5V
         ('R4', '2', 'J1', '1', 24, (Dird, ([(50, 90)], 0), ([(56, 0)], -90), 25)),# 5V
         ### J4 (USB)
         # VBUS A4 <--> B4
@@ -231,15 +231,18 @@ def main():
         ('J4', 'A4', 'J4', 'B4', 20, (Strt2,
             [(-1, 0), (32, 90), (12,  60), (30, 90), (40,  45)],
             [(+1, 0), (32, 90), (12, 120), (30, 90), (40, 135)], 5)),
+        # Gnd Shield
+        ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, 0, -45)),
+        ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, 0, +45)),
+        ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, ([(55, -90)], 0), 90, 0)),
+        ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, ([(55, -90)], 0), 90, 0)),
         # DM/DP
-        ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(48, -90)], [(48, -90)], 9)),# DM
-        ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(48, +90)], [(48, +90)], 9)),# DP
+        ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(50, -90)], [(50, -90)], -16)),# DM
+        ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(50, +90)], [(50, +90)], -16)),# DP
         # DM/DP <--> R6, R7
-        ('J4', 'A7', 'R6',  '1', 11.72, (Dird, ([(82, -90), (75, 0), (12, -90)], 0), ([(26, +90)], 0), 10)),# DM
-        ('J4', 'B6', 'R7',  '1', 11.72, (Dird, ([(60, -90), (75, 0), (12, -90)], 0), ([(26, -90)], 0), 10)),# DP
-        # Gnd: B1 <--> D1
-        #('J4', 'B1', 'D1', '1', 23.5, (Dird, ([(50, -90), (85, 0)], 90), 135)),
-        # Gnd: USB CC/BOOT0
+        ('J4', 'A7', 'R6', '1', 11.72, (Dird, -90, ([(26, +90), (40, 180), (65, -90), (20, 180)], -90), -10)),# DM
+        ('J4', 'B6', 'R7', '1', 11.72, (Dird, -90, ([(26, -90), (72, 180), (65, -90), (20, 180)], -90), -10)),# DP
+        # Gnd: USB CC1/CC2/BOOT0
         ('R8', '2', 'R9', '2', 20, (Strt)),
         ('R8', '2', 'R3', '2', 20, (Strt)),
         ### BOOT0: mcu <--> R3
@@ -252,8 +255,6 @@ def main():
     ###
     ### VIA
     ###
-    layer_F_Cu = pcb.GetLayerID( 'F.Cu' )
-    layer_B_Cu = pcb.GetLayerID( 'B.Cu' )
 
     # pad vias
     via_pads = [
@@ -269,8 +270,8 @@ def main():
     kad.wire_mods_to_via( (-65, 10), VIA_Size[0], [
         ('U1', '5', 24, (Dird, 90, 0)),
         ('C8', '1', 24, (Dird, 0, 0)),
-        ('J2', '3', 24, (Dird, 0, 45), 'F.Cu' ),
-        ('J2', '3', 24, (Dird, 0, 45), 'B.Cu' ),
+        ('J2', '3', 24, (Dird, 45, 0), 'F.Cu' ),
+        ('J2', '3', 24, (Dird, 90, 0), 'B.Cu' ),
     ] )
     # NRST
     kad.wire_mods_to_via( (55, 30), VIA_Size[2], [
@@ -278,8 +279,16 @@ def main():
         ('C9', '1', 16, (Dird, 90, 90)),
     ] )
     # Gnd: U2
-    kad.wire_mods_to_via( (0, +45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
-    kad.wire_mods_to_via( (0, -45), VIA_Size[1], [ ('U2', '3', 20, (Strt)) ] )
+    kad.wire_mods_to_via( (-15, +48), VIA_Size[1], [
+        ('U2', '3', 24, (Dird, 0, 90)),
+        ('U2', '3', 24, (Dird, ([(35, 180)], 90), 0)),
+        ('U1', '32', 20, (Dird, 90, ([(32, -90)], 135))),
+    ] )
+    kad.wire_mods_to_via( (-15, -48), VIA_Size[1], [
+        ('U2', '3', 20, (Dird, 0, 90)),
+        ('U2', '3', 24, (Dird, ([(35, 180)], 90), 0)),
+        ('U1', '16', 20, (Dird, 0, ([(32, +90)], -45))),
+    ] )
     # USB DM/DP <--> mcu
     kad.wire_mods_to_via( (-55, -26), VIA_Size[2], [
         ('U1', '21', 20, (Dird, 90, 0, 5)),

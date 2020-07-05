@@ -211,13 +211,13 @@ def add_wire_straight( pnts, net, layer, width, radius = 0 ):
         vec_b = vec2.sub( next, curr )
         len_a = vec2.length( vec_a )
         len_b = vec2.length( vec_b )
-        length = min( radius,
+        length = min( abs( radius ),
             len_a / 2 if idx - 1 > 0 else len_a,
             len_b / 2 if idx + 1 < len( pnts ) - 1 else len_b )
         if length < 1:
             rpnts.append( curr )
         else:
-            if False and abs( vec2.dot( vec_a, vec_b ) ) < len_a * len_b * 0.001:
+            if radius < 0 and abs( vec2.dot( vec_a, vec_b ) ) < len_a * len_b * 0.001:
                 # bezier circle
                 num_divs = 15
                 cef = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
