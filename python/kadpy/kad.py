@@ -144,6 +144,15 @@ def add_via( pos, net, size ):# size [mm]
     pcb.Add( via )
     return via
 
+def add_via_on_pad( mod_name, pad_name, via_size ):
+    pos, net = get_pad_pos_net( mod_name, pad_name )
+    add_via( pos, net, via_size )
+
+def add_via_relative( mod_name, pad_name, offset_vec, size_via ):
+    pos, angle, _, net = get_pad_pos_angle_layer_net( mod_name, pad_name )
+    pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
+    return add_via( pos_via, net, size_via )
+
 def get_via_pos_net( via ):
     return pnt.unit2mils( via.GetPosition() ), via.GetNet()
 
@@ -351,24 +360,21 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
         add_wire_zigzag( pos_a, pos_b, angle_a + dangle, delta_angle, net, layer, width, radius )
 
 def wire_mods( tracks ):
-    for mod_a, pad_a, mod_b, pad_b, width, prms in tracks:
-        pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
-        pos_b, angle_b, _,     _   = get_pad_pos_angle_layer_net( mod_b, pad_b )
-        layer = get_mod_layer( mod_a )
+    for track in tracks:
+        mod_a, pad_a, mod_b, pad_b, width, prms = track[:6]
+        if mod_a != None:
+            pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
+        if mod_b != None:
+            pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
+        if mod_a == None:# pad_a is via
+            pos_a, _ = get_via_pos_net( pad_a )
+            angle_a = angle_b
+        if mod_b == None:# pad_b is via
+            pos_b, _ = get_via_pos_net( pad_b )
+            angle_b = angle_a
+        if len( track ) > 6:
+            layer = pcb.GetLayerID( track[6] )
         __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms )
-
-def wire_mods_to_via( offset_vec, size_via, tracks ):
-    for idx, track in enumerate( tracks ):
-        mod_name, pad_name, width, prms = track[:4]
-        pos, angle, layer, net = get_pad_pos_angle_layer_net( mod_name, pad_name )
-        if len( track ) > 4:
-            layer = pcb.GetLayerID( track[4] )
-        if idx == 0:
-            angle_via = angle
-            pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
-            via = add_via( pos_via, net, size_via )
-        __add_wire( pos_via, angle_via, pos, angle, net, layer, width, prms )
-    return via
 
 
 # drawing
