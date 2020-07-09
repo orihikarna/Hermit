@@ -362,10 +362,10 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
 def wire_mods( tracks ):
     for track in tracks:
         mod_a, pad_a, mod_b, pad_b, width, prms = track[:6]
+        if mod_b != None:# check b first for layer
+            pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
         if mod_a != None:
             pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
-        if mod_b != None:
-            pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
         if mod_a == None:# pad_a is via
             pos_a, _ = get_via_pos_net( pad_a )
             angle_a = angle_b

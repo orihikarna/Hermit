@@ -64,8 +64,8 @@ def drawEdgeCuts():
     if True:# LED (80mils in 200mils = 60mils each on above and below)
         LED_W = 80#mils = 2.32mm
         # slope
-        sl_w = 60
-        sl_h = 30
+        sl_w = (200 - LED_W) / 2
+        sl_h = 30# 0.75mm
         sl_angle = int( math.atan2( sl_h, sl_w ) / math.pi * 180 )
         pos, _ = kad.get_mod_pos_angle( 'D3' )
         corners.append( [((-sl_h/2, pos[1] + (LED_W + sl_w) / 2), -90-sl_angle), BezierRound, [8]] )
@@ -102,7 +102,7 @@ def main():
     drawEdgeCuts()
 
     zones = []
-    add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height) ), zones )
+    add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width - 100, PCB_Height), (100, 0) ), zones )
     add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width - 500, PCB_Height), (500, 0)), zones )
     add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (100, 100)), zones )
 
@@ -230,7 +230,7 @@ def main():
         ('U1', '8', 'J2', '2', 20, (Dird, 0, +45, -16)),# PA2
         (None, via_vcca, 'J2', '3', 24, (Dird, 45, 0), 'F.Cu'),
         (None, via_vcca, 'J2', '3', 24, (Dird, 90, 0), 'B.Cu'),
-        ('U1', '4', 'J2', '4', 20, (Dird, 0, -45, -16)),# NRST
+        ('U1', '4', 'J2', '4', 20, (ZgZg, 0, 25, -16)),# NRST
         ('U1', '3', 'J2', '5', 20, (Dird, 0, -45, -16)),# PF1
         ('U1', '2', 'J2', '6', 20, (Dird, 0, ([(80, 135), (56, 90)], -45), -16)),# PF0
     ] )
@@ -249,14 +249,24 @@ def main():
         #     [(-3.1, 0), (15, 90), (24,  60), (40, 90), (40,  45)],
         #     [(+3.1, 0), (15, 90), (24, 120), (40, 90), (40, 135)], 5)),
         ('J4', 'A4', 'J4', 'B4', 20, (Strt2,
-            [(-1, 0), (32, 90), (14,  60), (65, 90)],
-            [(+1, 0), (32, 90), (14, 120), (65, 90)], -30)),
+            [(-1.75, 0), (30, 90), (20,  62), (65, 90)],
+            [(+1.75, 0), (30, 90), (20, 118), (65, 90)], -32)),
+        # Vcc <--> D1
+        ('D1', '2', 'J4', 'B4', 20, (Dird,
+            ([(100, -45)], 90),
+            ([(+1.75, 0), (30, 90), (20, 118)], 90), -32)),
         # Gnd Shield
         ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, 0, -45)),
         ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, 0, +45)),
         ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, ([(55, -90)], 0), 90, 0)),
         ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, ([(55, -90)], 0), 90, 0)),
-        ('C3', '2',  'J4', 'S1', 23.5, (Dird, 90, -45, -20), 'F.Cu'),
+        ('J4', 'S1', 'J4', 'S4', 24, (Strt), 'B.Cu'),
+        ('J4', 'S2', 'J4', 'S3', 24, (Strt), 'F.Cu'),
+        ('C3', '2',  'J4', 'S1', 24, (Dird, 90, -45, -20), 'F.Cu'),
+        ('J2', '7',  'J4', 'S1', 24, (Dird, 0, 45, -20), 'B.Cu'),
+        ('R3', '2',  'J4', 'S4', 24, (Dird, 0, 0), 'F.Cu'),
+        ('R9', '2',  'J4', 'S3', 24, (Dird, 0, 0), 'F.Cu'),
+        ('R1', '2',  'J4', 'S3', 24, (Dird, 90, 90), 'F.Cu'),
         # DM/DP
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(50, -90)], [(50, -90)], -16)),# DM
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(50+30, -90), (-30, -90)], [(50, -90)], -16)),# DM
@@ -303,9 +313,9 @@ def main():
     # connections
     kad.wire_mods( [
         # VBUS: J4 <--> Regulator/F1
-        ('J4', 'A4', 'F1', '1', 24, (Dird, ([(55, -90)], 0), ([(45, 180)], 45), -20)),
+        ('J4', 'A4', 'F1', '1', 23.5, (Dird, ([(55, -90)], 0), ([(45, 180)], 45), -20)),
         # Gnd: J4/A1 <--> mcu/C4
-        ('J4', 'A1', 'C4', '2', 24, (Dird, 90, -45, -20)),
+        ('J4', 'A1', 'C4', '2', 23.5, (Dird, 90, -45, -20)),
         # Gnd: Regulator/C1 <--> Vdda/C7
         ('C1', '2', 'C7', '2', 24, (ZgZg, 90, 55, -20)),
         # BOOT0: mcu/PB8 <--> R3
@@ -323,10 +333,10 @@ def main():
     via_sw1   = kad.add_via_relative( 'SW1', '1', (50, 40), VIA_Size[2] )
     via_boot0 = kad.add_via_relative( 'SW1', '2', (0, 125), VIA_Size[2] )
     kad.wire_mods( [
-        (None, via_boot0, 'SW1', '2', 16, (Dird, 90, 0, 15)),
-        (None, via_boot0, 'R3',  '1', 16, (ZgZg, 90, 45, -10)),
-        (None, via_sw1, 'SW1', '1', 16, (Dird, 90, 0)),# Vcc
-        (None, via_sw1, 'C3',  '1', 16, (ZgZg, 90, 60, -20)),# Vcc
+        (None, via_boot0, 'SW1', '2', 16, (Dird, 90, 0, -12)),
+        (None, via_boot0, 'R3',  '1', 16, (ZgZg, 90, 45, -12)),
+        (None, via_sw1, 'SW1', '1', 16, (Dird, 90, 0, -12)),# Vcc
+        (None, via_sw1, 'C3',  '1', 16, (ZgZg, 90, 60, -12)),# Vcc
     ] )
     # D1/D2
     via_pads = [ ('R1', '1'), ('R2', '1') ]
@@ -335,6 +345,7 @@ def main():
     # D2
     via_d2 = kad.add_via_relative( 'U1', '25', (135, 0), VIA_Size[1] )
     kad.wire_mods( [
+        ('R1', '2', 'R2', '2', 20, (Strt)),
         (None, via_d2, 'U1', '25', 20, (Dird, 90, 0)),# PA15
         (None, via_d2, 'D2', '2', 20, (Dird, 0, 135, -16)),
     ] )
@@ -344,7 +355,7 @@ def main():
         ('D3', '4', 'J1', '1', 20, (Dird, ([(10, 0)], 90), 45, -16), 'B.Cu'),# 5V
         ('D3', '2', 'C5', '2', 20, (Dird, ([(10, 0)], 90), 90), 'F.Cu'),# Gnd
         (None, via_d3, 'D3',  '3', 16, (Dird, 0, ([(10, 0)], 90), -16)),
-        (None, via_d3, 'U1', '15', 16, (ZgZg, 0, 45, -16)),
+        (None, via_d3, 'U1', '15', 16, (ZgZg, 90, 45, -16)),
     ] )
 
 
