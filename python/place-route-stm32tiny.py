@@ -104,9 +104,9 @@ def main():
     zones = []
     add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width - 100, PCB_Height), (100, 0) ), zones )
     add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width - 500, PCB_Height), (500, 0)), zones )
-    add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (100, 100)), zones )
+    add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (110, 110)), zones )
 
-    kad.add_text( (470, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200621', 'F.SilkS', (0.9, 0.9), 6,
+    kad.add_text( (440, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200710', 'F.SilkS', (0.9, 0.9), 6,
         pcbnew.GR_TEXT_HJUSTIFY_LEFT, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
 
     ###
@@ -176,8 +176,8 @@ def main():
         # Gnd
         (None, via_reggnd1, 'U2', '3', 24, (Dird, 0, 90)),
         (None, via_reggnd2, 'U2', '3', 24, (Dird, 0, 90)),
-        (None, via_reggnd1, 'U2', '3', 24, (Dird, ([(35, 180)], 90), ([(50, 180)], 0), -30)),
-        (None, via_reggnd2, 'U2', '3', 24, (Dird, ([(35, 180)], 90), ([(50, 180)], 0), -30)),
+        (None, via_reggnd1, 'U2', '3', 24, (Dird, ([(35, 180)], 90), ([(50, 180)], 0), -32)),
+        (None, via_reggnd2, 'U2', '3', 24, (Dird, ([(35, 180)], 90), ([(50, 180)], 0), -32)),
     ] )
     # mcu
     via_vcca = kad.add_via_relative( 'U1', '5', (-65, 10), VIA_Size[0] )
@@ -272,15 +272,15 @@ def main():
         ('J4', 'A7', 'J4', 'B7', 11.72, (Strt2, [(50+30, -90), (-30, -90)], [(50, -90)], -16)),# DM
         ('J4', 'A6', 'J4', 'B6', 11.72, (Strt2, [(50, +90)], [(50, +90)], -16)),# DP
         # DM/DP <--> R6, R7
-        ('J4', 'A7', 'R6', '1', 11.72, (Dird, -90, ([(26, +90), (40, 180), (65, -90), (20, 180)], -90), -10)),# DM
-        ('J4', 'B6', 'R7', '1', 11.72, (Dird, -90, ([(26, -90), (72, 180), (65, -90), (20, 180)], -90), -10)),# DP
+        ('J4', 'A7', 'R6', '1', 11.72, (Dird, -90, ([(26, +90), (40, 180), (45, -90), (28, -135)], -90), -16)),# DM
+        ('J4', 'B6', 'R7', '1', 11.72, (Dird, -90, ([(26, -90), (72, 180), (55, -90), (28, -135)], -90), -16)),# DP
         # Gnd: CC1/CC2/BOOT0
         ('R8', '2', 'R9', '2', 20, (Strt)),
         ('R8', '2', 'R3', '2', 20, (Strt)),
         # CC1/CC2
-        (None, via_cc1, 'J4', 'A5', 11.72, (Dird, -90, ([(46, 90)], 0), -20)),
+        (None, via_cc1, 'J4', 'A5', 11.72, (Dird, -90, ([(50, 90)], -135), -20)),
         (None, via_cc1, 'R8',  '1', 16, (Dird, 0, 90, 25)),
-        (None, via_cc2, 'J4', 'B5', 11.72, (Dird, -90, ([(46, 90)], 0), -20)),
+        (None, via_cc2, 'J4', 'B5', 11.72, (Dird, -90, ([(50, 90)], +135), -20)),
         (None, via_cc2, 'R9',  '1', 16, (Dird, 0, 90, 25)),
     ] )
     # Vcc rounting
@@ -363,19 +363,19 @@ def main():
     ### Ref
     ###
     refs = [
-        ('C1', 115, 30,  90),
-        ('C2', 100,  0,  90),
-        ('C3', -60, 90, 180),
-        ('C4',  60, 90, 180),
-        ('C5', -60, 90, 180),
-        ('C6', -70, 60, 180),
+        ('C1', 90, +40, 90),
+        ('C2', 90, -40, 90),
+        ('C3', -60, 70, 180),
+        ('C4',  60,120, 180),
+        ('C5', -60, 70, 180),
+        ('C6',  60,-60, 180),
         ('C7',  90,  0,  90),
         ('C8',  90,  0,  90),
-        ('C9', -90,  0,  -90),
+        ('C9', -90,  0, -90),
         ('R1', -15, 0, 0),
         ('R2', -15, 0, 0),
-        ('R4',  70, 60, 180),
-        ('R5', -70,120, 180),
+        ('R4',  60,120, 180),
+        ('R5', -60, 60, 180),
         ('R6', -100, 0, -90),
         ('R7', -100, 0, -90),
         ('L1',  100, 0,  90),
@@ -387,7 +387,7 @@ def main():
         ('U2', 0, 0, -90),
         ('D1', 15, 0, 0),
         ('D2', 15, 0, 0),
-        ('D3', 70, 90, -90),
+        ('D3', 50, 90, -90),
         ('SW1', 0, 0, -90),
         ('J1', 0, 0, None),
         ('J2', 0, 0, None),
@@ -436,7 +436,7 @@ def main():
             angle_pos1, angle_text1 = angles1
             angle_pos2, angle_text2 = angles2
             for idx, layer in enumerate( ['F.SilkS', 'B.SilkS'] ):
-                pos1 = vec2.scale( [70, 50][idx], vec2.rotate( angle_pos1 ), pos )
+                pos1 = vec2.scale( [65, 65][idx], vec2.rotate( angle_pos1 ), pos )
                 pos2 = vec2.scale( 50, vec2.rotate( angle_pos2 ), pos )
                 kad.add_text( pos1, angle_text1, text1, layer, (0.7, 0.7), 6,
                     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
