@@ -293,13 +293,13 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Comma: the origin
     angle_Comm = -6
-    org_Comm = vec2( 4.0, 3.8 )
+    org_Comm = vec2( 3.8, 3.8 )
     #org_Comm[1] += 30 / unit# yoffset for A4 paper
 
     # parameters
     dx_Dot_L = -0.08 * ratio
     dx_Comm_K = dx_Dot_L * 2.0
-    dy_Scln = 0.4 * ratio
+    dy_Scln = 0.5 * ratio
 
     dangles_Thmb = (-14 * ratio, -8 * ratio)
     angle_Index_Thmb = 79.3
@@ -329,35 +329,39 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     tr_Dot = org_Dot + vec2( +0.5, -0.5 ) @ mat2_rot( angle_Dot )
     org_Scln = tr_Dot + vec2( +0.5, dy_Scln - 0.5) @ mat2_rot( angle_PinkyTop )
     dx_Scln_P = dy_Scln * math.tan( angle_Dot_Scln * deg2rad )
-    # Cln(:)
+    # Cln(:), LBrc([)
     org_Cln = org_Scln + vec2( +1, 0 ) @ mat2_rot( angle_PinkyTop )
+    org_LBrc = org_Cln + vec2( +1, 0 ) @ mat2_rot( angle_PinkyTop )
 
     ## Pinky bottom
+    tx = 2
     # Bsls(\)
-    tr_Dot = org_Dot + vec2( +0.5, -0.5 ) @ mat2_rot( angle_Dot )
     br_Dot = org_Dot + vec2( +0.5, +0.5 ) @ mat2_rot( angle_Dot )
-    lb_Cln = org_Cln - vec2( +0.5, -0.5 ) @ mat2_rot( angle_PinkyTop )
-    Lt = np.linalg.norm( tr_Dot - lb_Cln )
-    Lb = np.linalg.norm( br_Dot - lb_Cln )
+    lb_key = org_Scln + vec2( tx - 0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
+    Lt = np.linalg.norm( tr_Dot - lb_key )
+    Lb = np.linalg.norm( br_Dot - lb_key )
     angle_1 = math.acos( (1 + Lb * Lb - Lt * Lt ) / (2 * Lb)) * rad2deg
-    angle_2 = math.asin( 1 / Lb ) * rad2deg
-    angle_Dot_Bsls = angle_1 - angle_2
-    angle_PinkyBtm = angle_Dot + angle_Dot_Bsls
-    org_Bsls = lb_Cln + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+    angle_2 = math.asin( tx / Lb ) * rad2deg
+    angle_Dot_Btm = angle_1 - angle_2
+    angle_PinkyBtm = angle_Dot + angle_Dot_Btm
+    angle_Btm_Top = angle_PinkyBtm - angle_PinkyTop
     # Slsh(/)
     bl_Scln = org_Scln + vec2( -0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
     x, _, _ = vec2_find_intersection( br_Dot, vec2( 0, 1 ) @ mat2_rot( angle_Dot ), bl_Scln, vec2( -1, 0 ) @ mat2_rot( angle_PinkyBtm ) )
-    tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Bsls * deg2rad ) * np.linalg.norm( x - br_Dot )
+    tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Btm * deg2rad ) * np.linalg.norm( x - br_Dot )
     org_Slsh = tl_Slsh + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+    if tx == 2:
+        # RBrc(]), Bsls(\)
+        org_RBrc = lb_key + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+        org_Bsls = org_RBrc + vec2( -1, math.tan( angle_Btm_Top * deg2rad ) ) @ mat2_rot( angle_PinkyBtm )
+    elif tx == 1:
+        # RBrc(]), Bsls(\)
+        org_Bsls = lb_key + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+        org_RBrc = org_Bsls + vec2( +1, -math.tan( angle_Btm_Top * deg2rad ) ) @ mat2_rot( angle_PinkyBtm )
 
-    keyw_Cln = 1.25
+    keyw_Cln = 1.0
     keyw_Mins = 1.0
     org_Mins = org_Cln + vec2( dx_Scln_P + (keyw_Mins - 1) / 2, -1 ) @ mat2_rot( angle_PinkyTop )
-    org_Cln  += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyTop )
-    org_Bsls += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyBtm )
-
-    # org_LBrc = org_Cln  + vec2( 1, 0 ) @ mat2_rot( angle_PinkyTop )
-    # org_RBrc = org_Bsls + (org_Bsls - org_Slsh)
 
     add_col( data, angle_Comm,  org_Comm, [dx_Comm_K, dx_Comm_K, dx_I_8], col_Comm, col_C, xctr )
     add_col( data, angle_Dot,   org_Dot,  [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot, col_X, xctr )
@@ -368,13 +372,20 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     add_col( data, angle_Index, org_I, dxs_Index, col_I1, col_I2, xctr )
 
     add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P] * 3, col_Scln[1:], col_Z[1:], xctr )
-    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P],     col_Cln[2:3], col_Tab[2:3], xctr, keyw = keyw_Cln )
+    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P],     col_Cln[2:3], [], xctr, keyw = keyw_Cln )
     add_col( data, angle_PinkyTop, org_Mins, [dx_Scln_P],     col_Cln[3:4], col_Tab[3:4], xctr, keyw = keyw_Mins )
-    # add_col( data, angle_PinkyTop, org_LBrc, [0], col_Brac[1:], [], xctr, ydir = +1 )
+    add_col( data, angle_PinkyTop, org_LBrc, [0], col_Brac[1:], [], xctr, ydir = +1 )
 
     add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
-    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Cln[1:0:-1],  col_Tab[1:0:-1], xctr, ydir = +1, keyw = keyw_Cln )
-    # add_col( data, angle_PinkyBtm, org_RBrc, [0], col_Brac[1:0:-1], [], xctr, ydir = +1 )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Cln[1:0:-1], [], xctr, ydir = +1, keyw = keyw_Cln )
+    add_col( data, angle_PinkyBtm, org_RBrc, [0], col_Brac[0::-1], [], xctr, ydir = +1 )
+
+    # left side
+    keyw_Cln = 1.25
+    org_Cln  += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyTop )
+    org_Bsls += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyBtm )
+    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P], [], col_Tab[2:3], xctr, keyw = keyw_Cln )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0], [],  col_Tab[1:0:-1], xctr, ydir = +1, keyw = keyw_Cln )
 
     #angle_Thmb = angle_Comm_Thmb + angle_Comm
     angle_Thmb = angle_Index_Thmb + angle_Index
@@ -402,7 +413,7 @@ if __name__=='__main__':
 
     # Hermit
     unit = 17.8
-    paper_size = vec2( 294, 210 )
+    paper_size = vec2( 297, 210 )
     thickness = 0.3#mm
 
     N = 16
@@ -418,7 +429,7 @@ if __name__=='__main__':
 
         kbd = keyboard_layout.load( dst_path )
         # kbd.print()
-        kbd.write_png( dst_png_fmt.format( i ), unit, thickness, vec2( 294, 170 ) )
+        kbd.write_png( dst_png_fmt.format( i ), unit, thickness, vec2( 297, 170 ) )
         if i == 10:
             kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
         #break
