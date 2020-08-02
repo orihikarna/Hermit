@@ -95,12 +95,25 @@ class keyboard_layout:
     def print( self ):
         for k, v in self.meta.items():
             print( "meta: {} -> {}".format( k, v ) )
+        keys = []
         for key in self.keys:
             ps = ""
             for k, v in key.prop.items():
                 if v != 0:
                     ps += ", {}={}".format( k, v )
-            print( "key '{}' {}".format( key.name.replace( '\n', ',' ), ps[2:] ) )
+            name = key.name.replace( '\n', ',' )
+            #print( "key '{}' {}".format( name, ps[2:] ) )
+            if name in ['M', '<,,', '>,.', '?,/']:
+                (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
+                px = x - rx + w / 2
+                py = y - ry + h / 2
+                q = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+                keys.append( (name, q, r) )
+        max_x = max( map( lambda vals: vals[1][0], keys ) )
+        min_y = min( map( lambda vals: vals[1][1], keys ) )
+        keys.sort( key = lambda vals: vals[1][0] )
+        for name, q, r in keys:
+            print( "key '{}' {:.3f}, {:.3f}, {:.1f}".format( name[-1], (q[0] - max_x), (q[1] - min_y), r ) )
 
     def write_png( self, path: str, unit, thickness, paper_size ):
         # 2560 x 1600, 286mm x 179mm, MacBook size
@@ -310,6 +323,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     # Index columns: M, N, I
     dx_I_8 = dx_Dot_L * 3 - dx_Comm_K * 2
     angle_M_Comm = math.atan2( dx_Comm_K, 1 ) * rad2deg
+    angle_Comm = -angle_M_Comm# For Zoea!
     dx_M_7 = -math.sin( angle_M_Comm * deg2rad ) + dx_I_8 / math.cos( angle_M_Comm * deg2rad )
     dx_M_J = -dx_M_7
     angle_Index = angle_M_Comm + angle_Comm
@@ -428,7 +442,7 @@ if __name__=='__main__':
             json.dump( data, fout, indent = 4 )
 
         kbd = keyboard_layout.load( dst_path )
-        # kbd.print()
+        kbd.print()
         kbd.write_png( dst_png_fmt.format( i ), unit, thickness, vec2( 297, 170 ) )
         if i == 10:
             kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
