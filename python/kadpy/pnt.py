@@ -13,3 +13,15 @@ def unit2mm( pnt ):
 
 def unit2mils( pnt ):
     return (pcbnew.ToMils( pnt[0] ), pcbnew.ToMils( pnt[1] ) )
+
+def to_unit( a, mm_or_mils ):
+    if mm_or_mils:
+        return mm2unit( a )
+    else:
+        return mils2unit( a )
+
+def from_unit( a, mm_or_mils ):
+    if mm_or_mils:
+        return unit2mm( a )
+    else:
+        return unit2mils( a )

@@ -111,9 +111,9 @@ class keyboard_layout:
                 keys.append( (name, q, r) )
         max_x = max( map( lambda vals: vals[1][0], keys ) )
         min_y = min( map( lambda vals: vals[1][1], keys ) )
-        keys.sort( key = lambda vals: vals[1][0] )
+        keys.sort( key = lambda vals: -vals[1][0] )
         for name, q, r in keys:
-            print( "key '{}' {:.3f}, {:.3f}, {:.1f}".format( name[-1], (q[0] - max_x), (q[1] - min_y), r ) )
+            print( "    ['{}', {:.3f}, {:.3f}, {:.1f}],".format( name[-1], (q[0] - max_x), (q[1] - min_y), r ) )
 
     def write_png( self, path: str, unit, thickness, paper_size ):
         # 2560 x 1600, 286mm x 179mm, MacBook size
@@ -306,6 +306,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Comma: the origin
     angle_Comm = -6
+    angle_Comm = 0# For Zoea!
     org_Comm = vec2( 3.8, 3.8 )
     #org_Comm[1] += 30 / unit# yoffset for A4 paper
 
@@ -323,7 +324,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     # Index columns: M, N, I
     dx_I_8 = dx_Dot_L * 3 - dx_Comm_K * 2
     angle_M_Comm = math.atan2( dx_Comm_K, 1 ) * rad2deg
-    angle_Comm = -angle_M_Comm# For Zoea!
+    #angle_Comm = -angle_M_Comm# For Zoea!
     dx_M_7 = -math.sin( angle_M_Comm * deg2rad ) + dx_I_8 / math.cos( angle_M_Comm * deg2rad )
     dx_M_J = -dx_M_7
     angle_Index = angle_M_Comm + angle_Comm
