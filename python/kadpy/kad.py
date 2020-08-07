@@ -5,6 +5,7 @@ import vec2
 import mat2
 
 UnitMM = False
+PointDigits = 0
 
 def scalar_to_unit( v, mm_or_mils ):
     if mm_or_mils:
@@ -52,8 +53,8 @@ def add_line_rawunit( a, b, layer = 'Edge.Cuts', width = 2):
     return line
 
 def add_line( a, b, layer = 'Edge.Cuts', width = 2):
-    pnt_a = pnt.to_unit( vec2.round( a ), UnitMM )
-    pnt_b = pnt.to_unit( vec2.round( b ), UnitMM )
+    pnt_a = pnt.to_unit( vec2.round( a, PointDigits ), UnitMM )
+    pnt_b = pnt.to_unit( vec2.round( b, PointDigits ), UnitMM )
     if True:
         aa = pnt.from_unit( pnt_a, UnitMM )
         bb = pnt.from_unit( pnt_b, UnitMM )
@@ -73,8 +74,8 @@ def add_line( a, b, layer = 'Edge.Cuts', width = 2):
     return line
 
 def add_arc( ctr, pos, angle, layer = 'Edge.Cuts', width = 2 ):
-    pnt_ctr = pnt.mils2unit( vec2.round( ctr ) )
-    pnt_pos = pnt.mils2unit( vec2.round( pos ) )
+    pnt_ctr = pnt.mils2unit( vec2.round( ctr, PointDigits ) )
+    pnt_pos = pnt.mils2unit( vec2.round( pos, PointDigits ) )
     arc = pcbnew.DRAWSEGMENT()
     arc.SetShape( pcbnew.S_ARC )
     arc.SetCenter( pnt_ctr )
@@ -86,9 +87,9 @@ def add_arc( ctr, pos, angle, layer = 'Edge.Cuts', width = 2 ):
     return arc
 
 def add_arc2( ctr, pos, end, angle, layer = 'Edge.Cuts', width = 2 ):
-    pnt_ctr = pnt.to_unit( vec2.round( ctr ), UnitMM )
-    pnt_pos = pnt.to_unit( vec2.round( pos ), UnitMM )
-    pnt_end = pnt.to_unit( vec2.round( end ), UnitMM )
+    pnt_ctr = pnt.to_unit( vec2.round( ctr, PointDigits ), UnitMM )
+    pnt_pos = pnt.to_unit( vec2.round( pos, PointDigits ), UnitMM )
+    pnt_end = pnt.to_unit( vec2.round( end, PointDigits ), UnitMM )
     arc = pcbnew.DRAWSEGMENT()
     arc.SetShape( pcbnew.S_ARC )
     arc.SetCenter( pnt_ctr )
@@ -108,7 +109,7 @@ def add_arc2( ctr, pos, end, angle, layer = 'Edge.Cuts', width = 2 ):
 
 def add_text( pos, angle, string, layer = 'F.SilkS', size = (1, 1), thick = 5, hjustify = None, vjustify = None ):
     text = pcbnew.TEXTE_PCB( pcb )
-    text.SetPosition( pnt.to_unit( vec2.round( pos ), UnitMM ) )
+    text.SetPosition( pnt.to_unit( vec2.round( pos, PointDigits ), UnitMM ) )
     text.SetTextAngle( angle * 10 )
     text.SetText( string )
     text.SetLayer( pcb.GetLayerID( layer ) )
@@ -126,8 +127,8 @@ def add_text( pos, angle, string, layer = 'F.SilkS', size = (1, 1), thick = 5, h
 ## Tracks & Vias
 ##
 def add_track( a, b, net, layer, width ):
-    pnt_a = pnt.to_unit( vec2.round( a ), UnitMM )
-    pnt_b = pnt.to_unit( vec2.round( b ), UnitMM )
+    pnt_a = pnt.to_unit( vec2.round( a, PointDigits ), UnitMM )
+    pnt_b = pnt.to_unit( vec2.round( b, PointDigits ), UnitMM )
     track = pcbnew.TRACK( pcb )
     track.SetStart( pnt_a )
     track.SetEnd(   pnt_b )
@@ -140,7 +141,7 @@ def add_track( a, b, net, layer, width ):
     return track
 
 def add_via( pos, net, size ):# size [mm]
-    pnt_ = pnt.to_unit( vec2.round( pos ), UnitMM )
+    pnt_ = pnt.to_unit( vec2.round( pos, PointDigits ), UnitMM )
     via = pcbnew.VIA( pcb )
     via.SetPosition( pnt_ )
     via.SetWidth( pcbnew.FromMM( size[0] ) )
@@ -180,7 +181,7 @@ def get_mod_pos_angle( mod_name ):
 def set_mod_pos_angle( mod_name, pos, angle ):
     mod = get_mod( mod_name )
     if pos != None:
-        mod.SetPosition( pnt.to_unit( vec2.round( pos ), UnitMM ) )
+        mod.SetPosition( pnt.to_unit( vec2.round( pos, PointDigits ), UnitMM ) )
     mod.SetOrientation( 10 * angle )
     return mod
 
@@ -231,7 +232,7 @@ def add_wire_straight( pnts, net, layer, width, radius = 0 ):
         length = min( abs( radius ),
             len_a / 2 if idx - 1 > 0 else len_a,
             len_b / 2 if idx + 1 < len( pnts ) - 1 else len_b )
-        if length < 1:
+        if length < 10**(-PointDigits):
             rpnts.append( curr )
         else:
             if radius < 0:# and abs( vec2.dot( vec_a, vec_b ) ) < len_a * len_b * 0.001:
@@ -370,16 +371,24 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
 def wire_mods( tracks ):
     for track in tracks:
         mod_a, pad_a, mod_b, pad_b, width, prms = track[:6]
-        if mod_b != None:# check b first for layer
+        if type( pad_b ) is not pcbnew.VIA:# check b first for layer
             pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
-        if mod_a != None:
+        if type( pad_a ) is not pcbnew.VIA:
             pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
-        if mod_a == None:# pad_a is via
+        if type( pad_a ) is pcbnew.VIA:# pad_a is via
             pos_a, _ = get_via_pos_net( pad_a )
-            angle_a = angle_b
-        if mod_b == None:# pad_b is via
+            if mod_a == None:
+                angle_a = angle_b
+            else:
+                _, angle_a = get_mod_pos_angle( mod_a )
+                #layer = get_mod_layer( mod_a )
+        if type( pad_b ) is pcbnew.VIA:# pad_b is via
             pos_b, _ = get_via_pos_net( pad_b )
-            angle_b = angle_a
+            if mod_b == None:# pad_b is via
+                angle_b = angle_a
+            else:
+                _, angle_b = get_mod_pos_angle( mod_b )
+                #layer = get_mod_layer( mod_b )
         if len( track ) > 6:
             layer = pcb.GetLayerID( track[6] )
         __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms )
@@ -543,7 +552,7 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
             print( 'Round: blen < radius, {} < {}'.format( blen, radius ) )
             debug = True
         if debug:
-            kad.add_arc( xpos, vec2.add( xpos, (10, 0) ), 360, layer, width )
+            add_arc( xpos, vec2.add( xpos, (10, 0) ), 360, layer, width )
             return b
         angle = vec2.angle( avec, bvec )
         angle = math.ceil( angle * 10 ) / 10
@@ -575,7 +584,7 @@ def draw_closed_corners( corners, layer, width ):
 
 # zones
 def add_zone( rect, layer, idx = 0, net_name = 'GND' ):
-    pnts = map( lambda pt: pnt.to_unit( vec2.round( pt ), UnitMM ), rect )
+    pnts = map( lambda pt: pnt.to_unit( vec2.round( pt, PointDigits ), UnitMM ), rect )
     net = pcb.FindNet( net_name ).GetNet()
     zone = pcb.InsertArea( net, idx, layer, pnts[0][0], pnts[0][1], pcbnew.ZONE_CONTAINER.DIAGONAL_EDGE )
     poly = zone.Outline()

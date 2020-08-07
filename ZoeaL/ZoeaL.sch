@@ -104,9 +104,9 @@ Text GLabel 3875 2125 2    50   Input ~ 0
 TX
 Text GLabel 3875 2225 2    50   Input ~ 0
 RX
-Text GLabel 3875 2825 2    50   Input ~ 0
+Text GLabel 2675 2525 0    50   Input ~ 0
 SCL
-Text GLabel 3875 2925 2    50   Input ~ 0
+Text GLabel 2675 2425 0    50   Input ~ 0
 SDA
 Text GLabel 3875 3225 2    50   Input ~ 0
 SWDIO
@@ -174,9 +174,9 @@ F 3 "~" H 2050 2075 50  0001 C CNN
 	1    2050 2075
 	-1   0    0    1   
 $EndComp
-Text GLabel 2050 2175 3    50   Input ~ 0
-SDA
 Text GLabel 1900 2175 3    50   Input ~ 0
+SDA
+Text GLabel 2050 2175 3    50   Input ~ 0
 SCL
 $Comp
 L Device:C_Small C6
@@ -366,7 +366,6 @@ Wire Wire Line
 Connection ~ 4400 875 
 Wire Wire Line
 	4400 875  4575 875 
-NoConn ~ 2675 3325
 Wire Wire Line
 	3100 875  3250 875 
 $Comp
@@ -490,7 +489,7 @@ F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 5600 30
 $EndComp
 Connection ~ 4850 3125
 Connection ~ 4850 3025
-Text GLabel 2675 2825 0    50   Input ~ 0
+Text GLabel 3875 2325 2    50   Input ~ 0
 LED
 $Comp
 L power:PWR_FLAG #FLG0103
@@ -505,7 +504,6 @@ F 3 "~" H 5225 1275 50  0001 C CNN
 $EndComp
 Text GLabel 5225 1275 2    50   Input ~ 0
 5V
-NoConn ~ 2675 3225
 $Comp
 L Device:R_Small R1
 U 1 1 5D82BC12
@@ -713,13 +711,13 @@ F 3 "" H 6675 3925 50  0001 C CNN
 $EndComp
 Text GLabel 7275 2425 2    50   Input ~ 0
 5V
-Text GLabel 7275 3625 2    50   Input ~ 0
-LDO
 Text GLabel 7275 3525 2    50   Input ~ 0
+LDO
+Text GLabel 7275 3625 2    50   Input ~ 0
 LCO
-Text GLabel 7325 3125 2    50   Input ~ 0
-SDA
 Text GLabel 7325 3025 2    50   Input ~ 0
+SDA
+Text GLabel 7325 3125 2    50   Input ~ 0
 SCL
 Wire Wire Line
 	7275 2925 7275 3025
@@ -731,22 +729,22 @@ Wire Wire Line
 Wire Wire Line
 	7275 3225 7275 3125
 Connection ~ 7275 3125
-Text GLabel 6575 1500 0    50   Input ~ 0
+Text GLabel 6575 1200 0    50   Input ~ 0
 NRST
 $Comp
 L power:GND #PWR0125
 U 1 1 5F40307C
-P 6575 1600
-F 0 "#PWR0125" H 6575 1350 50  0001 C CNN
-F 1 "GND" H 6580 1427 50  0000 C CNN
-F 2 "" H 6575 1600 50  0001 C CNN
-F 3 "" H 6575 1600 50  0001 C CNN
-	1    6575 1600
+P 6575 1100
+F 0 "#PWR0125" H 6575 850 50  0001 C CNN
+F 1 "GND" H 6580 927 50  0000 C CNN
+F 2 "" H 6575 1100 50  0001 C CNN
+F 3 "" H 6575 1100 50  0001 C CNN
+	1    6575 1100
 	0    1    1    0   
 $EndComp
-Text GLabel 6575 1300 0    50   Input ~ 0
+Text GLabel 6575 1600 0    50   Input ~ 0
 SWDIO
-Text GLabel 6575 1400 0    50   Input ~ 0
+Text GLabel 6575 1500 0    50   Input ~ 0
 SWCLK
 $Comp
 L key-parts:STM32F042K6Tx U1
@@ -770,14 +768,11 @@ F 3 "~" H 6775 1300 50  0001 C CNN
 	1    6775 1300
 	1    0    0    -1  
 $EndComp
-Text GLabel 6575 1100 0    50   Input ~ 0
+Text GLabel 6575 1300 0    50   Input ~ 0
 TX
-Text GLabel 6575 1200 0    50   Input ~ 0
+Text GLabel 6575 1400 0    50   Input ~ 0
 RX
 NoConn ~ 3875 2525
-NoConn ~ 3875 2625
-NoConn ~ 2675 2425
-NoConn ~ 2675 2525
 $Comp
 L power:VCC #PWR0126
 U 1 1 5F461294
@@ -801,16 +796,15 @@ Wire Wire Line
 Connection ~ 3050 6100
 Wire Wire Line
 	3050 6100 3050 6150
-Text GLabel 2675 3125 0    50   Input ~ 0
+Text GLabel 3875 2625 2    50   Input ~ 0
 LDI
-Text GLabel 2675 2925 0    50   Input ~ 0
+Text GLabel 3875 2425 2    50   Input ~ 0
 LCI
-NoConn ~ 2675 3025
-Text GLabel 2675 2725 0    50   Input ~ 0
+Text GLabel 2675 3325 0    50   Input ~ 0
 COL1
-Text GLabel 3875 2025 2    50   Input ~ 0
+Text GLabel 2675 3025 0    50   Input ~ 0
 ROW2
-Text GLabel 3875 1925 2    50   Input ~ 0
+Text GLabel 2675 2925 0    50   Input ~ 0
 ROW1
 $Comp
 L Device:R_Small R6
@@ -821,7 +815,7 @@ F 1 "5k1" V 7375 2625 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 7375 2625 50  0001 C CNN
 F 3 "~" H 7375 2625 50  0001 C CNN
 	1    7375 2625
-	0    1    1    0   
+	0    -1   1    0   
 $EndComp
 $Comp
 L Device:R_Small R7
@@ -832,7 +826,7 @@ F 1 "5k1" V 7375 2725 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 7375 2725 50  0001 C CNN
 F 3 "~" H 7375 2725 50  0001 C CNN
 	1    7375 2725
-	0    1    1    0   
+	0    -1   1    0   
 $EndComp
 $Comp
 L power:GND #PWR0127
@@ -860,21 +854,21 @@ Text GLabel 5200 5500 0    50   Input ~ 0
 LCO
 Text GLabel 5200 5600 0    50   Input ~ 0
 LDO
-Text GLabel 7100 4950 2    50   Input ~ 0
+Text GLabel 7150 4950 2    50   Input ~ 0
 LCI
-Text GLabel 7100 5050 2    50   Input ~ 0
+Text GLabel 7150 5050 2    50   Input ~ 0
 LDI
 Wire Wire Line
 	5750 4850 5750 4700
 $Comp
 L power:GND #PWR0122
 U 1 1 5F36D82A
-P 7150 4700
-F 0 "#PWR0122" H 7150 4450 50  0001 C CNN
-F 1 "GND" H 7155 4527 50  0000 C CNN
-F 2 "" H 7150 4700 50  0001 C CNN
-F 3 "" H 7150 4700 50  0001 C CNN
-	1    7150 4700
+P 7100 4700
+F 0 "#PWR0122" H 7100 4450 50  0001 C CNN
+F 1 "GND" H 7105 4527 50  0000 C CNN
+F 2 "" H 7100 4700 50  0001 C CNN
+F 3 "" H 7100 4700 50  0001 C CNN
+	1    7100 4700
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
@@ -939,10 +933,7 @@ Wire Wire Line
 Wire Wire Line
 	6650 5050 6700 5050
 Wire Wire Line
-	6250 4750 6700 4750
-Wire Wire Line
 	6700 4750 6700 4850
-Connection ~ 6250 4750
 Wire Wire Line
 	6650 4850 6650 4700
 Connection ~ 6650 4700
@@ -951,8 +942,6 @@ Wire Wire Line
 Wire Wire Line
 	7100 4850 7100 4700
 Connection ~ 7100 4700
-Wire Wire Line
-	7100 4700 7150 4700
 Text GLabel 5200 5400 0    50   Input ~ 0
 5V
 $Comp
@@ -984,9 +973,9 @@ Wire Wire Line
 	5850 5200 5850 5600
 Wire Wire Line
 	5850 5600 5600 5600
-Text GLabel 3875 2425 2    50   Input ~ 0
+Text GLabel 2675 3225 0    50   Input ~ 0
 ROW4
-Text GLabel 3875 2325 2    50   Input ~ 0
+Text GLabel 2675 3125 0    50   Input ~ 0
 ROW3
 $Comp
 L key-parts:SW_ChocV2 SW11
@@ -1158,6 +1147,25 @@ $EndComp
 Connection ~ 925  1175
 Text Notes 850  1650 0    50   ~ 10
 NRST
-NoConn ~ 3875 3425
 NoConn ~ 3875 2725
+NoConn ~ 3875 2825
+NoConn ~ 3875 2925
+$Comp
+L Device:D_Small D0
+U 1 1 5F2D8D42
+P 6600 4750
+F 0 "D0" V 6600 4682 50  0000 R CNN
+F 1 "D_Small" V 6555 4682 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 6600 4750 50  0001 C CNN
+F 3 "~" V 6600 4750 50  0001 C CNN
+	1    6600 4750
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7100 4950 7150 4950
+Wire Wire Line
+	7100 5050 7150 5050
+Wire Wire Line
+	6500 4750 6250 4750
+Connection ~ 6250 4750
 $EndSCHEMATC
