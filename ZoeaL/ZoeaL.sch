@@ -489,7 +489,7 @@ F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 5600 30
 $EndComp
 Connection ~ 4850 3125
 Connection ~ 4850 3025
-Text GLabel 3875 2325 2    50   Input ~ 0
+Text GLabel 2675 2825 0    50   Input ~ 0
 LED
 $Comp
 L power:PWR_FLAG #FLG0103
@@ -1134,7 +1134,6 @@ NoConn ~ 3875 1925
 NoConn ~ 3875 2025
 NoConn ~ 3875 3425
 NoConn ~ 2675 2725
-NoConn ~ 2675 2825
 Wire Wire Line
 	6250 4750 6250 4550
 Wire Wire Line
@@ -1181,4 +1180,5 @@ Wire Wire Line
 	5250 5500 5300 5500
 Wire Wire Line
 	5250 5600 5350 5600
+NoConn ~ 3875 2325
 $EndSCHEMATC

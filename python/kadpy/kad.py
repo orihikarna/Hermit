@@ -74,8 +74,8 @@ def add_line( a, b, layer = 'Edge.Cuts', width = 2):
     return line
 
 def add_arc( ctr, pos, angle, layer = 'Edge.Cuts', width = 2 ):
-    pnt_ctr = pnt.mils2unit( vec2.round( ctr, PointDigits ) )
-    pnt_pos = pnt.mils2unit( vec2.round( pos, PointDigits ) )
+    pnt_ctr = pnt.to_unit( vec2.round( ctr, PointDigits ), UnitMM )
+    pnt_pos = pnt.to_unit( vec2.round( pos, PointDigits ), UnitMM )
     arc = pcbnew.DRAWSEGMENT()
     arc.SetShape( pcbnew.S_ARC )
     arc.SetCenter( pnt_ctr )
