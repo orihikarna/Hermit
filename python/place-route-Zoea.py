@@ -38,7 +38,7 @@ VIA_Size = [(1.1, 0.6), (1.0, 0.5), (0.8, 0.4), (0.6, 0.3)]
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Width  = 100
-PCB_Height = 57.7# platinum ratio
+PCB_Height = 57.72# platinum ratio
 
 keys = [
     ['/', 0.000, 0.520, 3.5],
@@ -64,9 +64,9 @@ def drawEdgeCuts():
 
     corners = []
     ### top
-    corners.append( [((W/2, 0), 0), Round, [2]] )
+    corners.append( [((W/2, 0), 0), Round, [4]] )
     ### right
-    corners.append( [((W, 10), 90), Round, [2]] )
+    corners.append( [((W, 10), 90), Round, [4]] )
     # USB
     pos, _ = kad.get_mod_pos_angle( 'J2' )
     if True:
@@ -75,14 +75,14 @@ def drawEdgeCuts():
         corners.append( [((W-3, pos[1] + 4.675),   0), Round, [0.5]] )
         corners.append( [((W, H-5),               90), Round, [0.5]] )
     ### bottom
-    corners.append( [((W-5, H), 180), Round, [3]] )
+    corners.append( [((W-5, H), 180), Round, [4]] )
     if True:
-        corners.append( [((W*2/3, H-5), -90), Round, [2]] )
-        corners.append( [((W/2, H*2/3), 180), Round, [2]] )
-        corners.append( [((W/3,   H-5),  90), Round, [2]] )
-        corners.append( [((5, H),       180), Round, [2]] )
+        corners.append( [((W*2/3, H-5), -90), Round, [4]] )
+        corners.append( [((W/2, H*2/3), 180), Round, [4]] )
+        corners.append( [((W/3,   H-5),  90), Round, [4]] )
+        corners.append( [((5, H),       180), Round, [4]] )
     ### left
-    corners.append( [((0, H - 5), -90), Round, [3]] )
+    corners.append( [((0, H - 5), -90), Round, [4]] )
     # split
     pos, _ = kad.get_mod_pos_angle( 'J1' )
     if True:
@@ -93,24 +93,33 @@ def drawEdgeCuts():
     # draw
     kad.draw_closed_corners( corners, layer, width )
 
-    r = 3.5
+    r = 4.5
     for idx, ctr in enumerate( [(r, r), (W-r, r), (W-r, H-r), (r, H-r), (W/3-r, H-r), (W*2/3+r, H-r)] ):
         sign = +1 if idx % 2 == 0 else -1
+        if True:
+            corners = []
+            for i in range( 6 ):
+                deg = i * 60 + 15 * sign
+                pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
+                corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
+            kad.draw_closed_corners( corners, layer, width )
+        else:
+            kad.add_arc( ctr, vec2.add( ctr, (2.0, 0) ), 360, layer, width )
         if False:
             corners = []
             for i in range( 6 ):
                 deg = i * 60 + 15 * sign
-                pos = vec2.scale( 3.0 / 1.732, vec2.rotate( deg ), ctr )
-                corners.append( [(pos, deg), Line, 0] )
-            kad.draw_closed_corners( corners, layer, width )
-        else:
-            kad.add_arc( ctr, vec2.add( ctr, (2.0, 0) ), 360, layer, width )
+                pos = vec2.scale( 5 / 2.0, vec2.rotate( deg ), ctr )
+                corners.append( [(pos, deg + 90), Linear, [0.1]] )
+            kad.draw_closed_corners( corners, 'F.Fab', width )
+        kad.add_arc( ctr, vec2.add( ctr, (3.0, 0) ), 360, 'F.Fab', width )
+        #break
 
 def add_zone( net_name, layer_name, rect, zones ):
     layer = pcb.GetLayerID( layer_name )
     zone, poly = kad.add_zone( rect, layer, len( zones ), net_name )
     zone.SetZoneClearance( pcbnew.FromMils( 20 ) )
-    #zone.SetMinThickness( pcbnew.FromMils( 16 ) )
+    zone.SetMinThickness( pcbnew.FromMils( 16 ) )
     #zone.SetThermalReliefGap( pcbnew.FromMils( 12 ) )
     #zone.SetThermalReliefCopperBridge( pcbnew.FromMils( 24 ) )
     zone.Hatch()
@@ -183,7 +192,7 @@ def main():
             ('R4', (8.5, +0.2), 180),
             ('R5', (8.5, -1.8), 180),
             # C4 & regulators
-            (None, (4.8, 5.2), -90, [
+            (None, (6.8, 3.9), -90, [
                 ('C4', (0, 0), 0),
                 (None, (0, -4.7), 0, [
                     ('C1', (0, -2.7), 0),
@@ -211,12 +220,12 @@ def main():
             ('R3', (-12, -1.9), +90),
         ] ),
         # D1
-        (None, (54, PCB_Height*2/3 - 1.27), 0, [
-            ('D1', (0, 0), 180),
-            ('R1', (4, 0), 0),
+        (None, (PCB_Width/3 + 4, PCB_Height*2/3 - 3), 0, [
+            ('D1', ( 0, 0), 90),
+            ('R1', (-2, 0), 90),
         ] ),
         # Pin headers & NRST
-        (None, (PCB_Width/3 + 1.27, PCB_Height*2/3 - 1.27), 0, [
+        (None, (PCB_Width/3 + 1.27 + 6, PCB_Height*2/3 - 1.27), 0, [
             ('J3', (0, 0),  90),
             ('C6', (1.27, -2.54), 180),
         ] ),
@@ -284,8 +293,8 @@ def main():
         ('RB1', '2', 'RB1', via_bt02, 0.5, (Dird, 0, 90)),
     ] )
     # LED
-    via_lci = kad.add_via_relative( 'U1', '11', (0.8, 1.4), VIA_Size[3] )
-    via_ldi = kad.add_via_relative( 'U1', '13', (0.8, 2.2), VIA_Size[3] )
+    via_lci = kad.add_via_relative( 'U1', '11', (1.8, -2.2), VIA_Size[3] )
+    via_ldi = kad.add_via_relative( 'U1', '13', (1.0, -1.4), VIA_Size[3] )
     via_lb1_5v = kad.add_via_relative( 'R2', '2', (0, 11.9 + 0.2), VIA_Size[1] )
     via_lb1_ci = kad.add_via_relative( 'R2', '2', (0, 11.0), VIA_Size[2] )
     via_lb1_di = kad.add_via_relative( 'R2', '2', (0, 10.1), VIA_Size[2] )
@@ -295,20 +304,20 @@ def main():
         # LDI
         #   3.8 - 3.2/2 - 1.0x0.707 = 1.493
         ('LB1', '4', 'J1', via_lb1_di, 0.4, (Dird, ([(1.5, 0), (1.0, +45)], 0), 0, -0.6)),
-        ('J1', via_lb1_di, 'L14', '3', 0.4, (Dird, 0, 180, -2.8-0.2)),
+        ('J1', via_lb1_di, 'L14', '3', 0.4, (Dird, 0, 180, -2.6)),
         ('L14', '4', 'L13', '3', 0.4, (Dird, ([(1.5, 0), (1.0, +45), (3.2, 0)], -45), 0, -0.6)),
         ('L13', '4', 'L12', '3', 0.4, (Dird, ([(1.5, 0), (1.0, +45), (3.2, 0)], -45), 0, -0.6)),
         ('L12', '4', 'L11', '3', 0.4, (Dird, ([(1.5, 0), (1.0, +45), (3.2, 0)], -45), ([(2.4, 180)], 120), -0.6)),
-        ('L11', '4','U1',via_ldi,0.4, (Dird, ([(1.5, 0), (1.0, +45), (3.2, 0), (1.9, -45)], -90), ([(20, 0), (5, 45)], 0), -0.6)),
+        ('L11', '4','U1',via_ldi,0.4, (Dird, ([(1.5, 0), (1.0, +45), (3.2, 0), (1.9, -45)], -90), ([(10, 0), (3, -45), (11, 0), (3, 45)], 0), -0.6)),
         ('U1', '13','U1',via_ldi,0.4, (Dird, 90, 0, -1)),
         # LCI
         #   3.8 - 2.4/2 - 1.2x0.707 = 1.752
         ('LB1', '5', 'J1', via_lb1_ci, 0.4, (Dird, ([(1.75, 0), (1.2, +45)], 0), 0, -0.6)),
-        ('J1', via_lb1_ci, 'L14', '2', 0.4, (Dird, 0, 180, -1.9-0.2)),
+        ('J1', via_lb1_ci, 'L14', '2', 0.4, (Dird, 0, 180, -1.8)),
         ('L14', '5', 'L13', '2', 0.4, (Dird, ([(1.75, 0), (1.2, +45), (2.4, 0)], -45), 0, -0.6)),
         ('L13', '5', 'L12', '2', 0.4, (Dird, ([(1.75, 0), (1.2, +45), (2.4, 0)], -45), 0, -0.6)),
         ('L12', '5', 'L11', '2', 0.4, (Dird, ([(1.75, 0), (1.2, +45), (2.4, 0)], -45), ([(2.8, 180)], 120), -0.6)),
-        ('L11', '5','U1',via_lci,0.4, (Dird, ([(1.75, 0), (1.2, +45), (2.4, 0), (1.2, -45)], -90), ([(21, 0), (5, 45)], 0), -0.6)),
+        ('L11', '5','U1',via_lci,0.4, (Dird, ([(1.75, 0), (1.2, +45), (2.4, 0), (1.2, -45)], -90), ([(11.2, 0), (3, -45), (10, 0), (3, 45)], 0), -0.6)),
         ('U1', '11','U1',via_lci,0.4, (Dird, 90, 0, -1)),
         # Vcc
         #   3.8 + 2.4 - 2.6/2 - 1.0x0.707 = 4.9 - 0.707 = 4.193
@@ -323,7 +332,7 @@ def main():
 
     via_vcc_l11 = kad.add_via_relative( 'L11', '1', (-4.5, 0.5), VIA_Size[0] )
     via_vcc_l12 = kad.add_via_relative( 'L12', '1', (0,  8.5), VIA_Size[0] )
-    via_vcc_c1  = kad.add_via_relative( 'L12', '1', (0, 13.5), VIA_Size[0] )
+    via_vcc_c1  = kad.add_via_relative( 'L12', '1', (0, 12.5), VIA_Size[0] )
     kad.wire_mods( [
         ('L11', '1', None, via_vcc_l11, 0.6, (Dird, 0, 45, -1)),
         ('L12', '1', None, via_vcc_l12, 0.6, (Dird, 0, 90)),
@@ -339,14 +348,14 @@ def main():
     via_vcca1 = kad.add_via_relative( 'U1', '1', (-2.6, -0.1), VIA_Size[2] )
     via_vcca5 = kad.add_via_relative( 'U1', '5', (-2.6, +0.0), VIA_Size[2] )
     via_nrst  = kad.add_via_relative( 'U1', '4', (-1.6, 0), VIA_Size[3] )
-    via_swdio = kad.add_via_relative( 'U1', '23', (-3.2, 0.8), VIA_Size[3] )
-    via_swclk = kad.add_via_relative( 'U1', '24', (-3.7, 0.8), VIA_Size[3] )
+    via_swdio = kad.add_via_relative( 'U1', '23', (-4.0, 0.8), VIA_Size[3] )
+    via_swclk = kad.add_via_relative( 'U1', '24', (-4.8, 0.8), VIA_Size[3] )
     VCC = pcb.FindNet( 'VCC' )
     via_u1_ctr = kad.add_via( kad.get_mod_pos_angle( 'U1' )[0], VCC, VIA_Size[1] )
     kad.wire_mods( [
         # pass caps
         ('C4', '1', 'U1', '17', 0.5, (Dird, 0, 0)),
-        ('C4', '2', 'U1', '16', 0.5, (Dird, 90, 90, -1)),
+        ('C4', '2', 'U1', '16', 0.5, (ZgZg, 90, 45, -1)),
         ('C3', '1', 'U1',  '1', 0.5, (Dird, 0, 0)),
         ('C3', '2', 'U1', '32', 0.5, (Dird, 90, 90, -1)),
         ('C3', '2', 'C5', '2',  0.5, (Dird, 0, 90)),
@@ -374,22 +383,21 @@ def main():
         ('U1', '3', 'R3', '1', 0.5, (Dird, 180, ([(+2, 90)], -45), -0.8)),
         # NRST
         ('U1', '4', None, via_nrst, 0.4, (Strt)),
-        ('J3', '2', None, via_nrst, 0.4, (Dird, ([(5, 0)], 90), 0, -1), 'B.Cu'),
+        ('J3', '2', None, via_nrst, 0.4, (Dird, -45, 0, -1), 'B.Cu'),
         # NRST
         ('J3', '2', 'C6', '1', 0.4, (Dird, 0, 0)),
         ('J3', '1', 'C6', '2', 0.4, (Dird, 0, 0)),
         # SWCLK/DIO
         ('U1', '23', None, via_swdio, 0.4, (Dird, 0, 45, -0.4)),
         ('U1', '24', None, via_swclk, 0.4, (Dird, 0, 45, -0.4)),
-        ('J3', '5', 'U1', via_swclk, 0.4, (Dird, 0, 45, -0.4), 'B.Cu'),
-        ('J3', '6', 'U1', via_swdio, 0.4, (Dird, 0, 45, -0.4), 'B.Cu'),
+        ('J3', '3', 'U1', via_swclk, 0.4, (Dird, 0, 45, -0.4), 'B.Cu'),
+        ('J3', '4', 'U1', via_swdio, 0.4, (Dird, 0, 45, -0.4), 'B.Cu'),
         # TX/RX
-        ('U1', '8', 'J3', '3', 0.4, (Dird, 90, ([(2.8, 0)], 90), -1)),
-        ('U1', '9', 'J3', '4', 0.4, (Dird, 90, ([(2.0, 0)], 90), -1)),
+        ('U1', '8', 'J3', '5', 0.4, (Dird, 90, ([(1.4, 0)], 90), -1)),
+        ('U1', '9', 'J3', '6', 0.4, (Dird, 90, ([(2.2, 0)], 90), -1)),
         # LED
-        ('U1', '15', 'D1', '2', 0.5, (Dird, 90, ([(1.4, -90)], 0), -1)),
+        ('U1', '7', 'D1', '2', 0.5, (Dird, 0, -45, -1)),
         ('R1', '1', 'D1', '1', 0.5, (Dird, 90, 0)),
-        ('R1', '2', 'U2', '3', 0.5, (Dird, 0, 0, -1)),
     ] )
     pcb.Delete( via_u1_ctr )
     # USB (PC) connector
@@ -453,7 +461,7 @@ def main():
         ('J1', via_splt_vba, 'R2', '2', 0.8, (Dird, 90, 0)),
         ('J1', via_splt_vbb, 'R3', '2', 0.8, (Dird, 90, 0)),
         # dm/dp = I2C
-        ('J1', via_splt_dpa, 'J1', 'A6', 0.3, (Dird, 90, ([(3.5, 90)], -45), -0.2)),
+        ('J1', via_splt_dpa, 'J1', 'A6', 0.3, (Dird, 90, ([(3.52, 90)], -45), -0.1)),
         ('J1', via_splt_dpb, 'J1', 'B6', 0.3, (Dird, 0, 90)),
         ('J1', via_splt_dpa, 'J1', via_splt_dpb, 0.4, (Strt), 'B.Cu'),
         ('J1', via_splt_dma, 'J1', 'A7', 0.3, (Dird, 0, 90)),

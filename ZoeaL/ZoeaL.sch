@@ -489,7 +489,7 @@ F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 5600 30
 $EndComp
 Connection ~ 4850 3125
 Connection ~ 4850 3025
-Text GLabel 2675 2825 0    50   Input ~ 0
+Text GLabel 3875 2025 2    50   Input ~ 0
 LED
 $Comp
 L power:PWR_FLAG #FLG0103
@@ -742,9 +742,9 @@ F 3 "" H 6575 1100 50  0001 C CNN
 	1    6575 1100
 	0    1    1    0   
 $EndComp
-Text GLabel 6575 1600 0    50   Input ~ 0
+Text GLabel 6575 1400 0    50   Input ~ 0
 SWDIO
-Text GLabel 6575 1500 0    50   Input ~ 0
+Text GLabel 6575 1300 0    50   Input ~ 0
 SWCLK
 $Comp
 L key-parts:STM32F042K6Tx U1
@@ -768,9 +768,9 @@ F 3 "~" H 6775 1300 50  0001 C CNN
 	1    6775 1300
 	1    0    0    -1  
 $EndComp
-Text GLabel 6575 1300 0    50   Input ~ 0
+Text GLabel 6575 1500 0    50   Input ~ 0
 TX
-Text GLabel 6575 1400 0    50   Input ~ 0
+Text GLabel 6575 1600 0    50   Input ~ 0
 RX
 NoConn ~ 3875 2525
 $Comp
@@ -1131,7 +1131,6 @@ Wire Wire Line
 Wire Wire Line
 	7100 5050 7150 5050
 NoConn ~ 3875 1925
-NoConn ~ 3875 2025
 NoConn ~ 3875 3425
 NoConn ~ 2675 2725
 Wire Wire Line
@@ -1181,4 +1180,5 @@ Wire Wire Line
 Wire Wire Line
 	5250 5600 5350 5600
 NoConn ~ 3875 2325
+NoConn ~ 2675 2825
 $EndSCHEMATC
