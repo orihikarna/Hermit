@@ -597,11 +597,11 @@ F 3 "" H 2975 3625 50  0001 C CNN
 $EndComp
 Text GLabel 2975 2925 0    50   Input ~ 0
 5V
-Text GLabel 4375 2025 2    50   Input ~ 0
+Text GLabel 4375 2625 2    50   Input ~ 0
 ROW1
-Text GLabel 4375 2125 2    50   Input ~ 0
+Text GLabel 4375 2525 2    50   Input ~ 0
 ROW2
-Text GLabel 4375 2225 2    50   Input ~ 0
+Text GLabel 4375 2425 2    50   Input ~ 0
 ROW3
 Text GLabel 4375 2325 2    50   Input ~ 0
 ROW4
@@ -609,9 +609,6 @@ Text GLabel 4375 3025 2    50   Input ~ 0
 COL1
 Text GLabel 4375 2925 2    50   Input ~ 0
 BOOT0
-NoConn ~ 4375 2425
-NoConn ~ 4375 2525
-NoConn ~ 4375 2625
 NoConn ~ 4375 3125
 NoConn ~ 4375 3225
 NoConn ~ 4375 3325
@@ -697,4 +694,28 @@ Text GLabel 2550 5175 1    50   Input ~ 0
 5V
 NoConn ~ 2975 2625
 NoConn ~ 2975 2725
+Text GLabel 975  2100 1    50   Input ~ 0
+5V
+$Comp
+L power:GND #PWR?
+U 1 1 5F385690
+P 975 2300
+F 0 "#PWR?" H 975 2050 50  0001 C CNN
+F 1 "GND" H 980 2127 50  0000 C CNN
+F 2 "" H 975 2300 50  0001 C CNN
+F 3 "" H 975 2300 50  0001 C CNN
+	1    975  2300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small C1
+U 1 1 5F3862F2
+P 975 2200
+F 0 "C1" H 725 2200 50  0000 L CNN
+F 1 "0.1u" H 825 2275 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 975 2200 50  0001 C CNN
+F 3 "~" H 975 2200 50  0001 C CNN
+	1    975  2200
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

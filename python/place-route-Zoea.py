@@ -189,7 +189,8 @@ def main():
         kad.wire_mods([('L' + name, '6', 'SW' + name, '3', 0.6, (Dird, 0, 90))])
         ## Diode
         if idx > 0:
-            pos = vec2.mult( mat2.rotate( -angle ), (-8, -2), sw_pos )
+            #pos = vec2.mult( mat2.rotate( -angle ), (-8, -2), sw_pos )
+            pos = vec2.mult( mat2.rotate( -angle ), (-5, +2), sw_pos )
             kad.set_mod_pos_angle( 'D' + name, pos, -90 - angle )
             # wire to SW
             kad.wire_mods([('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
@@ -241,7 +242,7 @@ def main():
         ] )
     if board == BRM:
         # expander
-        kad.move_mods( (PCB_Width/2, 30), 0, [
+        kad.move_mods( (PCB_Width/2, 28), 0, [
             ('U1', (0, 0), -90),
         ] )
     if board in [BLM, BRM]:
@@ -315,13 +316,9 @@ def main():
             ('C11', '2', 'U1', '30', 0.5, (Dird, 90, ([(3.2, 90)], 0), -1.0)),
         ] )
     if board == BLM:
-        # Debouce
+        # Debounce
         via_vcc_col1 = kad.add_via_relative( 'C11', '1', (0, -2), VIA_Size[1] )
         kad.wire_mods( [
-            ('R11', '1', 'R12', '1', 0.5, (Strt)),
-            ('R11', '2', 'C11', '2', 0.5, (Strt)),
-            # SW
-            ('R11', '1', 'SW14', '1', 0.5, (Dird, 0, 90)),
             # Vcc
             ('C11', '1', None, via_vcc_col1, 0.5, (Strt)),
             ('SWB1','2', 'J1', via_vcc_col1, 0.5, (Dird, 0, 0)),
@@ -329,11 +326,6 @@ def main():
         via_bt01 = kad.add_via_relative( 'U1', '31', (0, -2), VIA_Size[3] )
         via_bt02 = kad.add_via_relative( 'RB1', '2', (13, 0), VIA_Size[2] )
         kad.wire_mods( [
-            ('RB1', '1', 'RB2', '1', 0.5, (Strt)),
-            ('RB1', '2', 'CB1', '2', 0.5, (Strt)),
-            # SW
-            ('RB1', '1', 'SWB1', '1', 0.5, (Dird, 0, 90)),
-            ('CB1', '1', 'SWB1', '2', 0.5, (Dird, 0, 90)),
             # Vcc
             ('U1', via_bt01, 'RB1', via_bt02, 0.5, (Dird, ([(8, 180)], 90), 0, -1), 'B.Cu'),
             ('CB1', '1', 'U1', '5', 0.5, (Dird, ([(1.5, -90), (3.4, 0), (2.5, 90)], 0), 0, -1)),
@@ -341,6 +333,21 @@ def main():
             ('U1', '31', 'U1', via_bt01, 0.5, (Dird, 90, 0, -1)),
             ('RB1', '2', 'RB1', via_bt02, 0.5, (Dird, 0, 90)),
         ] )
+    if board in [BLM, BRM]:
+        kad.wire_mods( [
+            # COL1
+            ('R11', '1', 'R12', '1', 0.5, (Strt)),
+            ('R11', '2', 'C11', '2', 0.5, (Strt)),
+            # BOOT0
+            ('RB1', '1', 'RB2', '1', 0.5, (Strt)),
+            ('RB1', '2', 'CB1', '2', 0.5, (Strt)),
+            # SW14
+            ('R11', '1', 'SW14', '1', 0.5, (Dird, 0, 90)),
+            # SWB1
+            ('RB1', '1', 'SWB1', '1', 0.5, (Dird, 0, 90)),
+            ('CB1', '1', 'SWB1', '2', 0.5, (Dird, 0, 90)),
+        ] )
+    if board == BLM:
         # LED
         via_lci = kad.add_via_relative( 'U1', '11', (1.8, -2.2), VIA_Size[3] )
         via_ldi = kad.add_via_relative( 'U1', '13', (1.0, -1.4), VIA_Size[3] )
