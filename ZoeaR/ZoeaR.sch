@@ -275,9 +275,9 @@ $EndComp
 Text GLabel 7275 2425 2    50   Input ~ 0
 5V
 Text GLabel 7275 3525 2    50   Input ~ 0
-LDO
+LDI
 Text GLabel 7275 3625 2    50   Input ~ 0
-LCO
+LCI
 Text GLabel 7325 3025 2    50   Input ~ 0
 SDA
 Text GLabel 7325 3125 2    50   Input ~ 0
@@ -292,17 +292,6 @@ Wire Wire Line
 Wire Wire Line
 	7275 3225 7275 3125
 Connection ~ 7275 3125
-$Comp
-L power:VCC #PWR0126
-U 1 1 5F461294
-P 1550 5900
-F 0 "#PWR0126" H 1550 5750 50  0001 C CNN
-F 1 "VCC" H 1567 6073 50  0000 C CNN
-F 2 "" H 1550 5900 50  0001 C CNN
-F 3 "" H 1550 5900 50  0001 C CNN
-	1    1550 5900
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
 	1550 5900 1850 5900
 Wire Wire Line
@@ -359,33 +348,8 @@ F 3 "" H 7475 2725 50  0001 C CNN
 	1    7475 2725
 	0    -1   -1   0   
 $EndComp
-Text GLabel 7150 4950 2    50   Input ~ 0
-LCI
-Text GLabel 7150 5050 2    50   Input ~ 0
-LDI
-Wire Wire Line
-	5750 4850 5750 4700
-$Comp
-L power:GND #PWR0122
-U 1 1 5F36D82A
-P 7100 4700
-F 0 "#PWR0122" H 7100 4450 50  0001 C CNN
-F 1 "GND" H 7105 4527 50  0000 C CNN
-F 2 "" H 7100 4700 50  0001 C CNN
-F 3 "" H 7100 4700 50  0001 C CNN
-	1    7100 4700
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	5350 4850 5350 4750
-Wire Wire Line
-	5300 4750 5350 4750
-Text GLabel 5300 4750 0    50   Input ~ 0
+Text GLabel 7150 5150 2    50   Input ~ 0
 5V
-Wire Wire Line
-	5750 5050 5800 5050
-Wire Wire Line
-	5750 4950 5800 4950
 Wire Wire Line
 	3450 4600 3900 4600
 Wire Wire Line
@@ -401,63 +365,21 @@ Wire Wire Line
 Connection ~ 1850 5900
 Wire Wire Line
 	1850 5900 2750 5900
-$Comp
-L power:VCC #PWR0104
-U 1 1 5F2C5F12
-P 2550 5175
-F 0 "#PWR0104" H 2550 5025 50  0001 C CNN
-F 1 "VCC" H 2567 5348 50  0000 C CNN
-F 2 "" H 2550 5175 50  0001 C CNN
-F 3 "" H 2550 5175 50  0001 C CNN
-	1    2550 5175
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5750 4700 6200 4700
-Wire Wire Line
-	6200 4850 6200 4700
-Connection ~ 6200 4700
-Wire Wire Line
-	6200 4700 6650 4700
-Wire Wire Line
-	5350 4750 5800 4750
-Wire Wire Line
-	5800 4750 5800 4850
-Connection ~ 5350 4750
 Wire Wire Line
 	6200 4950 6250 4950
 Wire Wire Line
-	6200 5050 6250 5050
-Wire Wire Line
-	5800 4750 6250 4750
-Wire Wire Line
-	6250 4750 6250 4850
-Connection ~ 5800 4750
-Wire Wire Line
 	6650 4950 6700 4950
-Wire Wire Line
-	6650 5050 6700 5050
-Wire Wire Line
-	6650 4850 6650 4700
-Connection ~ 6650 4700
-Wire Wire Line
-	6650 4700 7100 4700
-Wire Wire Line
-	7100 4850 7100 4700
-Connection ~ 7100 4700
 $Comp
 L power:GND #PWR0111
 U 1 1 5F3285E2
-P 5250 5400
-F 0 "#PWR0111" H 5250 5150 50  0001 C CNN
-F 1 "GND" H 5255 5227 50  0000 C CNN
-F 2 "" H 5250 5400 50  0001 C CNN
-F 3 "" H 5250 5400 50  0001 C CNN
-	1    5250 5400
-	0    -1   -1   0   
+P 4850 5600
+F 0 "#PWR0111" H 4850 5350 50  0001 C CNN
+F 1 "GND" H 4855 5427 50  0000 C CNN
+F 2 "" H 4850 5600 50  0001 C CNN
+F 3 "" H 4850 5600 50  0001 C CNN
+	1    4850 5600
+	0    1    1    0   
 $EndComp
-Wire Wire Line
-	5350 4950 5300 4950
 $Comp
 L key-parts:SW_ChocV2 SW11
 U 1 1 5F360028
@@ -568,7 +490,7 @@ F 1 "LC8822" H 6900 5147 16  0000 C CNN
 F 2 "key-parts:LC8822" H 6900 4950 60  0001 C CNN
 F 3 "" H 6900 4950 60  0001 C CNN
 	1    6900 4950
-	1    0    0    -1  
+	-1   0    0    1   
 $EndComp
 $Comp
 L key-parts:LC8822 L12
@@ -579,7 +501,7 @@ F 1 "LC8822" H 6450 5147 16  0000 C CNN
 F 2 "key-parts:LC8822" H 6450 4950 60  0001 C CNN
 F 3 "" H 6450 4950 60  0001 C CNN
 	1    6450 4950
-	1    0    0    -1  
+	-1   0    0    1   
 $EndComp
 $Comp
 L key-parts:LC8822 L13
@@ -590,7 +512,7 @@ F 1 "LC8822" H 6000 5147 16  0000 C CNN
 F 2 "key-parts:LC8822" H 6000 4950 60  0001 C CNN
 F 3 "" H 6000 4950 60  0001 C CNN
 	1    6000 4950
-	1    0    0    -1  
+	-1   0    0    1   
 $EndComp
 $Comp
 L key-parts:LC8822 L14
@@ -601,48 +523,8 @@ F 1 "LC8822" H 5550 5147 16  0000 C CNN
 F 2 "key-parts:LC8822" H 5550 4950 60  0001 C CNN
 F 3 "" H 5550 4950 60  0001 C CNN
 	1    5550 4950
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:D_Small D0
-U 1 1 5F2D8D42
-P 6475 4550
-F 0 "D0" V 6475 4482 50  0000 R CNN
-F 1 "D_Small" V 6430 4482 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 6475 4550 50  0001 C CNN
-F 3 "~" V 6475 4550 50  0001 C CNN
-	1    6475 4550
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	7100 4950 7150 4950
-Wire Wire Line
-	7100 5050 7150 5050
-Wire Wire Line
-	6250 4750 6250 4550
-Wire Wire Line
-	6250 4550 6375 4550
-Connection ~ 6250 4750
-Wire Wire Line
-	6575 4550 6700 4550
-Wire Wire Line
-	6700 4550 6700 4850
-$Comp
-L power:PWR_FLAG #FLG0104
-U 1 1 5F33566C
-P 6700 4550
-F 0 "#FLG0104" H 6700 4625 50  0001 C CNN
-F 1 "PWR_FLAG" H 6700 4677 50  0000 L CNN
-F 2 "" H 6700 4550 50  0001 C CNN
-F 3 "~" H 6700 4550 50  0001 C CNN
-	1    6700 4550
-	1    0    0    -1  
-$EndComp
-Connection ~ 6700 4550
-Wire Wire Line
-	5300 4950 5300 5500
-Wire Wire Line
-	5350 5600 5350 5050
 $Comp
 L key-parts:LC8822 LB1
 U 1 1 5F273C47
@@ -652,18 +534,10 @@ F 1 "LC8822" H 5050 5697 16  0000 C CNN
 F 2 "key-parts:LC8822" H 5050 5500 60  0001 C CNN
 F 3 "" H 5050 5500 60  0001 C CNN
 	1    5050 5500
-	1    0    0    -1  
+	-1   0    0    1   
 $EndComp
-Text GLabel 4850 5400 0    50   Input ~ 0
+Text GLabel 5250 5600 2    50   Input ~ 0
 5V
-Text GLabel 4850 5600 0    50   Input ~ 0
-LDO
-Text GLabel 4850 5500 0    50   Input ~ 0
-LCO
-Wire Wire Line
-	5250 5500 5300 5500
-Wire Wire Line
-	5250 5600 5350 5600
 $Comp
 L Interface_Expansion:MCP23017_SS U1
 U 1 1 5F366B9E
@@ -674,28 +548,6 @@ F 2 "Package_SO:SSOP-28_5.3x10.2mm_P0.65mm" H 3875 1825 50  0001 L CNN
 F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf" H 3875 1725 50  0001 L CNN
 	1    3675 2825
 	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR0101
-U 1 1 5F36979C
-P 2975 2625
-F 0 "#PWR0101" H 2975 2375 50  0001 C CNN
-F 1 "GND" H 2980 2452 50  0000 C CNN
-F 2 "" H 2975 2625 50  0001 C CNN
-F 3 "" H 2975 2625 50  0001 C CNN
-	1    2975 2625
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR0102
-U 1 1 5F36AC2A
-P 2975 2725
-F 0 "#PWR0102" H 2975 2475 50  0001 C CNN
-F 1 "GND" H 2980 2552 50  0000 C CNN
-F 2 "" H 2975 2725 50  0001 C CNN
-F 3 "" H 2975 2725 50  0001 C CNN
-	1    2975 2725
-	0    1    1    0   
 $EndComp
 Text GLabel 3675 1725 1    50   Input ~ 0
 5V
@@ -768,4 +620,81 @@ NoConn ~ 4375 3525
 NoConn ~ 4375 3625
 Text GLabel 4375 2725 2    50   Input ~ 0
 LED
+Text GLabel 4850 5400 0    50   Input ~ 0
+LDI
+Text GLabel 4850 5500 0    50   Input ~ 0
+LCI
+Wire Wire Line
+	5750 4950 5800 4950
+NoConn ~ 7100 4950
+Wire Wire Line
+	5350 4850 5250 4850
+Wire Wire Line
+	5250 4850 5250 5400
+Wire Wire Line
+	5250 5500 5300 5500
+Wire Wire Line
+	5300 5500 5300 4950
+Wire Wire Line
+	5300 4950 5350 4950
+Wire Wire Line
+	7100 5050 7100 5150
+Wire Wire Line
+	6650 5050 6650 5150
+Wire Wire Line
+	6650 5150 7100 5150
+Wire Wire Line
+	7150 5150 7100 5150
+Connection ~ 7100 5150
+Wire Wire Line
+	6200 5050 6200 5150
+Wire Wire Line
+	6200 5150 6650 5150
+Connection ~ 6650 5150
+Wire Wire Line
+	5750 5050 5750 5150
+Wire Wire Line
+	5750 5150 6200 5150
+Connection ~ 6200 5150
+$Comp
+L power:GND #PWR0104
+U 1 1 5F3A1287
+P 5350 5200
+F 0 "#PWR0104" H 5350 4950 50  0001 C CNN
+F 1 "GND" H 5355 5027 50  0000 C CNN
+F 2 "" H 5350 5200 50  0001 C CNN
+F 3 "" H 5350 5200 50  0001 C CNN
+	1    5350 5200
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5350 5050 5350 5200
+Wire Wire Line
+	5350 5200 5800 5200
+Wire Wire Line
+	5800 5200 5800 5050
+Connection ~ 5350 5200
+Wire Wire Line
+	5800 5200 6250 5200
+Wire Wire Line
+	6250 5200 6250 5050
+Connection ~ 5800 5200
+Wire Wire Line
+	6250 5200 6700 5200
+Wire Wire Line
+	6700 5200 6700 5050
+Connection ~ 6250 5200
+Wire Wire Line
+	5750 4850 5800 4850
+Wire Wire Line
+	6200 4850 6250 4850
+Wire Wire Line
+	6650 4850 6700 4850
+NoConn ~ 7100 4850
+Text GLabel 1550 5900 0    50   Input ~ 0
+5V
+Text GLabel 2550 5175 1    50   Input ~ 0
+5V
+NoConn ~ 2975 2625
+NoConn ~ 2975 2725
 $EndSCHEMATC
