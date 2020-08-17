@@ -274,10 +274,6 @@ F 3 "" H 6675 3925 50  0001 C CNN
 $EndComp
 Text GLabel 7275 2425 2    50   Input ~ 0
 5V
-Text GLabel 7275 3525 2    50   Input ~ 0
-LDI
-Text GLabel 7275 3625 2    50   Input ~ 0
-LCI
 Text GLabel 7325 3025 2    50   Input ~ 0
 SDA
 Text GLabel 7325 3125 2    50   Input ~ 0
@@ -597,13 +593,13 @@ F 3 "" H 2975 3625 50  0001 C CNN
 $EndComp
 Text GLabel 2975 2925 0    50   Input ~ 0
 5V
-Text GLabel 4375 2625 2    50   Input ~ 0
-ROW1
-Text GLabel 4375 2525 2    50   Input ~ 0
-ROW2
 Text GLabel 4375 2425 2    50   Input ~ 0
-ROW3
+ROW1
 Text GLabel 4375 2325 2    50   Input ~ 0
+ROW2
+Text GLabel 4375 2225 2    50   Input ~ 0
+ROW3
+Text GLabel 4375 2125 2    50   Input ~ 0
 ROW4
 Text GLabel 4375 3025 2    50   Input ~ 0
 COL1
@@ -615,7 +611,7 @@ NoConn ~ 4375 3325
 NoConn ~ 4375 3425
 NoConn ~ 4375 3525
 NoConn ~ 4375 3625
-Text GLabel 4375 2725 2    50   Input ~ 0
+Text GLabel 4375 2025 2    50   Input ~ 0
 LED
 Text GLabel 4850 5400 0    50   Input ~ 0
 LDI
@@ -697,10 +693,10 @@ NoConn ~ 2975 2725
 Text GLabel 975  2100 1    50   Input ~ 0
 5V
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0101
 U 1 1 5F385690
 P 975 2300
-F 0 "#PWR?" H 975 2050 50  0001 C CNN
+F 0 "#PWR0101" H 975 2050 50  0001 C CNN
 F 1 "GND" H 980 2127 50  0000 C CNN
 F 2 "" H 975 2300 50  0001 C CNN
 F 3 "" H 975 2300 50  0001 C CNN
@@ -718,4 +714,11 @@ F 3 "~" H 975 2200 50  0001 C CNN
 	1    975  2200
 	1    0    0    -1  
 $EndComp
+Text GLabel 7275 3525 2    50   Input ~ 0
+LCI
+Text GLabel 7275 3625 2    50   Input ~ 0
+LDI
+NoConn ~ 4375 2525
+NoConn ~ 4375 2625
+NoConn ~ 4375 2725
 $EndSCHEMATC
