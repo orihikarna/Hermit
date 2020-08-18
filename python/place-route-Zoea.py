@@ -51,8 +51,11 @@ keys.insert( 0, [' ', 0.8, 0.75, -20] )
 KeyUnit = 19.05
 
 # Board Type
-BLM = 0# Left Middle
-BRM = 1# Right Middle
+BZL = 0# Left plate
+BZR = 1# Right plate
+BZT = 2# Top plate
+BZB = 3# Bottom plate
+BZM = 4# Middle plate
 
 def get_key_postfix( idx ):
     if idx == 0:
@@ -67,35 +70,35 @@ def drawEdgeCuts( board ):
     H = PCB_Height
 
     corners = []
-    ### top
+    ## top
     corners.append( [((W/2, 0), 0), Round, [4]] )
-    ### right
+    ## right
     corners.append( [((W, 10), 90), Round, [4]] )
     # split
-    if board == BRM:
+    if board == BZR:
         pos, _ = kad.get_mod_pos_angle( 'J1' )
         corners.append( [((W-3, pos[1] - 4.675), 180), Round, [0.5]] )
         corners.append( [((W-5.73, pos[1]     ), +90), Round, [0.5]] )
         corners.append( [((W-3, pos[1] + 4.675),   0), Round, [0.5]] )
         corners.append( [((W, H-5),              +90), Round, [0.5]] )
     # USB
-    if board == BLM:
+    if board == BZL:
         pos, _ = kad.get_mod_pos_angle( 'J2' )
         corners.append( [((W-3, pos[1] - 4.675), 180), Round, [0.5]] )
         corners.append( [((W-5.73, pos[1]     ),  90), Round, [0.5]] )
         corners.append( [((W-3, pos[1] + 4.675),   0), Round, [0.5]] )
         corners.append( [((W, H-5),               90), Round, [0.5]] )
-    ### bottom
+    ## bottom
     corners.append( [((W-5, H), 180), Round, [4]] )
     if True:
         corners.append( [((W*2/3, H-5), -90), Round, [4]] )
         corners.append( [((W/2, H*2/3), 180), Round, [4]] )
         corners.append( [((W/3,   H-5),  90), Round, [4]] )
         corners.append( [((5, H),       180), Round, [4]] )
-    ### left
+    ## left
     corners.append( [((0, H - 5), -90), Round, [4]] )
     # split
-    if board == BLM:
+    if board == BZL:
         pos, _ = kad.get_mod_pos_angle( 'J1' )
         corners.append( [((3, pos[1] + 4.675),   0), Round, [0.5]] )
         corners.append( [((5.73, pos[1]     ), -90), Round, [0.5]] )
@@ -104,10 +107,38 @@ def drawEdgeCuts( board ):
     # draw
     kad.draw_closed_corners( corners, layer, width )
 
+    if board in [BZL, BZR, BZM]:
+        T = 5
+        D = 8.7
+        corners = []
+        ## top
+        corners.append( [((W/2, T), 0), BezierRound, [2]] )
+        corners.append( [((W-D, D), 45), BezierRound, [2]] )
+        ## right
+        corners.append( [((W-T, 2*D+5), 90), BezierRound, [2]] )
+        corners.append( [((W-D, H-D), 135), BezierRound, [2]] )
+        ## bottom
+        corners.append( [((W*5/6, H-T), 180), BezierRound, [2]] )
+        if True:
+            corners.append( [((W*2/3+D, H-D), -135), BezierRound, [2]] )
+            corners.append( [((W*2/3+T, H-D*2-2), -90), BezierRound, [2]] )
+            corners.append( [((W/2, H*2/3-T), 180),   BezierRound, [4]] )
+            corners.append( [((W/3-T,   H-D*2-2),  90), BezierRound, [4]] )
+            corners.append( [((W/3-D,   H-D), 135), BezierRound, [2]] )
+            corners.append( [((W*1/6, H-T),       180), BezierRound, [2]] )
+        ## left
+        corners.append( [((D, H-D), -135), BezierRound, [2]] )
+        corners.append( [((T, H-2*D-5), -90), BezierRound, [2]] )
+        corners.append( [((D, D), -45), BezierRound, [2]] )
+        # draw
+        kad.draw_closed_corners( corners, layer, width )
+
     r = 4.5
     for idx, ctr in enumerate( [(r, r), (W-r, r), (W-r, H-r), (r, H-r), (W/3-r, H-r), (W*2/3+r, H-r)] ):
         sign = +1 if idx % 2 == 0 else -1
-        if True:
+        if board in [BZT, BZB, BZM]:
+            kad.set_mod_pos_angle( 'H{}'.format( idx + 1 ), ctr, 0 )
+        if board in [BZL, BZR]:
             corners = []
             for i in range( 6 ):
                 deg = i * 60 + 15 * sign
@@ -147,10 +178,13 @@ def main():
     kad.removeTracksAndVias()
 
     # board type
-    if kad.get_mod( 'U2' ) == None:
-        board = BRM
-    else:
-        board = BLM
+    filename = pcb.GetFileName()
+    boardname = filename[filename.find( 'Zoea')+4]
+    #print( filename, boardname )
+    for bname, btype in [('L', BZL), ('R', BZR), ('T', BZT), ('B', BZB), ('M', BZM)]:
+        if boardname == bname:
+            board = btype
+            break
 
     drawEdgeCuts( board )
 
@@ -174,35 +208,44 @@ def main():
         else:
             px = (x - 0.5) * KeyUnit - 2.5
             py = (y + 0.5) * KeyUnit + 2.5
-        if board == BRM:
+        if board == BZR:
             px = -px
             angle = -angle
         else:
             px += PCB_Width
-        ## SW
         sw_pos = (px, py)
-        kad.set_mod_pos_angle( 'SW' + name, sw_pos, 180 - angle )
-        ## LED
-        pos = vec2.scale( 4.93, vec2.rotate( 90 + angle ), sw_pos )
-        kad.set_mod_pos_angle( 'L' + name, pos, -angle )
-        # wire GND to SW
-        kad.wire_mods([('L' + name, '6', 'SW' + name, '3', 0.6, (Dird, 0, 90))])
-        ## Diode
-        if idx > 0:
-            #pos = vec2.mult( mat2.rotate( -angle ), (-8, -2), sw_pos )
-            pos = vec2.mult( mat2.rotate( -angle ), (-5, +2), sw_pos )
-            kad.set_mod_pos_angle( 'D' + name, pos, -90 - angle )
-            # wire to SW
-            kad.wire_mods([('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
-        if board == BLM and idx == 1:
-            pos = vec2.mult( mat2.rotate( -angle ), (-9, 9), sw_pos )
-            #kad.set_mod_pos_angle( 'D0', pos, -90 - angle )
-            kad.set_mod_pos_angle( 'D0', pos, -90 )
+        if board == BZT:
+            corners = []
+            for i in range(4):
+                deg = i * 90 + angle
+                pos = vec2.scale( 14 / 2.0, vec2.rotate( deg ), sw_pos )
+                corners.append( [(pos, deg + 90), BezierRound, [1]] )
+            kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
+
+        if board in [BZL, BZR]:
+            ## SW
+            kad.set_mod_pos_angle( 'SW' + name, sw_pos, 180 - angle )
+            ## LED
+            pos = vec2.scale( 4.93, vec2.rotate( 90 + angle ), sw_pos )
+            kad.set_mod_pos_angle( 'L' + name, pos, -angle )
+            # wire GND to SW
+            kad.wire_mods([('L' + name, '6', 'SW' + name, '3', 0.6, (Dird, 0, 90))])
+            ## Diode
+            if idx > 0:
+                #pos = vec2.mult( mat2.rotate( -angle ), (-8, -2), sw_pos )
+                pos = vec2.mult( mat2.rotate( -angle ), (-5, +2), sw_pos )
+                kad.set_mod_pos_angle( 'D' + name, pos, -90 - angle )
+                # wire to SW
+                kad.wire_mods([('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
+            if board == BZL and idx == 1:
+                pos = vec2.mult( mat2.rotate( -angle ), (-9, 9), sw_pos )
+                #kad.set_mod_pos_angle( 'D0', pos, -90 - angle )
+                kad.set_mod_pos_angle( 'D0', pos, -90 )
 
     ###
     ### Set mod positios
     ###
-    if board == BLM:
+    if board == BZL:
         kad.move_mods( (0, 0), 0, [
             # mcu
             (None, (PCB_Width/2, 29), 0, [
@@ -240,14 +283,14 @@ def main():
                 ('C6', (1.27, -2.54), 180),
             ] ),
         ] )
-    if board == BRM:
+    if board == BZR:
         # expander
         kad.move_mods( (PCB_Width/2, 28.5), 0, [
             ('U1', (0, 0), -90),
             ('C1', (-1.3, -5.8), 180),
         ] )
-    if board in [BLM, BRM]:
-        sign = +1 if board == BLM else -1
+    if board in [BZL, BZR]:
+        sign = +1 if board == BZL else -1
         # D1
         kad.move_mods( (0, 0), 0, [
             (None, (PCB_Width/2 - PCB_Width/6*sign + 4 * sign, PCB_Height*2/3 - 3), 0, [
@@ -273,7 +316,7 @@ def main():
             ] ),
         ] )
     # Split (USB) connector
-    if board == BLM:
+    if board == BZL:
         kad.move_mods( (0, PCB_Height/2), 180, [
             (None, (2.62, 0), 0, [
                 ('J1', (0, 0), +90),
@@ -284,7 +327,7 @@ def main():
                 ('R3', (-12, -1.9), +90),
             ] ),
         ] )
-    elif board == BRM:
+    elif board == BZR:
         kad.move_mods( (PCB_Width, PCB_Height/2), 0, [
             (None, (-2.62, 0), 0, [
                 ('J1', (0, 0), +90),
@@ -300,7 +343,7 @@ def main():
     ### Wire mods
     ###
     # Split (USB) connector
-    if board in [BLM, BRM]:
+    if board in [BZL, BZR]:
         via_splt_vba = kad.add_via_relative( 'J1', 'A4', (-0.4, -5.8), VIA_Size[1] )
         via_splt_vbb = kad.add_via_relative( 'J1', 'B4', (+0.4, -5.8), VIA_Size[1] )
         via_splt_cc1 = kad.add_via_relative( 'J1', 'A5', (-0.15, -2.4), VIA_Size[3] )
@@ -342,7 +385,7 @@ def main():
             ('J1', via_splt_sb1, 'J1', 'A8', 0.3, (Dird, 0, 90)),
             ('J1', via_splt_sb2, 'J1', 'B8', 0.3, (Dird, 0, 90)),
         ] )
-    if board == BLM:
+    if board == BZL:
         kad.wire_mods( [
             # I2C pull-up's
             ('J1', via_splt_vba, 'R2', '2', 0.8, (Dird, 90, 0)),
@@ -353,7 +396,7 @@ def main():
             ('LB1', '3', 'J1', via_splt_sb1, 0.4, (Dird, ([(3.3, 180), (6.2, 135), (5.2, 90)], 30), 0, -1)),
             ('LB1', '2', 'J1', via_splt_sb2, 0.4, (Dird, ([(3.8, 180), (7.0, 135), (6.1, 90)], 30), ([(2.2, -45)], 0), -1)),
         ] )
-    if board == BRM:
+    if board == BZR:
         via_led_u1 = kad.add_via_relative( 'U1', '1', (0, -2), VIA_Size[2] )
         via_led_d1 = kad.add_via_relative( 'D1', '2', (0, +2), VIA_Size[2] )
         kad.wire_mods( [
@@ -374,7 +417,7 @@ def main():
             ('D1', '2', 'D1', via_led_d1, 0.5, (Dird, 90, 0)),
             ('U1', via_led_u1, 'D1', via_led_d1, 0.5, (ZgZg, 90, 80, -0.6), 'B.Cu'),
         ] )
-    if board == BRM:
+    if board == BZR:
         # mcp23017
         via_u1_vcc  = kad.add_via_relative( 'U1', '9',  (+1.6, 0), VIA_Size[2] )
         via_u1_nrst = kad.add_via_relative( 'U1', '18', (-1.6, 0), VIA_Size[3] )
@@ -387,7 +430,7 @@ def main():
             ('U1', via_u1_vcc, 'J1', via_splt_vbb, 0.45, (Dird, 90, ([(21, 90)], -45), -1), 'F.Cu'),
         ] )
 
-    if board in [BLM, BRM]:
+    if board in [BZL, BZR]:
         # COL lines
         kad.wire_mods( [
             ('SW14', '1', 'SW13', '1', 0.5, (Dird, 0,  0, -5)),
@@ -395,7 +438,7 @@ def main():
             ('SW12', '1', 'SW11', '1', 0.5, (Dird, 0, 90, -9)),
         ] )
     # ROW lines
-    if board == BLM:
+    if board == BZL:
         kad.wire_mods( [
             ('D11', '2', 'U1', '26', 0.5, (Dird, 0, ([(1.6, 90)], 0), -1.0)),
             ('D12', '2', 'U1', '27', 0.5, (Dird, 0, ([(2.4, 90)], 0), -1.8)),
@@ -403,7 +446,7 @@ def main():
             ('D14', '2', 'U1', '29', 0.5, (Dird, 0, ([(4.0, 90)], 0), -1.8)),
             ('C11', '2', 'U1', '30', 0.5, (Dird, 90, ([(3.2, 90)], 0), -1.0)),
         ] )
-    elif board == BRM:
+    elif board == BZR:
         kad.wire_mods( [
             ('D11', '2', 'U1', '5', 0.5, (Dird, ([(5, 0), (12, 90)], -45), ([(3.6, 180)], -90), -1.0)),
             ('D12', '2', 'U1', '4', 0.5, (Dird, 0, ([(4.4, 180)], 90), -1.8)),
@@ -412,7 +455,7 @@ def main():
             ('CB1', '2', 'U1', '21', 0.5, (Dird, 0, ([(2.0, 0)], 90), -1)),
         ] )
     # Debounce
-    if board == BLM:
+    if board == BZL:
         via_vcc_col1 = kad.add_via_relative( 'C11', '1', (0, -2), VIA_Size[1] )
         kad.wire_mods( [
             # Vcc
@@ -429,7 +472,7 @@ def main():
             ('U1', '31', 'U1', via_bt01, 0.5, (Dird, 90, 0, -1)),
             ('RB1', '2', 'RB1', via_bt02, 0.5, (Dird, 0, 90)),
         ] )
-    elif board == BRM:
+    elif board == BZR:
         pos_u1, net = kad.get_pad_pos_net( 'U1', '22' )
         pos_c11 = kad.get_pad_pos( 'C11', '2' )
         via_col1_u1 = kad.add_via( (pos_c11[0] - 1, pos_u1[1] - 2), net, VIA_Size[2] )
@@ -440,7 +483,7 @@ def main():
             ('U1', via_col1_u1, 'C11', via_col1_c11, 0.45, (Dird, 0, 90, -1), 'B.Cu'),
         ] )
 
-    if board in [BLM, BRM]:
+    if board in [BZL, BZR]:
         kad.wire_mods( [
             # COL1
             ('R11', '1', 'R12', '1', 0.5, (Strt)),
@@ -455,7 +498,7 @@ def main():
             ('CB1', '1', 'SWB1', '2', 0.6, (Dird, 0, 90, -1)),
         ] )
     # LED
-    if board == BLM:
+    if board == BZL:
         via_lci = kad.add_via_relative( 'U1', '11', (1.8, -2.2), VIA_Size[3] )
         via_ldi = kad.add_via_relative( 'U1', '13', (1.0, -1.4), VIA_Size[3] )
         via_lb1_5v = kad.add_via_relative( 'R2', '2', (0, 11.9 + 0.2), VIA_Size[1] )
@@ -506,7 +549,7 @@ def main():
             ('D0', '2', 'L1', '1', 0.6, (Dird, ([(2.2, 0)], 45), 90, -0.4)),
             ('F1', '2', 'L1', '2', 0.6, (Dird, 0, 90)),
         ] )
-    elif board == BRM:
+    elif board == BZR:
         via_vcc_l14 = kad.add_via_relative( 'L14', '1', (0, +4), VIA_Size[0] )
         via_vcc_lb1 = kad.add_via_relative( 'CB1', '1', (0, -2), VIA_Size[0] )
         kad.wire_mods( [
@@ -535,7 +578,7 @@ def main():
             ('CB1', '1', 'CB1', via_vcc_lb1, 0.6, (Dird, 90, 0)),
         ] )
 
-    if board == BLM:
+    if board == BZL:
         # mcu
         via_vcca1 = kad.add_via_relative( 'U1', '1', (-2.6, -0.1), VIA_Size[2] )
         via_vcca5 = kad.add_via_relative( 'U1', '5', (-2.6, +0.0), VIA_Size[2] )
