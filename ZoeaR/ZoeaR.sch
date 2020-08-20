@@ -601,9 +601,9 @@ Text GLabel 4375 2225 2    50   Input ~ 0
 ROW3
 Text GLabel 4375 2125 2    50   Input ~ 0
 ROW4
-Text GLabel 4375 3025 2    50   Input ~ 0
-COL1
 Text GLabel 4375 2925 2    50   Input ~ 0
+COL1
+Text GLabel 4375 3025 2    50   Input ~ 0
 BOOT0
 NoConn ~ 4375 3125
 NoConn ~ 4375 3225

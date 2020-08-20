@@ -159,6 +159,8 @@ def add_via_on_pad( mod_name, pad_name, via_size ):
 
 def add_via_relative( mod_name, pad_name, offset_vec, size_via ):
     pos, angle, _, net = get_pad_pos_angle_layer_net( mod_name, pad_name )
+    if get_mod_layer( mod_name ) == pcb.GetLayerID( 'B.Cu' ):
+        offset_vec = (offset_vec[0], -offset_vec[1])
     pos_via = vec2.mult( mat2.rotate( angle ), offset_vec, pos )
     return add_via( pos_via, net, size_via )
 
@@ -329,7 +331,7 @@ def add_wire_zigzag( pos_a, pos_b, angle, delta_angle, net, layer, width, radius
     add_wire_directed( (pos_a, angle), (mid_pos, mid_angle), net, layer, width, radius )
     add_wire_directed( (pos_b, angle), (mid_pos, mid_angle), net, layer, width, radius )
 
-def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
+def __add_wire( pos_a, angle_a, sign_a, pos_b, angle_b, sign_b, net, layer, width, prms ):
     if type( prms ) == type( Straight ) and prms == Straight:
         add_wire_straight( [pos_a, pos_b], net, layer, width )
     elif prms[0] == OffsetStraight:
@@ -337,9 +339,9 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
         offsets_a = []
         offsets_b = []
         for off_len_a, off_angle_a in prms_a:
-            offsets_a.append( (off_len_a, angle_a + off_angle_a) )
+            offsets_a.append( (off_len_a, angle_a + off_angle_a * sign_a) )
         for off_len_b, off_angle_b in prms_b:
-            offsets_b.append( (off_len_b, angle_b + off_angle_b) )
+            offsets_b.append( (off_len_b, angle_b + off_angle_b * sign_b) )
         prms2_a = (pos_a, offsets_a)
         prms2_b = (pos_b, offsets_b)
         add_wire_offsets_straight( prms2_a, prms2_b, net, layer, width, radius )
@@ -350,48 +352,67 @@ def __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms ):
         offsets_b = []
         if type( prms_a ) == type( () ):# tuple
             for off_len_a, off_angle_a in prms_a[0]:
-                offsets_a.append( (off_len_a, angle_a + off_angle_a) )
-            dir_angle_a = prms_a[1]
+                offsets_a.append( (off_len_a, angle_a + off_angle_a * sign_a) )
+            dir_angle_a = prms_a[1] * sign_a
         else:
-            dir_angle_a = prms_a
+            dir_angle_a = prms_a * sign_a
         if type( prms_b ) == type( () ):# tuple
             for off_len_b, off_angle_b in prms_b[0]:
-                offsets_b.append( (off_len_b, angle_b + off_angle_b) )
-            dir_angle_b = prms_b[1]
+                offsets_b.append( (off_len_b, angle_b + off_angle_b * sign_b) )
+            dir_angle_b = prms_b[1] * sign_b
         else:
-            dir_angle_b = prms_b
+            dir_angle_b = prms_b * sign_b
         prms2_a = (pos_a, offsets_a, angle_a + dir_angle_a)
         prms2_b = (pos_b, offsets_b, angle_b + dir_angle_b)
         add_wire_offsets_directed( prms2_a, prms2_b, net, layer, width, radius )
     elif prms[0] == ZigZag:
         dangle, delta_angle = prms[1:3]
         radius = prms[3] if len( prms ) > 3 else 0
-        add_wire_zigzag( pos_a, pos_b, angle_a + dangle, delta_angle, net, layer, width, radius )
+        add_wire_zigzag( pos_a, pos_b, angle_a + dangle * sign_a, delta_angle, net, layer, width, radius )
 
 def wire_mods( tracks ):
+    layer_FCu = pcb.GetLayerID( 'F.Cu' )
+    layer_BCu = pcb.GetLayerID( 'B.Cu' )
     for track in tracks:
         mod_a, pad_a, mod_b, pad_b, width, prms = track[:6]
+        sign_a, sign_b = +1, +1
+        layer = None
         if type( pad_b ) is not pcbnew.VIA:# check b first for layer
             pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
+            if layer == layer_BCu:
+                sign_b = -1
         if type( pad_a ) is not pcbnew.VIA:
             pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
+            if layer == layer_BCu:
+                sign_a = -1
         if type( pad_a ) is pcbnew.VIA:# pad_a is via
-            pos_a, _ = get_via_pos_net( pad_a )
+            pos_a, net = get_via_pos_net( pad_a )
             if mod_a == None:
                 angle_a = angle_b
             else:
                 _, angle_a = get_mod_pos_angle( mod_a )
-                #layer = get_mod_layer( mod_a )
+                layer_a = get_mod_layer( mod_a )
+                if layer_a == layer_BCu:
+                    sign_a = -1
         if type( pad_b ) is pcbnew.VIA:# pad_b is via
-            pos_b, _ = get_via_pos_net( pad_b )
+            pos_b, net = get_via_pos_net( pad_b )
             if mod_b == None:# pad_b is via
                 angle_b = angle_a
             else:
                 _, angle_b = get_mod_pos_angle( mod_b )
-                #layer = get_mod_layer( mod_b )
+                layer_b = get_mod_layer( mod_b )
+                if layer_b == layer_BCu:
+                    sign_b = -1
+        if layer == None:
+            layer = layer_b if layer_a == None else layer_a
+        if layer == None:
+            print( 'layer is None' )
         if len( track ) > 6:
-            layer = pcb.GetLayerID( track[6] )
-        __add_wire( pos_a, angle_a, pos_b, angle_b, net, layer, width, prms )
+            if track[6] == 'Opp':
+                layer = layer_BCu if layer == layer_FCu else layer_FCu
+            else:
+                layer = pcb.GetLayerID( track[6] )
+        __add_wire( pos_a, angle_a, sign_a, pos_b, angle_b, sign_b, net, layer, width, prms )
 
 
 # drawing
