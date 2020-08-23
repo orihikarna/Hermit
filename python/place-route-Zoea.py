@@ -144,7 +144,8 @@ def drawEdgeCuts( board ):
         midcnrs.append( [((2, J1_y - Jw), 180), BezierRound, [1]] )# J1 top
         midcnrs.append( [((0, 5), -90), BezierRound, [1]] )# left
     # draw
-    kad.draw_closed_corners( corners, layer, width )
+    if board in [BZL, BZR, BZT]:
+        kad.draw_closed_corners( corners, layer, width )
     if board in [BZL, BZR, BZM]:
         kad.draw_closed_corners( midcnrs, 'Edge.Cuts' if board == BZM else 'F.Fab', width )
 
@@ -194,7 +195,7 @@ def drawEdgeCuts( board ):
                 pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
                 corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
             kad.draw_closed_corners( corners, layer, width )
-        else:
+        elif board in []:
             kad.add_arc( ctr, vec2.add( ctr, (2.0, 0) ), 360, layer, width )
         if False:
             corners = []
@@ -233,6 +234,10 @@ def main():
     for bname, btype in [('L', BZL), ('R', BZR), ('T', BZT), ('B', BZB), ('M', BZM)]:
         if boardname == bname:
             board = btype
+            # kad.add_text( (PCB_Width*1/6, PCB_Height-2), 0, 'Zoea' + bname, 'F.Cu', (1, 1), 0.15,
+            #     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
+            # kad.add_text( (PCB_Width*5/6, PCB_Height-2), 0, 'orihikarna 20/08/23', 'F.Cu', (1, 1), 0.15,
+            #     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
             break
 
     drawEdgeCuts( board )
@@ -240,10 +245,6 @@ def main():
     zones = []
     add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
     add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
-    # add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (110, 110)), zones )
-
-    # kad.add_text( (440, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200710', 'F.SilkS', (0.9, 0.9), 6,
-    #     pcbnew.GR_TEXT_HJUSTIFY_LEFT, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
 
     ###
     ### Set key positios
@@ -326,6 +327,8 @@ def main():
         kad.move_mods( (PCB_Width/2, 28.5), 0, [
             ('U1', (0, 0), -90),
             ('C1', (+1.3, -5.8), 0),
+            # R1
+            ('R1', (-7.5, 3.7), 0),
         ] )
     if board in [BZL, BZR]:
         sign = [+1, -1][board]
@@ -409,7 +412,7 @@ def main():
             ('J1', via_splt_dpa, 'J1', via_splt_dpb, 0.4, (Strt), 'Opp'),
             ('J1', via_splt_dma, 'J1', 'A7', 0.3, (Dird, 0, 90)),
             ('J1', via_splt_dmb, 'J1', 'B7', 0.3, (Dird, 0, 90)),
-            ('J1', via_splt_dma, 'J1', via_splt_dmb, 0.4, (Dird, 90, 0), 'Opp'),
+            ('J1', via_splt_dma, 'J1', via_splt_dmb, 0.4, (ZgZg, 0, 45, -0.8), 'Opp'),
             # cc1/2
             ('J1', via_splt_cc1, 'J1', 'A5', 0.3, (Dird, 0, 90)),
             ('J1', via_splt_cc2, 'J1', 'B5', 0.3, (Dird, 0, 90)),
@@ -452,10 +455,10 @@ def main():
             ('LB1', '4', 'J1', via_splt_sb2, 0.4, (Dird, ([(1.5, 0), (2.0, -45)], -90), ([(0.2, 0), (1.7, -90)], 0), -1)),
             ('LB1', '5', 'J1', via_splt_sb1, 0.4, (Dird, ([(1.75, 0), (2.8, -45)], -90), ([(2.2, -135)], 0), -1)),
             # LED
-            ('R1', '1', 'D1', '1', 0.5, (Dird, 90, 0)),
+            ('R1', '1', 'D1', '1', 0.5, (ZgZg, 90, 45, -0.8)),
             ('U1', '1', 'U1', via_led_u1, 0.45, (Dird, 90, 0)),
             ('D1', '2', 'D1', via_led_d1, 0.45, (Dird, 90, 0)),
-            ('U1', via_led_u1, 'D1', via_led_d1, 0.5, (ZgZg, 90, 80, -0.6), 'Opp'),
+            ('U1', via_led_u1, 'D1', via_led_d1, 0.5, (Dird, 90, 90, -0.8), 'Opp'),
         ] )
     if board == BZR:
         # mcp23017
@@ -724,90 +727,101 @@ def main():
     ###
     ### Ref
     ###
-    # refs = [
-    #     ('C1', 90, +40, 90),
-    #     ('C2', 90, -40, 90),
-    #     ('C3', -60, 70, 180),
-    #     ('C4',  60,120, 180),
-    #     ('C5', -60, 70, 180),
-    #     ('C6',  60,-60, 180),
-    #     ('C7',  90,  0,  90),
-    #     ('C8',  90,  0,  90),
-    #     ('C9', -90,  0, -90),
-    #     ('R1', -15, 0, 0),
-    #     ('R2', -15, 0, 0),
-    #     ('R4',  60,120, 180),
-    #     ('R5', -60, 60, 180),
-    #     ('R6', -100, 0, -90),
-    #     ('R7', -100, 0, -90),
-    #     ('L1',  100, 0,  90),
-    #     ('F1', -100, 0, -90),
-    #     ('R3', 100, 0, 90),
-    #     ('R8', 100, 0, 90),
-    #     ('R9', 100, 0, 90),
-    #     ('U1', 120, 135, 0),
-    #     ('U2', 0, 0, -90),
-    #     ('D1', 15, 0, 0),
-    #     ('D2', 15, 0, 0),
-    #     ('D3', 50, 90, -90),
-    #     ('SW1', 0, 0, -90),
-    #     ('J1', 0, 0, None),
-    #     ('J2', 0, 0, None),
-    #     ('J3', 0, 0, None),
-    # ]
-    # for mod_name, offset_length, offset_angle, text_angle in refs:
-    #     mod = kad.get_mod( mod_name )
-    #     pos, angle = kad.get_mod_pos_angle( mod_name )
-    #     ref = mod.Reference()
-    #     if text_angle == None:
-    #         ref.SetVisible( False )
-    #     else:
-    #         ref.SetTextSize( pcbnew.wxSizeMM( 0.9, 0.9 ) )
-    #         ref.SetThickness( pcbnew.FromMils( 7 ) )
-    #         pos_ref = vec2.scale( offset_length, vec2.rotate( - (offset_angle + angle) ), pos )
-    #         ref.SetPosition( pnt.mils2unit( vec2.round( pos_ref ) ) )
-    #         ref.SetTextAngle( text_angle * 10 )
-    #         ref.SetKeepUpright( False )
+    if board == BZL:
+        refs = [
+            ('C1', 2.5, 0, 90),
+            ('C2', 2.5, 0, 90),
+            ('C4', 2.5, 0, 90),
+            ('U2', 2.75, 0, 90),
+            ('C3', 3.3, 0, 180),
+            ('C5', 3.3, 0, 180),
+            ('R1', 3.3, 0, 180),
+            ('C6', 3.3, 0, 180),
+            ('D1', 3.3, 0, 180),
+            ('C11', 3.3, 0, 180),
+            ('R11', 3.3, 0, 180),
+            ('R12', 3.3, 0, 180),
+            ('CB1', 3.3, 180, 0),
+            ('RB1', 3.3, 180, 0),
+            ('RB2', 3.3, 180, 0),
+            ('R2', 2, -90,   0),
+            ('R3', 2, +90, 180),
+            ('R4', 3.3, 180, 180),
+            ('R5', 3.3, 180, 180),
+            ('R6', 3.3, 180, 180),
+            ('R7', 3.3, 180, 180),
+            ('R8', 3.3, 180, 0),
+            ('R9', 3.3, 180, 0),
+            ('L1', 3.3, 180, 0),
+            ('F1', 3.3, 180, 0),
+            ('D0',  1.6, -90, 180),
+            ('D11', 1.6, -90, 180),
+            ('D12', 1.6, -90, 180),
+            ('D13', 1.6, -90, 180),
+            ('D14', 1.6, -90, 180),
+            ('U1', 3, 135, 0),
+            ('J1', 7,   0, +90),
+            ('J2', 7, 180, -90),
+            ('J3', 0, 0, None),
+        ]
+    elif board == BZR:
+        refs = [
+            ('C1', 3.3, 0, 0),
+            ('R1', 3.3, 180, 0),
+            ('D1', 3.3, 0, 180),
+            ('C11', 3.3, 180, 180),
+            ('R11', 3.3, 180, 180),
+            ('R12', 3.3, 180, 180),
+            ('CB1', 3.3, 0, 0),
+            ('RB1', 3.3, 0, 0),
+            ('RB2', 3.3, 0, 0),
+            ('R6', 3.3, 180, 180),
+            ('R7', 3.3, 180, 180),
+            ('D11', 1.6, -90, 180),
+            ('D12', 1.6, -90, 180),
+            ('D13', 1.6, -90, 180),
+            ('D14', 1.6, -90, 180),
+            ('U1', 3, 135, 0),
+            ('J1', 7,   0, -90),
+        ]
+    else:
+        refs = [
+            ('H1', 0, 0, None),
+            ('H2', 0, 0, None),
+            ('H3', 0, 0, None),
+            ('H4', 0, 0, None),
+            ('H5', 0, 0, None),
+            ('H6', 0, 0, None),
+        ]
+    for mod_name, offset_length, offset_angle, text_angle in refs:
+        mod = kad.get_mod( mod_name )
+        pos, angle = kad.get_mod_pos_angle( mod_name )
+        ref = mod.Reference()
+        if text_angle == None:
+            ref.SetVisible( False )
+        else:
+            ref.SetTextSize( pcbnew.wxSizeMM( 1, 1 ) )
+            ref.SetThickness( pcbnew.FromMM( 0.15 ) )
+            pos_ref = vec2.scale( offset_length, vec2.rotate( - (offset_angle + angle) ), pos )
+            ref.SetPosition( pnt.to_unit( vec2.round( pos_ref, 3 ), True ) )
+            ref.SetTextAngle( text_angle * 10 )
+            ref.SetKeepUpright( False )
 
-    # refs = [ ('J3', (0, 90), (90, 0), [
-    #         ('1', 'A5', 'SCK'),
-    #         ('2', 'A6', 'MISO'),
-    #         ('3', 'A7', 'MOSI'),
-    #     ] ), ('J2', (90, 0), (0, 90), [
-    #         ('1', 'A3', 'RX'),
-    #         ('2', 'A2', 'TX'),
-    #         ('3', 'nRST', 'nRST'),
-    #         ('4', 'F1', 'F1'),
-    #         ('5', 'F0', 'F0'),
-    #         ('6', 'GND', 'GND'),
-    #         ('7', '3V3', '3V3'),
-    #     ] ), ('J1', (-90, 180), (0, -90), [
-    #         ('1', '5V', '5V'),
-    #         ('2', 'A9',  'SCL'),
-    #         ('3', 'A10', 'SDA'),
-    #         ('4', 'A13', 'DIO'),
-    #         ('5', 'A14', 'CLK'),
-    #         ('6', 'B3', 'SCK'),
-    #         ('7', 'B4', 'MISO'),
-    #         ('8', 'B5', 'MOSI'),
-    #     ] ),
-    # ]
-    # for mod, angles1, angles2, pads in refs:
-    #     for pad, text1, text2 in pads:
-    #         pos = kad.get_pad_pos( mod, pad )
-    #         angle_pos1, angle_text1 = angles1
-    #         angle_pos2, angle_text2 = angles2
-    #         for idx, layer in enumerate( ['F.SilkS', 'B.SilkS'] ):
-    #             pos1 = vec2.scale( [65, 65][idx], vec2.rotate( angle_pos1 ), pos )
-    #             pos2 = vec2.scale( 50, vec2.rotate( angle_pos2 ), pos )
-    #             kad.add_text( pos1, angle_text1, text1, layer, (0.7, 0.7), 6,
-    #                 pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
-    #             kad.add_text( pos2, angle_text2, text2, layer, (0.7, 0.7), 6,
-    #                 pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
+    if board == BZL:
+        pads = [
+            ('1', 'GND'),
+            ('2', 'nRST'),
+            ('3', 'CLK'),
+            ('4', 'DIO'),
+            ('5', 'TX'),
+            ('6', 'RX'),
+        ]
+        for pad, text in pads:
+            pos = kad.get_pad_pos( 'J3', pad )
+            pos = vec2.scale( 2, vec2.rotate( -90 ), pos )
+            kad.add_text( pos, 0, text, 'F.SilkS', (0.9, 0.9), 0.15,
+                pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
 
-    # pos, angle = kad.get_mod_pos_angle( 'SW1' )
-    # kad.add_text( pos, angle + 90, 'BOOT0', 'F.SilkS', (0.85, 0.65), 6,
-    #     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
     pcbnew.Refresh()
 
 if __name__=='__main__':
