@@ -42,8 +42,8 @@ PCB_Height = 57.72# platinum ratio
 
 J1_y = PCB_Height / 2
 J2_y = 40
-J3_x = PCB_Width/2 - 1.27 * 3
-D1_x = PCB_Width/3 + 7.4
+J3_x = PCB_Width/2 - 1.27 * 4
+D1_x = PCB_Width/3 + 8
 
 keys = [
     ['/', 0.000, 0.520, 3.5],
@@ -82,8 +82,9 @@ def drawEdgeCuts( board ):
     ## right
     corners.append( [((W, 10), 90), Round, [4]] )
     midcnrs.append( corners[-1] )
-    USBM = 6
-    USBT = 1.2
+    USBM = 5
+    USBT = 1.02
+    USBW = 3.2
     # USB (PC)
     if board == BZL:
         corners.append( [((W-3, J2_y - 4.675), 180), Round, [0.5]] )
@@ -91,13 +92,13 @@ def drawEdgeCuts( board ):
         corners.append( [((W-3, J2_y + 4.675),   0), Round, [0.5]] )
         corners.append( [((W, H-5),             90), Round, [0.5]] )
     if board in [BZL, BZR, BZM]:
-        midcnrs.append( [((W-2, J2_y - USBM - USBT*2), 180), Round, [1]] )
-        midcnrs.append( [((W-4, J2_y - USBM - USBT  ),  90), Round, [1]] )
-        midcnrs.append( [((W-2, J2_y - USBM         ),   0), Round, [1]] )
-        midcnrs.append( [((W,   J2_y                ),  90), Round, [1]] )
-        midcnrs.append( [((W-2, J2_y + USBM         ), 180), Round, [1]] )
-        midcnrs.append( [((W-4, J2_y + USBM + USBT  ),  90), Round, [1]] )
-        midcnrs.append( [((W-2, J2_y + USBM + USBT*2),   0), Round, [1]] )
+        midcnrs.append( [((W-USBW+2, J2_y - USBM - USBT*2), 180), Round, [1]] )
+        midcnrs.append( [((W-USBW,   J2_y - USBM - USBT  ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW+2, J2_y - USBM         ),   0), Round, [1]] )
+        midcnrs.append( [((W,        J2_y                ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW+2, J2_y + USBM         ), 180), Round, [1]] )
+        midcnrs.append( [((W-USBW,   J2_y + USBM + USBT  ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW+2, J2_y + USBM + USBT*2),   0), Round, [1]] )
         midcnrs.append( [((W, H-5),                     90), Round, [1]] )
     ## bottom
     corners.append( [((W-5, H), 180), Round, [4]] )
@@ -108,21 +109,11 @@ def drawEdgeCuts( board ):
         corners.append( [((W*2/3-5, H*2/3), 180), Round, [4]] )
         midcnrs.append( corners[-1] )
         if board in [BZL, BZR, BZM]:
-            # J3 r
-            midcnrs.append( [((J3_x+2.54*5.6,     H*2/3-0.6), -90), Round, [0.5]] )
-            midcnrs.append( [((J3_x+2.54*5.6-0.6, H*2/3-1.2), 180), Round, [0.5]] )
-            midcnrs.append( [((J3_x+2.54*5.6-1.2, H*2/3-0.6),  90), Round, [0.5]] )
-            midcnrs.append( [((J3_x+2.54*5.6-1.8, H*2/3    ), 180), Round, [0.5]] )
-            # J3 l
-            midcnrs.append( [((J3_x-2.54*0.1,     H*2/3-0.6), -90), Round, [0.5]] )
-            midcnrs.append( [((J3_x-2.54*0.1-0.6, H*2/3-1.2), 180), Round, [0.5]] )
-            midcnrs.append( [((J3_x-2.54*0.1-1.2, H*2/3-0.6),  90), Round, [0.5]] )
-            midcnrs.append( [((J3_x-2.54*0.1-1.8, H*2/3    ), 180), Round, [0.5]] )
-            # D1 LED
-            midcnrs.append( [((D1_x+2, H*2/3-1.2), -90), Round, [0.5]] )
-            midcnrs.append( [((D1_x,   H*2/3-2.4), 180), Round, [0.5]] )
-            midcnrs.append( [((D1_x-2, H*2/3-1.2),  90), Round, [0.5]] )
-            midcnrs.append( [((D1_x-3.2, H*2/3  ), 180), Round, [0.5]] )
+            # J3 & D1 LED
+            midcnrs.append( [((J3_x+1.27*11, H*2/3 - 1.27), -90), Round, [0.5]] )
+            midcnrs.append( [((W/2, H*2/3-2.54), 180), Round, [0.5]] )
+            midcnrs.append( [((D1_x-2.0, H*2/3 -1.27 ), 90), Round, [0.5]] )
+            midcnrs.append( [((D1_x-3.2, H*2/3 ), 180), Round, [0.5]] )
         corners.append( [((W/3,   H-5),  90), Round, [4]] )
         midcnrs.append( corners[-1] )
         corners.append( [((5, H),       180), Round, [4]] )
@@ -130,17 +121,13 @@ def drawEdgeCuts( board ):
     ## left
     corners.append( [((0, H - 5), -90), Round, [4]] )
     midcnrs.append( corners[-1] )
-    T = 5
-    Tb = 10
-    Dt = 11
-    D = 8.7
     # Split (USB)
     if board in [BZL, BZR]:
         corners.append( [((3, J1_y + 4.675),   0), Round, [0.5]] )
         corners.append( [((5.73, J1_y     ), -90), Round, [0.5]] )
         corners.append( [((3, J1_y - 4.675), 180), Round, [0.5]] )
         corners.append( [((0, 5),            -90), Round, [0.5]] )
-    if board in [BZL, BZR, BZM]:
+    if board in [BZL, BZR, BZM]:# mid plate
         Jw = 6.3
         midcnrs.append( [((2, J1_y + Jw), 0), BezierRound, [1]] )# J1 bottom
         T = 7.4# thickness for left
@@ -159,28 +146,38 @@ def drawEdgeCuts( board ):
     # draw
     kad.draw_closed_corners( corners, layer, width )
     if board in [BZL, BZR, BZM]:
-        kad.draw_closed_corners( midcnrs, 'Edge.Cuts' if board == BZM else 'F.Fab', width * 4 )
+        kad.draw_closed_corners( midcnrs, 'Edge.Cuts' if board == BZM else 'F.Fab', width )
 
-    # mid plate
-    if board in []:#[BZL, BZR, BZM]:
+    # mid plate USB hole
+    if board in [BZL, BZR, BZM]:
+        midcnrs = []
+        midcnrs.append( [((W-USBW-4, J2_y - USBM - USBT*2),   0), Round, [1]] )
+        midcnrs.append( [((W-USBW-2, J2_y - USBM - USBT  ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW-4, J2_y - USBM         ), 180), Round, [1]] )
+        midcnrs.append( [((W-16,     J2_y                ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW-4, J2_y + USBM         ),   0), Round, [1]] )
+        midcnrs.append( [((W-USBW-2, J2_y + USBM + USBT  ),  90), Round, [1]] )
+        midcnrs.append( [((W-USBW-4, J2_y + USBM + USBT*2), 180), Round, [1]] )
+        midcnrs.append( [((W-18,     J2_y                ), -90), Round, [1]] )
+        # draw
+        kad.draw_closed_corners( midcnrs, 'Edge.Cuts' if board == BZM else 'F.Fab', width )
+    # mid plate main hole
+    if board in [BZL, BZR, BZM]:
         corners = []
-        ## top
-        corners.append( [((W/2, T), 0), BezierRound, [8]] )
-        corners.append( [((W-Dt, Dt), 45), BezierRound, [8]] )
-        ## right
-        corners.append( [((W-T, 2*D+5), 90), BezierRound, [2]] )
-        ## bottom
-        corners.append( [((W*5/6, H-Tb), 180), BezierRound, [4]] )
-        if True:
-            corners.append( [((W*2/3+Tb, H-Tb-5), -90), BezierRound, [4]] )
-            corners.append( [((W/2, H*2/3-T), 180),   BezierRound, [4]] )
-            corners.append( [((W/3-T,   H-D*2-2),  90), BezierRound, [4]] )
-            corners.append( [((W/3-D,   H-D), 135), BezierRound, [4]] )
-            corners.append( [((W*1/6, H-T),       180), BezierRound, [4]] )
-        ## left
-        corners.append( [((D, H-D), -135), BezierRound, [2]] )
-        corners.append( [((T, H-2*D-5), -90), BezierRound, [4]] )
-        corners.append( [((Dt, Dt), -45), BezierRound, [4]] )
+        T = 5# thickness top
+        corners.append( [((W/2, T), 0), BezierRound, [1]] )# top
+        D = 10# diagonal top right
+        corners.append( [((W - D, D), 45), BezierRound, [1]] )# top right diagonal
+        T = 5# thickness right
+        corners.append( [((W-T, H/3), 90), BezierRound, [1]] )# right
+        corners.append( [((W*5/6, 29), 180), BezierRound, [1]] )# mid horizontal
+        T = 5# thickness mid
+        corners.append( [((W*2/3-1, H*2/3-T-2),  90), BezierRound, [1]] )# mid right
+        corners.append( [((W/2,     H*2/3-T  ), 180), BezierRound, [1]] )# mid bottom
+        corners.append( [((W/3+6,   H*2/3-T-2), -90), BezierRound, [1]] )# mid left
+        corners.append( [((W/3, 22), 180), BezierRound, [1]] )# mid left horizontal
+        corners.append( [((20, 18.5), -135), BezierRound, [1]] )# left bottom
+        corners.append( [((15, H/6), -90), BezierRound, [1]] )# top left
         # draw
         kad.draw_closed_corners( corners, 'Edge.Cuts' if board == BZM else 'F.Fab', width )
 
