@@ -132,9 +132,9 @@ def drawEdgeCuts( board ):
         midcnrs.append( [((2, J1_y + Jw), 0), BezierRound, [1]] )# J1 bottom
         T = 7.4# thickness for left
         midcnrs.append( [((T, J1_y + Jw + 2), 90), BezierRound, [1]] )# left
-        D = 9# diagonal left
+        D = 8.5# diagonal left
         midcnrs.append( [((D, H - D), 45), BezierRound, [1]] )# left bottom corner
-        T = 7# thickness for bottom
+        T = 5.8# thickness for bottom
         midcnrs.append( [((W/6, H - T), 0), BezierRound, [1]] )# bottom
         D = 10# diagonal right
         midcnrs.append( [((W/3 - D, H - D), -45), BezierRound, [1]] )# right bottom corner
@@ -206,6 +206,9 @@ def drawEdgeCuts( board ):
             kad.draw_closed_corners( corners, 'F.Fab', width )
         kad.add_arc( ctr, vec2.add( ctr, (3.0, 0) ), 360, 'F.Fab', width )
         #break
+    if board == BZT:
+        for y in range(20):
+            kad.add_line( (0, y*2), (W, y*2), 'F.Cu', 1 )
 
 def add_zone( net_name, layer_name, rect, zones ):
     layer = pcb.GetLayerID( layer_name )
@@ -444,8 +447,8 @@ def main():
         via_led_d1 = kad.add_via_relative( 'D1', '2', (0, -2), VIA_Size[2] )
         kad.wire_mods( [
             # 5v
-            ('J1', via_splt_vbb, 'C11', '1', 0.5, (Dird, ([(6, 90)], 0), 90, -0.8)),
-            ('J1', via_splt_vbb, 'C11', '1', 0.5, (Dird, ([(8, 90), (-2, 90)], 0), 90, -0.8)),
+            ('J1', via_splt_vbb, 'C11', '1', 0.5, (Dird, ([(7, 90)], 0), 90, -0.8)),
+            ('J1', via_splt_vbb, 'C11', '1', 0.5, (Dird, ([(9, 90), (-2, 90)], 0), 90, -0.8)),
             # Gnd
             ('U1', '15', 'U1', '17', 0.45, (Strt)),
             # dm/dp = I2C
@@ -604,12 +607,12 @@ def main():
             ('L11', '4', 'L12', '3', 0.4, (Dird, ([(1.5, 0), (1.0, -45), (3.2, 0)], -45), 0, -0.6)),
             ('L12', '4', 'L13', '3', 0.4, (Dird, ([(1.5, 0), (1.0, -45), (3.2, 0)], +45), 0, -0.6)),
             ('L13', '4', 'L14', '3', 0.4, (Dird, ([(1.5, 0), (1.0, -45)], 0), 0, -0.6)),
-            ('L14', '4', 'LB1', '3', 0.4, (Dird, ([(1.5, 0), (1.0, -45), (3.2, 0), (3, +45)], +45), ([(3.3, -180), (4.2, -135), (12, -90)], -120), -0.6)),
+            ('L14', '4', 'LB1', '3', 0.4, (Dird, ([(1.5, 0), (1.0, -45), (3.2, 0), (3, +45)], +45), ([(3.3, -180), (4.2, -135), (10, -90)], -110), -0.6)),
             # LCI
             ('L11', '5', 'L12', '2', 0.4, (Dird, ([(1.75, 0), (1.2, -45), (3.2, 0)], -45), 0, -0.6)),
             ('L12', '5', 'L13', '2', 0.4, (Dird, ([(1.75, 0), (1.2, -45), (2.4, 0)], +45), 0, -0.6)),
             ('L13', '5', 'L14', '2', 0.4, (Dird, ([(1.75, 0), (1.2, -45)], 0), 0, -0.6)),
-            ('L14', '5', 'LB1', '2', 0.4, (Dird, ([(1.75, 0), (1.2, -45), (2.4, 0)], +45), ([(3.8, -180), (5.0, -135), (12, -90)], -120), -0.6)),
+            ('L14', '5', 'LB1', '2', 0.4, (Dird, ([(1.75, 0), (1.2, -45), (2.4, 0)], +45), ([(3.8, -180), (5.0, -135), (10, -90)], -110), -0.6)),
             # 5V
             ('L11', '1', 'L12', '1', 0.6, (Dird, ([(1.2, +90), (7.8, 0)], -45), 0, -1)),
             ('L12', '1', 'L13', '1', 0.6, (Dird, ([(1.2, +90), (7.8, 0)], -45), 0, -1)),
