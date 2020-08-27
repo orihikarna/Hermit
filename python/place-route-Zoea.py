@@ -51,7 +51,7 @@ keys = [
     [',', -2.000, 0.000, 0.0],
     ['M', -3.074, 0.073, -9.1],
 ]
-keys.insert( 0, [' ', 0.8, 0.75, -20] )
+keys.append( [' ', 0.8, 0.75, -20] )
 
 KeyUnit = 19.05
 
@@ -206,9 +206,122 @@ def drawEdgeCuts( board ):
             kad.draw_closed_corners( corners, 'F.Fab', width )
         kad.add_arc( ctr, vec2.add( ctr, (3.0, 0) ), 360, 'F.Fab', width )
         #break
-    if board == BZT:
-        for y in range(20):
-            kad.add_line( (0, y*2), (W, y*2), 'F.Cu', 1 )
+
+def divide_line( a, b, pitch ):
+    v = vec2.sub( b, a )
+    l = vec2.length( v )
+    n = int( round( l / pitch ) )
+    dv = vec2.scale( 1.0 / n, v )
+    pnts = []
+    for i in range( n ):
+        pnts.append( vec2.scale( i, dv, a ) )
+    pnts.append( b )
+    return pnts
+
+def draw_top( sw_pos_angles ):
+    for sw_pos, angle in sw_pos_angles:
+        corners = []
+        for i in range(4):
+            deg = i * 90 + angle
+            pos = vec2.scale( 14 / 2.0, vec2.rotate( deg ), sw_pos )
+            corners.append( [(pos, deg + 90), BezierRound, [1]] )
+        kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
+    mid12 = vec2.scale( 0.5, vec2.add( sw_pos_angles[1][0], sw_pos_angles[2][0] ) )
+    mid12 = vec2.add( mid12, (0, 1) )
+    #kad.add_arc( mid12, vec2.add( mid12, (1, 0) ), 360, 'Edge.Cuts', 0.1 )
+    # dummy pads
+    kad.move_mods( mid12, 0, [
+        ('P1', (0, 0), 0),
+        ('P2', (0, 0), 0),
+    ] )
+    layer = 'F.Cu'
+    width = 1.0
+    ctr_angles = []
+    for idx, sw_pos_angle in enumerate( sw_pos_angles ):
+        # print( idx, sw_pos_angle )
+        if idx == 0:
+            continue
+        pos_a, angle_a = sw_pos_angles[idx-1]
+        pos_b, angle_b = sw_pos_angle
+        if abs( angle_a - angle_b ) > 1:
+            vec_a = vec2.rotate( angle_a + 90 )
+            vec_b = vec2.rotate( angle_b + 90 )
+            ctr, ka, kb = vec2.find_intersection( pos_a, vec_a, pos_b, vec_b )
+            if idx == 1:
+                angle_a += (angle_a - angle_b) * 1.0
+            elif idx + 1 == len( sw_pos_angles ):
+                angle_b += (angle_b - angle_a) * 1.0
+            ctr_angles.append( (ctr, angle_a, angle_b) )
+            if False:
+                print( ctr, ka, kb )
+                kad.add_line( ctr, pos_a, layer, width )
+                kad.add_line( ctr, pos_b, layer, width )
+        else:
+            ctr_angles.append( (None, pos_a, pos_b) )
+
+    pitch = 0.5
+    curvs = []
+    for y in range( -21, 49, 2 ):
+        for dir in [-1, +1]:
+            idx = 1# base index
+            pos, _ = sw_pos_angles[idx]
+            pos = vec2.add( pos, (0, y) )
+            while True:#0 <= idx and idx < len( sw_pos_angles ):
+                idx2 = idx + dir
+                if dir == -1:
+                    if idx2 < 0:
+                        break
+                    ctr, angle_b, angle_a = ctr_angles[idx2]
+                    vec_b = vec2.rotate( angle_b + 90 )
+                    pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
+                    #kad.add_line( pos_a, pos_b, layer, width )
+                    #curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( 180 + angle_b ), 8 )
+                    curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( 180 + angle_b ), pitch )
+                    curvs.append( curv )
+                    pos = pos_b
+                elif dir == +1:
+                    if idx2 >= len( sw_pos_angles ):
+                        break
+                    ctr, angle_a, angle_b = ctr_angles[idx]
+                    if ctr == None:# parallel lines
+                        pos_b = angle_b
+                        pos_b = vec2.add( pos_b, (0, y) )
+                        #kad.add_line( pos, pos_b, layer, width )
+                        curv = divide_line( pos, pos_b, pitch )
+                        curvs.append( curv )
+                        pos = pos_b
+                    else:
+                        vec_b = vec2.rotate( angle_b + 90 )
+                        pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
+                        #kad.add_line( pos_a, pos_b, layer, width )
+                        #curv = kad.calc_bezier_round_points( pos, vec2.rotate( 180 + angle_a ), pos_b, vec2.rotate( angle_b ), 6 )
+                        curv = kad.calc_bezier_corner_points( pos, vec2.rotate( 180 + angle_a ), pos_b, vec2.rotate( angle_b ), pitch )
+                        curvs.append( curv )
+                        pos = pos_b
+                idx = idx2
+
+    with open( '/Users/akihiro/repos/Hermit/ZoeaT/B_Cu_fill.txt' ) as fin:
+        data = fin.readlines()
+    w = int( data[0] )
+    h = int( data[1] )
+    print( w, h )
+    del data[0]
+    del data[0]
+    print( len( data ), len( data[0] ), len( data[1] ), len( data[2] ) )
+
+    for curv in curvs:
+        # kad.add_lines( curv, layer, width )
+        prev_inside = False
+        for idx, pnt in enumerate( curv ):
+            x, y = vec2.scale( 10, vec2.sub( pnt, (PCB_Width/2, PCB_Height/2) ) )
+            x = int( round( x + w / 2 ) )
+            y = int( round( y + h / 2 ) )
+            inside = True if 0 <= x and x < w and 0 <= y and y < h and data[y][x] == '1' else False
+            if idx > 0 and inside and prev_inside:
+                for layer in ['F.Cu', 'B.Cu']:
+                    kad.add_line( curv[idx-1], pnt, layer, width )
+            prev_inside = inside
+
 
 def add_zone( net_name, layer_name, rect, zones ):
     layer = pcb.GetLayerID( layer_name )
@@ -252,10 +365,11 @@ def main():
     ###
     ### Set key positios
     ###
+    sw_pos_angles = []
     for idx, key in enumerate( keys ):
         _, x, y, angle = key
         name = get_key_postfix( idx )
-        if idx == 0:
+        if idx == 4:
             px = x * KeyUnit
             py = PCB_Height - y * KeyUnit
         else:
@@ -265,13 +379,7 @@ def main():
             pass
             angle = angle + 180
         sw_pos = (px, py)
-        if board == BZT:
-            corners = []
-            for i in range(4):
-                deg = i * 90 + angle
-                pos = vec2.scale( 14 / 2.0, vec2.rotate( deg ), sw_pos )
-                corners.append( [(pos, deg + 90), BezierRound, [1]] )
-            kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
+        sw_pos_angles.append( (sw_pos, angle) )
 
         if board in [BZL, BZR]:
             sign = [+1, -1][board]
@@ -283,12 +391,15 @@ def main():
             # wire GND to SW
             kad.wire_mods([('L' + name, '6', 'SW' + name, '3', 0.6, (Dird, 0, 90))])
             ## Diode
-            if idx > 0:
+            if idx < 4:
                 #pos = vec2.mult( mat2.rotate( -angle ), (-8, -2), sw_pos )
                 pos = vec2.mult( mat2.rotate( -angle ), (-5, 2 * sign), sw_pos )
                 kad.set_mod_pos_angle( 'D' + name, pos, - 90 * sign - angle )
                 # wire to SW
                 kad.wire_mods([('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
+
+    if board == BZT:
+        draw_top( sw_pos_angles )
 
     ###
     ### Set mod positios

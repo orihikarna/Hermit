@@ -470,7 +470,13 @@ def is_supported_round_angle( angle ):
         return False
     return True
 
-def add_draw_bezier( pnts, num_divs, layer, width, debug = False ):
+def add_lines( curv, layer, width ):
+    for idx, pnt in enumerate( curv ):
+        if idx == 0:
+            continue
+        add_line( curv[idx-1], pnt, layer, width )
+
+def calc_bezier_points( pnts, num_divs, debug = False ):
     num_pnts = len( pnts )
     tmp = [(0, 0) for n in range( num_pnts )]
     curv = [pnts[0]]
@@ -484,13 +490,57 @@ def add_draw_bezier( pnts, num_divs, layer, width, debug = False ):
                 tmp[n] = vec2.scale( s, tmp[n], vec2.scale( t, tmp[n+1] ) )
         curv.append( tmp[0] )
     curv.append( pnts[-1] )
-    for idx, pnt in enumerate( curv ):
-        if idx == 0:
-            continue
-        add_line( curv[idx-1], pnt, layer, width )
+    #add_lines( curv, layer, width )
     if debug:# debug
         for pnt in pnts:
             add_arc( pnt, vec2.add( pnt, (20, 0) ), 360, 'F.Fab', 4 )
+    return curv
+
+def calc_bezier_corner_points( apos, avec, bpos, bvec, pitch = 1, ratio = 0.7 ):
+    _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+    debug = False
+    if alen <= 0:
+        print( 'BezierCorner: alen = {} < 0, at {}'.format( alen, apos ) )
+        debug = True
+    if blen <= 0:
+        print( 'BezierCorner: blen = {} < 0, at {}'.format( blen, bpos ) )
+        debug = True
+    actrl = vec2.scale( alen * ratio, avec, apos )
+    bctrl = vec2.scale( blen * ratio, bvec, bpos )
+    ndivs = int( round( (alen + blen) / pitch ) )
+    pnts = [apos, actrl, bctrl, bpos]
+    curv = calc_bezier_points( pnts, ndivs, debug )
+    return curv
+
+def calc_bezier_round_points( apos, avec, bpos, bvec, radius ):
+    _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+    debug = False
+    if alen <= radius:
+        print( 'BezierRound: alen < radius, {} < {}, at {}'.format( alen, radius, apos ) )
+        debug = True
+    if blen <= radius:
+        print( 'BezierRound: blen < radius, {} < {}, at {}'.format( blen, radius, bpos ) )
+        debug = True
+    amid = vec2.scale( alen - radius, avec, apos )
+    bmid = vec2.scale( blen - radius, bvec, bpos )
+    #add_line( apos, amid, layer, width )
+    #add_line( bpos, bmid, layer, width )
+    angle = vec2.angle( avec, bvec )
+    if angle < 0:
+        #angle += 360
+        angle *= -1
+    ndivs = int( round( angle / 4.5 ) )
+    #print( 'BezierRound: angle = {}, ndivs = {}'.format( angle, ndivs ) )
+    coeff = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
+    #print( 'coeff = {}'.format( coeff ) )
+    actrl = vec2.scale( alen + (coeff - 1) * radius, avec, apos )
+    bctrl = vec2.scale( blen + (coeff - 1) * radius, bvec, bpos )
+    pnts = [amid, actrl, bctrl, bmid]
+    curv = [apos]
+    for pos in calc_bezier_points( pnts, ndivs, debug ):
+        curv.append( pos )
+    curv.append( bpos )
+    return curv
 
 def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
     apos, aangle = a
@@ -528,33 +578,35 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
                 pnts.append( pt )
         pnts.append( bpos2 )
         pnts.append( bpos )
-        add_draw_bezier( pnts, ndivs, layer, width )
+        curv = calc_bezier_points( pnts, ndivs )
+        add_lines( curv, layer, width )
     elif cnr_type == BezierRound:
         radius = cnr_data[0]
-        _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
-        debug = False
-        if alen <= radius:
-            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( alen, radius, apos ) )
-            debug = True
-        if blen <= radius:
-            print( 'BezierRound: alen < radius, {} < {}, at {}'.format( blen, radius, bpos ) )
-            debug = True
-        amid = vec2.scale( alen - radius, avec, apos )
-        bmid = vec2.scale( blen - radius, bvec, bpos )
-        add_line( apos, amid, layer, width )
-        add_line( bpos, bmid, layer, width )
-        angle = vec2.angle( avec, bvec )
-        if angle < 0:
-            #angle += 360
-            angle *= -1
-        ndivs = int( round( angle / 4.5 ) )
-        #print( 'BezierRound: angle = {}, ndivs = {}'.format( angle, ndivs ) )
-        coeff = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
-        #print( 'coeff = {}'.format( coeff ) )
-        actrl = vec2.scale( alen + (coeff - 1) * radius, avec, apos )
-        bctrl = vec2.scale( blen + (coeff - 1) * radius, bvec, bpos )
-        pnts = [amid, actrl, bctrl, bmid]
-        add_draw_bezier( pnts, ndivs, layer, width, debug )
+        # _, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+        # debug = False
+        # if alen <= radius:
+        #     print( 'BezierRound: alen < radius, {} < {}, at {}'.format( alen, radius, apos ) )
+        #     debug = True
+        # if blen <= radius:
+        #     print( 'BezierRound: alen < radius, {} < {}, at {}'.format( blen, radius, bpos ) )
+        #     debug = True
+        # amid = vec2.scale( alen - radius, avec, apos )
+        # bmid = vec2.scale( blen - radius, bvec, bpos )
+        # add_line( apos, amid, layer, width )
+        # add_line( bpos, bmid, layer, width )
+        # angle = vec2.angle( avec, bvec )
+        # if angle < 0:
+        #     #angle += 360
+        #     angle *= -1
+        # ndivs = int( round( angle / 4.5 ) )
+        # #print( 'BezierRound: angle = {}, ndivs = {}'.format( angle, ndivs ) )
+        # coeff = (math.sqrt( 0.5 ) - 0.5) / 3 * 8
+        # #print( 'coeff = {}'.format( coeff ) )
+        # actrl = vec2.scale( alen + (coeff - 1) * radius, avec, apos )
+        # bctrl = vec2.scale( blen + (coeff - 1) * radius, bvec, bpos )
+        # pnts = [amid, actrl, bctrl, bmid]
+        curv = calc_bezier_round_points( apos, avec, bpos, bvec, radius )
+        add_lines( curv, layer, width )
     elif cnr_type == Round:
         radius = cnr_data[0]
         xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
