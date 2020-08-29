@@ -196,7 +196,7 @@ def drawEdgeCuts( board ):
                 corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
             kad.draw_closed_corners( corners, layer, width )
         elif board in []:
-            kad.add_arc( ctr, vec2.add( ctr, (2.0, 0) ), 360, layer, width )
+            kad.add_arc( ctr, vec2.add( ctr, (1.6, 0) ), 360, layer, width )
         if False:
             corners = []
             for i in range( 6 ):
@@ -218,22 +218,40 @@ def divide_line( a, b, pitch ):
     pnts.append( b )
     return pnts
 
+def get_distance( dist, dist_size, pnt ):
+    x, y = vec2.scale( 10, vec2.sub( pnt, (PCB_Width/2.0, PCB_Height/2.0) ) )
+    x = int( round( x + dist_size[0] / 2.0 ) )
+    y = int( round( y + dist_size[1] / 2.0 ) )
+    if 0 <= x and x < dist_size[0] and 0 <= y and y < dist_size[1]:
+        return dist[y][x] / 10.0
+    return 0
+
 def draw_top( sw_pos_angles ):
+    # keysw holes
     for sw_pos, angle in sw_pos_angles:
         corners = []
         for i in range(4):
             deg = i * 90 + angle
-            pos = vec2.scale( 14 / 2.0, vec2.rotate( deg ), sw_pos )
+            pos = vec2.scale( 13.90 / 2.0, vec2.rotate( deg ), sw_pos )
             corners.append( [(pos, deg + 90), BezierRound, [1]] )
         kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
-    mid12 = vec2.scale( 0.5, vec2.add( sw_pos_angles[1][0], sw_pos_angles[2][0] ) )
-    mid12 = vec2.add( mid12, (0, 1) )
-    #kad.add_arc( mid12, vec2.add( mid12, (1, 0) ), 360, 'Edge.Cuts', 0.1 )
-    # dummy pads
-    kad.move_mods( mid12, 0, [
-        ('P1', (0, 0), 0),
-        ('P2', (0, 0), 0),
-    ] )
+
+    # read distance data
+    with open( '/Users/akihiro/repos/Hermit/ZoeaT/Edge_Fill.txt' ) as fin:
+        dist_data = fin.readlines()
+        dist_w = int( dist_data[0] )
+        dist_h = int( dist_data[1] )
+        # print( dist_w, dist_h )
+        dist = []
+        for y in range( dist_h ):
+            vals = dist_data[y+2].split( ',' )
+            del vals[-1]
+            if len( vals ) != dist_w:
+                print( 'Error: len( vals )({}) != dist_w({})'.format( len( vals ), dist_w ) )
+                break
+            vals = map( lambda v: float( v ), vals )
+            dist.append( vals )
+
     layer = 'F.Cu'
     width = 1.0
     ctr_angles = []
@@ -259,9 +277,18 @@ def draw_top( sw_pos_angles ):
         else:
             ctr_angles.append( (None, pos_a, pos_b) )
 
-    pitch = 0.5
-    curvs = []
-    for y in range( -21, 49, 2 ):
+    pos_dummy = [None, None]
+    pitch = 2.0
+    nyrange = range( -186, 450, 16 )
+    width0, width1 = 0.3, 1.3
+    for ny in nyrange:
+        y = ny * 0.1
+        uy = float( ny - nyrange[0] ) / float( nyrange[-1] - nyrange[0] )
+        widths = [
+            width0 + (width1 - width0) * uy,
+            width1 + (width0 - width1) * uy,
+        ]
+        curvs = []
         for dir in [-1, +1]:
             idx = 1# base index
             pos, _ = sw_pos_angles[idx]
@@ -300,28 +327,47 @@ def draw_top( sw_pos_angles ):
                         pos = pos_b
                 idx = idx2
 
-    with open( '/Users/akihiro/repos/Hermit/ZoeaT/B_Cu_fill.txt' ) as fin:
-        data = fin.readlines()
-    w = int( data[0] )
-    h = int( data[1] )
-    print( w, h )
-    del data[0]
-    del data[0]
-    print( len( data ), len( data[0] ), len( data[1] ), len( data[2] ) )
-
-    for curv in curvs:
-        # kad.add_lines( curv, layer, width )
-        prev_inside = False
-        for idx, pnt in enumerate( curv ):
-            x, y = vec2.scale( 10, vec2.sub( pnt, (PCB_Width/2, PCB_Height/2) ) )
-            x = int( round( x + w / 2 ) )
-            y = int( round( y + h / 2 ) )
-            inside = True if 0 <= x and x < w and 0 <= y and y < h and data[y][x] == '1' else False
-            if idx > 0 and inside and prev_inside:
-                for layer in ['F.Cu', 'B.Cu']:
-                    kad.add_line( curv[idx-1], pnt, layer, width )
-            prev_inside = inside
-
+        for curv in curvs:
+            # kad.add_lines( curv, layer, width )
+            for idx, pnt in enumerate( curv ):
+                if idx == 0:
+                    continue
+                for lidx, layer in enumerate( ['F.Cu', 'B.Cu'] ):
+                    w = widths[lidx]
+                    thr = w / 2.0 + 0.5
+                    pnt_a = curv[idx-1]
+                    pnt_b = pnt
+                    dist_a = get_distance( dist, (dist_w, dist_h), pnt_a )
+                    dist_b = get_distance( dist, (dist_w, dist_h), pnt_b )
+                    if dist_a < thr and dist_b < thr:
+                        continue
+                    div = 20
+                    if dist_a < thr:
+                        for n in range( 1, div ):
+                            t = n / float( div )
+                            p = vec2.scale( t, vec2.sub( pnt_b, pnt_a ), pnt_a )
+                            dist_a = get_distance( dist, (dist_w, dist_h), p )
+                            if dist_a >= thr:
+                                pnt_a = p
+                                break
+                        if dist_a < thr:
+                            continue
+                    elif dist_b < thr:
+                        for n in range( 1, div ):
+                            t = n / float( div )
+                            p = vec2.scale( t, vec2.sub( pnt_a, pnt_b ), pnt_b )
+                            dist_b = get_distance( dist, (dist_w, dist_h), p )
+                            if dist_b >= thr:
+                                pnt_b = p
+                                break
+                        if dist_b < thr:
+                            continue
+                    if vec2.distance( pnt_a, pnt_b ) > 0.1:
+                        kad.add_line( pnt_a, pnt_b, layer, w )
+                        if pos_dummy[lidx] == None and w > 1.1:
+                            pos_dummy[lidx] = pnt
+    kad.set_mod_pos_angle( 'P1', pos_dummy[0], 0 )
+    kad.set_mod_pos_angle( 'P2', pos_dummy[1], 0 )
 
 def add_zone( net_name, layer_name, rect, zones ):
     layer = pcb.GetLayerID( layer_name )
@@ -358,9 +404,10 @@ def main():
 
     drawEdgeCuts( board )
 
-    zones = []
-    add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
-    add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
+    if board != BZT:
+        zones = []
+        add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
+        add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
 
     ###
     ### Set key positios
