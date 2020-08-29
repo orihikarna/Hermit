@@ -5,7 +5,7 @@ import vec2
 import mat2
 
 UnitMM = False
-PointDigits = 0
+PointDigits = 3
 
 def scalar_to_unit( v, mm_or_mils ):
     if mm_or_mils:

@@ -63,7 +63,7 @@ BZB = 3# Bottom plate
 BZM = 4# Middle plate
 
 def get_key_postfix( idx ):
-    if idx == 0:
+    if idx == 4:
         return 'B1'
     else:
         return '1{}'.format( idx )

@@ -410,17 +410,17 @@ F 3 "~" H 4000 1150 50  0001 C CNN
 	1    4000 1150
 	1    0    0    -1  
 $EndComp
-Text GLabel 4150 5450 2    50   Input ~ 0
+Text GLabel 4150 5200 2    50   Input ~ 0
 PA3
-Text GLabel 3250 6150 0    50   Input ~ 0
+Text GLabel 3250 5900 0    50   Input ~ 0
 PB5
-Text GLabel 3250 5750 0    50   Input ~ 0
+Text GLabel 3250 5500 0    50   Input ~ 0
 PA13
-Text GLabel 3250 6050 0    50   Input ~ 0
+Text GLabel 3250 5800 0    50   Input ~ 0
 PB4
-Text GLabel 3250 5950 0    50   Input ~ 0
+Text GLabel 3250 5700 0    50   Input ~ 0
 PB3
-Text GLabel 3250 5850 0    50   Input ~ 0
+Text GLabel 3250 5600 0    50   Input ~ 0
 PA14
 Connection ~ 4950 1000
 Text Notes 1675 2300 0    50   ~ 10
@@ -535,12 +535,12 @@ $EndComp
 $Comp
 L Connector_Generic:Conn_01x07 J2
 U 1 1 5EF3336E
-P 3950 5750
-F 0 "J2" H 3868 6267 50  0000 C CNN
-F 1 "Conn_01x07" H 3868 6176 50  0000 C CNN
-F 2 "key-parts:PinHeader_1x07_P2.54mm_Vertical" H 3950 5750 50  0001 C CNN
-F 3 "~" H 3950 5750 50  0001 C CNN
-	1    3950 5750
+P 3950 5500
+F 0 "J2" H 3868 6017 50  0000 C CNN
+F 1 "Conn_01x07" H 3868 5926 50  0000 C CNN
+F 2 "key-parts:PinHeader_1x07_P2.54mm_Vertical" H 3950 5500 50  0001 C CNN
+F 3 "~" H 3950 5500 50  0001 C CNN
+	1    3950 5500
 	-1   0    0    -1  
 $EndComp
 Text GLabel 1250 2600 1    50   Input ~ 0
@@ -652,12 +652,12 @@ Connection ~ 5175 3375
 $Comp
 L Connector_Generic:Conn_01x08 J1
 U 1 1 5EE8A871
-P 3450 5750
-F 0 "J1" H 3400 6275 50  0000 L CNN
-F 1 "Conn_01x08" H 3225 6175 50  0000 L CNN
-F 2 "key-parts:PinHeader_1x08_P2.54mm_Vertical" H 3450 5750 50  0001 C CNN
-F 3 "~" H 3450 5750 50  0001 C CNN
-	1    3450 5750
+P 3450 5500
+F 0 "J1" H 3400 6025 50  0000 L CNN
+F 1 "Conn_01x08" H 3225 5925 50  0000 L CNN
+F 2 "key-parts:PinHeader_1x08_P2.54mm_Vertical" H 3450 5500 50  0001 C CNN
+F 3 "~" H 3450 5500 50  0001 C CNN
+	1    3450 5500
 	1    0    0    -1  
 $EndComp
 Text GLabel 3150 2775 0    50   Input ~ 0
@@ -675,32 +675,32 @@ F 3 "" H 1250 4650 50  0001 C CNN
 	1    1250 4650
 	1    0    0    -1  
 $EndComp
-Text GLabel 3250 5450 0    50   Input ~ 0
+Text GLabel 3250 5200 0    50   Input ~ 0
 5V
-Text GLabel 4150 5550 2    50   Input ~ 0
+Text GLabel 4150 5300 2    50   Input ~ 0
 PA2
 Text GLabel 4150 2775 2    50   Input ~ 0
 PA5
-Text GLabel 3250 5650 0    50   Input ~ 0
+Text GLabel 3250 5400 0    50   Input ~ 0
 PA10
-Text GLabel 3250 5550 0    50   Input ~ 0
+Text GLabel 3250 5300 0    50   Input ~ 0
 PA9
-Text GLabel 3625 4825 1    50   Input ~ 0
+Text GLabel 3625 4575 1    50   Input ~ 0
 PA6
-Text GLabel 3725 4825 1    50   Input ~ 0
+Text GLabel 3725 4575 1    50   Input ~ 0
 PA5
 $Comp
 L Connector_Generic:Conn_01x03 J3
 U 1 1 5EEC9E21
-P 3625 5025
-F 0 "J3" V 3497 5205 50  0000 L CNN
-F 1 "Conn_01x03" V 3588 5205 50  0000 L CNN
-F 2 "key-parts:PinHeader_1x03_P2.54mm_Vertical" H 3625 5025 50  0001 C CNN
-F 3 "~" H 3625 5025 50  0001 C CNN
-	1    3625 5025
+P 3625 4775
+F 0 "J3" V 3497 4955 50  0000 L CNN
+F 1 "Conn_01x03" V 3588 4955 50  0000 L CNN
+F 2 "key-parts:PinHeader_1x03_P2.54mm_Vertical" H 3625 4775 50  0001 C CNN
+F 3 "~" H 3625 4775 50  0001 C CNN
+	1    3625 4775
 	0    1    1    0   
 $EndComp
-Text GLabel 3525 4825 1    50   Input ~ 0
+Text GLabel 3525 4575 1    50   Input ~ 0
 PA7
 Text GLabel 4150 2875 2    50   Input ~ 0
 PA6
@@ -813,32 +813,32 @@ F 3 "" H 6075 4275 50  0001 C CNN
 	1    6075 4275
 	1    0    0    -1  
 $EndComp
-Text GLabel 4150 5850 2    50   Input ~ 0
+Text GLabel 4150 5600 2    50   Input ~ 0
 PF1
-Text GLabel 4150 5950 2    50   Input ~ 0
+Text GLabel 4150 5700 2    50   Input ~ 0
 PF0
 $Comp
 L power:GND #PWR0108
 U 1 1 5D657E62
-P 4150 6050
-F 0 "#PWR0108" H 4150 5800 50  0001 C CNN
-F 1 "GND" H 4155 5877 50  0000 C CNN
-F 2 "" H 4150 6050 50  0001 C CNN
-F 3 "" H 4150 6050 50  0001 C CNN
-	1    4150 6050
+P 4150 5800
+F 0 "#PWR0108" H 4150 5550 50  0001 C CNN
+F 1 "GND" H 4155 5627 50  0000 C CNN
+F 2 "" H 4150 5800 50  0001 C CNN
+F 3 "" H 4150 5800 50  0001 C CNN
+	1    4150 5800
 	0    -1   -1   0   
 $EndComp
 $Comp
 L power:VCC #PWR0115
 U 1 1 5DA6520E
-P 4150 5650
-F 0 "#PWR0115" H 4150 5500 50  0001 C CNN
-F 1 "VCC" H 4167 5823 50  0000 C CNN
-F 2 "" H 4150 5650 50  0001 C CNN
-F 3 "" H 4150 5650 50  0001 C CNN
-	1    4150 5650
+P 4150 5400
+F 0 "#PWR0115" H 4150 5250 50  0001 C CNN
+F 1 "VCC" H 4167 5573 50  0000 C CNN
+F 2 "" H 4150 5400 50  0001 C CNN
+F 3 "" H 4150 5400 50  0001 C CNN
+	1    4150 5400
 	0    1    1    0   
 $EndComp
-Text GLabel 4150 5750 2    50   Input ~ 0
+Text GLabel 4150 5500 2    50   Input ~ 0
 NRST
 $EndSCHEMATC
