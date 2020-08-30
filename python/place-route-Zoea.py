@@ -339,33 +339,19 @@ def draw_top_bottom( board, sw_pos_angles ):
                     thr = w / 2.0 + 0.5
                     pnt_a = curv[idx-1]
                     pnt_b = pnt
-                    dist_a = get_distance( dist, (dist_w, dist_h), pnt_a )
-                    dist_b = get_distance( dist, (dist_w, dist_h), pnt_b )
-                    if dist_a < thr and dist_b < thr:
-                        continue
+                    dpt_a = None
+                    dpt_b = None
                     div = 20
-                    if dist_a < thr:
-                        for n in range( 1, div ):
-                            t = n / float( div )
-                            p = vec2.scale( t, vec2.sub( pnt_b, pnt_a ), pnt_a )
-                            dist_a = get_distance( dist, (dist_w, dist_h), p )
-                            if dist_a >= thr:
-                                pnt_a = p
-                                break
-                        if dist_a < thr:
-                            continue
-                    elif dist_b < thr:
-                        for n in range( 1, div ):
-                            t = n / float( div )
-                            p = vec2.scale( t, vec2.sub( pnt_a, pnt_b ), pnt_b )
-                            dist_b = get_distance( dist, (dist_w, dist_h), p )
-                            if dist_b >= thr:
-                                pnt_b = p
-                                break
-                        if dist_b < thr:
-                            continue
-                    if vec2.distance( pnt_a, pnt_b ) > 0.1:
-                        kad.add_line( pnt_a, pnt_b, layer, w )
+                    for n in range( 0, div + 1 ):
+                        t = n / float( div )
+                        p = vec2.scale( t, vec2.sub( pnt_b, pnt_a ), pnt_a )
+                        d = get_distance( dist, (dist_w, dist_h), p )
+                        if d >= thr:
+                            if dpt_a == None:
+                                dpt_a = p
+                            dpt_b = p
+                    if dpt_a != None and vec2.distance( dpt_a, dpt_b ) > 0.1:
+                        kad.add_line( dpt_a, dpt_b, layer, w )
                         if pos_dummy[lidx] == None and w > 1.1:
                             pos_dummy[lidx] = pnt
     kad.set_mod_pos_angle( 'P1', pos_dummy[0], 0 )
