@@ -3,8 +3,10 @@ import cv2
 import numpy as np
 from PIL import Image
 
-root = '/Users/akihiro/repos/Hermit/ZoeaT/'
-path_svg = root + 'layer/ZoeaT-Edge_Cuts.svg'
+# board = 'ZoeaT'
+board = 'ZoeaB'
+root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
+path_svg = root + 'layer/{}-Edge_Cuts.svg'.format( board )
 path_png = root + 'svg.png'
 path_txt = root + 'Edge_Fill.txt'
 path_test = root + 'test.png'
