@@ -344,7 +344,7 @@ F 3 "" H 7475 2725 50  0001 C CNN
 	1    7475 2725
 	0    -1   -1   0   
 $EndComp
-Text GLabel 7150 5150 2    50   Input ~ 0
+Text GLabel 7150 4775 2    50   Input ~ 0
 5V
 Wire Wire Line
 	3450 4600 3900 4600
@@ -361,10 +361,6 @@ Wire Wire Line
 Connection ~ 1850 5900
 Wire Wire Line
 	1850 5900 2750 5900
-Wire Wire Line
-	6200 4950 6250 4950
-Wire Wire Line
-	6650 4950 6700 4950
 $Comp
 L power:GND #PWR0111
 U 1 1 5F3285E2
@@ -477,62 +473,7 @@ Wire Wire Line
 	2150 5475 2150 6100
 Wire Wire Line
 	2550 5175 2550 5475
-$Comp
-L key-parts:LC8822 L11
-U 1 1 5F26E33C
-P 6900 4950
-F 0 "L11" H 6900 5212 51  0000 C CNN
-F 1 "LC8822" H 6900 5147 16  0000 C CNN
-F 2 "key-parts:LC8822" H 6900 4950 60  0001 C CNN
-F 3 "" H 6900 4950 60  0001 C CNN
-	1    6900 4950
-	-1   0    0    1   
-$EndComp
-$Comp
-L key-parts:LC8822 L12
-U 1 1 5F272A89
-P 6450 4950
-F 0 "L12" H 6450 5212 51  0000 C CNN
-F 1 "LC8822" H 6450 5147 16  0000 C CNN
-F 2 "key-parts:LC8822" H 6450 4950 60  0001 C CNN
-F 3 "" H 6450 4950 60  0001 C CNN
-	1    6450 4950
-	-1   0    0    1   
-$EndComp
-$Comp
-L key-parts:LC8822 L13
-U 1 1 5F272FE2
-P 6000 4950
-F 0 "L13" H 6000 5212 51  0000 C CNN
-F 1 "LC8822" H 6000 5147 16  0000 C CNN
-F 2 "key-parts:LC8822" H 6000 4950 60  0001 C CNN
-F 3 "" H 6000 4950 60  0001 C CNN
-	1    6000 4950
-	-1   0    0    1   
-$EndComp
-$Comp
-L key-parts:LC8822 L14
-U 1 1 5F273558
-P 5550 4950
-F 0 "L14" H 5550 5212 51  0000 C CNN
-F 1 "LC8822" H 5550 5147 16  0000 C CNN
-F 2 "key-parts:LC8822" H 5550 4950 60  0001 C CNN
-F 3 "" H 5550 4950 60  0001 C CNN
-	1    5550 4950
-	-1   0    0    1   
-$EndComp
-$Comp
-L key-parts:LC8822 LB1
-U 1 1 5F273C47
-P 5050 5500
-F 0 "LB1" H 5050 5762 51  0000 C CNN
-F 1 "LC8822" H 5050 5697 16  0000 C CNN
-F 2 "key-parts:LC8822" H 5050 5500 60  0001 C CNN
-F 3 "" H 5050 5500 60  0001 C CNN
-	1    5050 5500
-	-1   0    0    1   
-$EndComp
-Text GLabel 5250 5600 2    50   Input ~ 0
+Text GLabel 5375 5500 2    50   Input ~ 0
 5V
 $Comp
 L Interface_Expansion:MCP23017_SS U1
@@ -613,77 +554,20 @@ NoConn ~ 4375 3525
 NoConn ~ 4375 3625
 Text GLabel 4375 2025 2    50   Input ~ 0
 LED
-Text GLabel 4850 5400 0    50   Input ~ 0
-LDI
 Text GLabel 4850 5500 0    50   Input ~ 0
-LCI
-Wire Wire Line
-	5750 4950 5800 4950
+LDI
 NoConn ~ 7100 4950
-Wire Wire Line
-	5350 4850 5250 4850
-Wire Wire Line
-	5250 4850 5250 5400
-Wire Wire Line
-	5250 5500 5300 5500
-Wire Wire Line
-	5300 5500 5300 4950
-Wire Wire Line
-	5300 4950 5350 4950
-Wire Wire Line
-	7100 5050 7100 5150
-Wire Wire Line
-	6650 5050 6650 5150
-Wire Wire Line
-	6650 5150 7100 5150
-Wire Wire Line
-	7150 5150 7100 5150
-Connection ~ 7100 5150
-Wire Wire Line
-	6200 5050 6200 5150
-Wire Wire Line
-	6200 5150 6650 5150
-Connection ~ 6650 5150
-Wire Wire Line
-	5750 5050 5750 5150
-Wire Wire Line
-	5750 5150 6200 5150
-Connection ~ 6200 5150
 $Comp
 L power:GND #PWR0104
 U 1 1 5F3A1287
-P 5200 5200
-F 0 "#PWR0104" H 5200 4950 50  0001 C CNN
-F 1 "GND" H 5205 5027 50  0000 C CNN
-F 2 "" H 5200 5200 50  0001 C CNN
-F 3 "" H 5200 5200 50  0001 C CNN
-	1    5200 5200
+P 5250 5025
+F 0 "#PWR0104" H 5250 4775 50  0001 C CNN
+F 1 "GND" H 5255 4852 50  0000 C CNN
+F 2 "" H 5250 5025 50  0001 C CNN
+F 3 "" H 5250 5025 50  0001 C CNN
+	1    5250 5025
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	5350 5050 5350 5200
-Wire Wire Line
-	5350 5200 5800 5200
-Wire Wire Line
-	5800 5200 5800 5050
-Connection ~ 5350 5200
-Wire Wire Line
-	5800 5200 6250 5200
-Wire Wire Line
-	6250 5200 6250 5050
-Connection ~ 5800 5200
-Wire Wire Line
-	6250 5200 6700 5200
-Wire Wire Line
-	6700 5200 6700 5050
-Connection ~ 6250 5200
-Wire Wire Line
-	5750 4850 5800 4850
-Wire Wire Line
-	6200 4850 6250 4850
-Wire Wire Line
-	6650 4850 6700 4850
-NoConn ~ 7100 4850
 Text GLabel 1550 5900 0    50   Input ~ 0
 5V
 Text GLabel 2550 5175 1    50   Input ~ 0
@@ -714,13 +598,229 @@ F 3 "~" H 975 2200 50  0001 C CNN
 	1    975  2200
 	1    0    0    -1  
 $EndComp
-Text GLabel 7275 3525 2    50   Input ~ 0
-LCI
-Text GLabel 7275 3625 2    50   Input ~ 0
+Text GLabel 7375 3625 2    50   Input ~ 0
 LDI
 NoConn ~ 4375 2525
 NoConn ~ 4375 2625
 NoConn ~ 4375 2725
+$Comp
+L key-parts:SK6812-MINI-E LB1
+U 1 1 5F4E9B6E
+P 5050 5550
+F 0 "LB1" H 5050 5724 51  0000 C CNN
+F 1 "SK6812-MINI-E" H 5050 5550 16  0001 C CNN
+F 2 "key-parts:SK6812-MINI-E" H 5050 5550 60  0001 C CNN
+F 3 "" H 5050 5550 60  0001 C CNN
+	1    5050 5550
+	-1   0    0    -1  
+$EndComp
 Wire Wire Line
-	5200 5200 5350 5200
+	7375 3625 7275 3625
+Wire Wire Line
+	7275 3525 7275 3625
+Connection ~ 7275 3625
+$Comp
+L key-parts:SK6812-MINI-E L14
+U 1 1 5F4EDDD8
+P 5550 4900
+F 0 "L14" H 5550 5074 51  0000 C CNN
+F 1 "SK6812-MINI-E" H 5550 4900 16  0001 C CNN
+F 2 "key-parts:SK6812-MINI-E" H 5550 4900 60  0001 C CNN
+F 3 "" H 5550 4900 60  0001 C CNN
+	1    5550 4900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L key-parts:SK6812-MINI-E L13
+U 1 1 5F4F357D
+P 6000 4900
+F 0 "L13" H 6000 5074 51  0000 C CNN
+F 1 "SK6812-MINI-E" H 6000 4900 16  0001 C CNN
+F 2 "key-parts:SK6812-MINI-E" H 6000 4900 60  0001 C CNN
+F 3 "" H 6000 4900 60  0001 C CNN
+	1    6000 4900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L key-parts:SK6812-MINI-E L12
+U 1 1 5F4F6046
+P 6450 4900
+F 0 "L12" H 6450 5074 51  0000 C CNN
+F 1 "SK6812-MINI-E" H 6450 4900 16  0001 C CNN
+F 2 "key-parts:SK6812-MINI-E" H 6450 4900 60  0001 C CNN
+F 3 "" H 6450 4900 60  0001 C CNN
+	1    6450 4900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L key-parts:SK6812-MINI-E L11
+U 1 1 5F4F8941
+P 6900 4900
+F 0 "L11" H 6900 5074 51  0000 C CNN
+F 1 "SK6812-MINI-E" H 6900 4900 16  0001 C CNN
+F 2 "key-parts:SK6812-MINI-E" H 6900 4900 60  0001 C CNN
+F 3 "" H 6900 4900 60  0001 C CNN
+	1    6900 4900
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	5250 5500 5375 5500
+Wire Wire Line
+	7150 4775 7100 4775
+Wire Wire Line
+	5750 4775 5750 4850
+Wire Wire Line
+	6200 4850 6200 4775
+Connection ~ 6200 4775
+Wire Wire Line
+	6200 4775 5750 4775
+Wire Wire Line
+	6650 4850 6650 4775
+Connection ~ 6650 4775
+Wire Wire Line
+	6650 4775 6200 4775
+Wire Wire Line
+	7100 4850 7100 4775
+Connection ~ 7100 4775
+Wire Wire Line
+	7100 4775 6650 4775
+Wire Wire Line
+	5250 5600 5300 5600
+Wire Wire Line
+	5300 5600 5300 4850
+Wire Wire Line
+	5300 4850 5350 4850
+Wire Wire Line
+	5250 5025 5350 5025
+Wire Wire Line
+	6700 5025 6700 4950
+Wire Wire Line
+	6250 4950 6250 5025
+Connection ~ 6250 5025
+Wire Wire Line
+	6250 5025 6700 5025
+Wire Wire Line
+	5800 4950 5800 5025
+Connection ~ 5800 5025
+Wire Wire Line
+	5800 5025 6250 5025
+Wire Wire Line
+	5350 4950 5350 5025
+Connection ~ 5350 5025
+Wire Wire Line
+	5350 5025 5800 5025
+Wire Wire Line
+	5750 4950 5775 4950
+Wire Wire Line
+	5775 4950 5775 4850
+Wire Wire Line
+	5775 4850 5800 4850
+Wire Wire Line
+	6200 4950 6225 4950
+Wire Wire Line
+	6225 4950 6225 4850
+Wire Wire Line
+	6225 4850 6250 4850
+Wire Wire Line
+	6650 4950 6675 4950
+Wire Wire Line
+	6675 4950 6675 4850
+Wire Wire Line
+	6675 4850 6700 4850
+Text GLabel 6150 5675 0    50   Input ~ 0
+5V
+$Comp
+L power:GND #PWR0102
+U 1 1 5F508D2B
+P 6150 5875
+F 0 "#PWR0102" H 6150 5625 50  0001 C CNN
+F 1 "GND" H 6155 5702 50  0000 C CNN
+F 2 "" H 6150 5875 50  0001 C CNN
+F 3 "" H 6150 5875 50  0001 C CNN
+	1    6150 5875
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:C_Small CLB1
+U 1 1 5F508D31
+P 6225 5775
+F 0 "CLB1" H 6250 5850 50  0000 L CNN
+F 1 "0.1u" H 6250 5700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6225 5775 50  0001 C CNN
+F 3 "~" H 6225 5775 50  0001 C CNN
+	1    6225 5775
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small CL14
+U 1 1 5F50B0C2
+P 6450 5775
+F 0 "CL14" H 6475 5850 50  0000 L CNN
+F 1 "0.1u" H 6475 5700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6450 5775 50  0001 C CNN
+F 3 "~" H 6450 5775 50  0001 C CNN
+	1    6450 5775
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small CL13
+U 1 1 5F50B5A4
+P 6675 5775
+F 0 "CL13" H 6700 5850 50  0000 L CNN
+F 1 "0.1u" H 6700 5700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6675 5775 50  0001 C CNN
+F 3 "~" H 6675 5775 50  0001 C CNN
+	1    6675 5775
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small CL12
+U 1 1 5F50BAE3
+P 6900 5775
+F 0 "CL12" H 6925 5850 50  0000 L CNN
+F 1 "0.1u" H 6925 5700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6900 5775 50  0001 C CNN
+F 3 "~" H 6900 5775 50  0001 C CNN
+	1    6900 5775
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small CL11
+U 1 1 5F50BF26
+P 7125 5775
+F 0 "CL11" H 7150 5850 50  0000 L CNN
+F 1 "0.1u" H 7150 5700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 7125 5775 50  0001 C CNN
+F 3 "~" H 7125 5775 50  0001 C CNN
+	1    7125 5775
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6150 5675 6225 5675
+Connection ~ 6225 5675
+Wire Wire Line
+	6225 5675 6450 5675
+Connection ~ 6450 5675
+Wire Wire Line
+	6450 5675 6675 5675
+Connection ~ 6675 5675
+Wire Wire Line
+	6675 5675 6900 5675
+Connection ~ 6900 5675
+Wire Wire Line
+	6900 5675 7125 5675
+Wire Wire Line
+	6150 5875 6225 5875
+Connection ~ 6225 5875
+Wire Wire Line
+	6225 5875 6450 5875
+Connection ~ 6450 5875
+Wire Wire Line
+	6450 5875 6675 5875
+Connection ~ 6675 5875
+Wire Wire Line
+	6675 5875 6900 5875
+Connection ~ 6900 5875
+Wire Wire Line
+	6900 5875 7125 5875
 $EndSCHEMATC
