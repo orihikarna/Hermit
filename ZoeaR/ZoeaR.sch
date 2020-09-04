@@ -823,4 +823,34 @@ Wire Wire Line
 Connection ~ 6900 5875
 Wire Wire Line
 	6900 5875 7125 5875
+Text GLabel 1500 3925 0    50   Input ~ 0
+5V
+Text GLabel 1500 3825 0    50   Input ~ 0
+SDA
+Text GLabel 1500 3725 0    50   Input ~ 0
+SCL
+$Comp
+L power:GND #PWR0109
+U 1 1 5F531520
+P 1500 3525
+F 0 "#PWR0109" H 1500 3275 50  0001 C CNN
+F 1 "GND" H 1505 3352 50  0000 C CNN
+F 2 "" H 1500 3525 50  0001 C CNN
+F 3 "" H 1500 3525 50  0001 C CNN
+	1    1500 3525
+	0    1    1    0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x05 J3
+U 1 1 5F534A64
+P 1700 3725
+F 0 "J3" H 1780 3767 50  0000 L CNN
+F 1 "Conn_01x05" H 1780 3676 50  0000 L CNN
+F 2 "key-parts:PinHeader_1x05_P2.54mm_Vertical" H 1700 3725 50  0001 C CNN
+F 3 "~" H 1700 3725 50  0001 C CNN
+	1    1700 3725
+	1    0    0    -1  
+$EndComp
+Text GLabel 1500 3625 0    50   Input ~ 0
+LDI
 $EndSCHEMATC
