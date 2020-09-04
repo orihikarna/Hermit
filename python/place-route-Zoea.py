@@ -386,7 +386,7 @@ def main():
             board = btype
             if board in [BZL, BZR, BZM]:
                 kad.add_text( (PCB_Width/2, 1.5), 0, 'Zoea{} by orihikarna 20/09/04'.format( bname ),
-                    'F.SilkS' if board == BZL else 'B.SilkS', (1, 1), 0.15,
+                    'F.SilkS' if board != BZR else 'B.SilkS', (1, 1), 0.15,
                     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
             break
 
@@ -967,6 +967,8 @@ def main():
         pads = ['GND', 'nRST', 'CLK', 'DIO', 'TX', 'RX']
     elif board == BZR:
         pads = ['GND', 'LDI', 'SCL', 'SDA', '5V']
+    else:
+        pads = []
     for idx, text in enumerate( pads ):
         pos = kad.get_pad_pos( 'J3', '{}'.format( idx + 1 ) )
         pos = vec2.scale( 2, vec2.rotate( -90 ), pos )

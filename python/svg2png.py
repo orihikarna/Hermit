@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-# board = 'ZoeaT'
+board = 'ZoeaT'
 board = 'ZoeaB'
 root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_svg = root + 'layer/{}-Edge_Cuts.svg'.format( board )

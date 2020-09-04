@@ -106,7 +106,7 @@ def main():
     add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width - 500, PCB_Height), (500, 0)), zones )
     add_zone( 'VCC', 'B.Cu', make_rect( (300, 100), (110, 110)), zones )
 
-    kad.add_text( (440, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200710', 'F.SilkS', (0.9, 0.9), 6,
+    kad.add_text( (440, 405), 0, '   STM32\n   F042K6\n     tiny\n   orihikarna\n200904', 'F.SilkS', (0.9, 0.9), 6,
         pcbnew.GR_TEXT_HJUSTIFY_LEFT, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
 
     ###
@@ -258,8 +258,8 @@ def main():
         # Gnd Shield
         ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, 0, +45)),
         ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, 0, -45)),
-        ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, ([(55, 90)], 0), 90, 0)),
-        ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, ([(55, 90)], 0), 90, 0)),
+        ('J4', 'A1', 'J4', 'S1', 23.5, (Dird, ([(55, 90)], 0), 90, -20)),
+        ('J4', 'B1', 'J4', 'S2', 23.5, (Dird, ([(55, 90)], 0), 90, -20)),
         ('J4', 'S1', 'J4', 'S4', 24, (Strt), 'B.Cu'),
         ('J4', 'S2', 'J4', 'S3', 24, (Strt), 'F.Cu'),
         ('C3', '2',  'J4', 'S1', 24, (Dird, 90, 45, -20), 'F.Cu'),
