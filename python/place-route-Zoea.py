@@ -104,7 +104,7 @@ def drawEdgeCuts( board ):
         midcnrs.append( [((W-USBW+2, J2_y + USBM         ), 180), Round, [0.5]] )
         midcnrs.append( [((W-USBW,   J2_y + USBM + USBT  ),  90), Round, [0.8]] )
         midcnrs.append( [((W-USBW+2, J2_y + USBM + USBT*2),   0), Round, [0.8]] )
-        midcnrs.append( [((W,        H-5),                   90), Round, [0.5]] )
+        midcnrs.append( [((W,        H - R - 1),             90), Round, [0.5]] )
     ## bottom
     corners.append( [((W*5/6, H), 180), Round, [R]] )
     midcnrs.append( corners[-1] )
@@ -172,9 +172,9 @@ def drawEdgeCuts( board ):
         midcnrs.append( [((W - D,   D        ),  45), BezierRound, [1]] )# top right diagonal
         T = 5# thickness right
         midcnrs.append( [((W-T,     H/3      ),  90), BezierRound, [1]] )# right
-        midcnrs.append( [((W*5/6,   30.6       ), 180), BezierRound, [1]] )# mid horizontal
+        midcnrs.append( [((W*5/6,   30.6     ), 180), BezierRound, [1]] )# mid horizontal
         T = 5# thickness mid
-        midcnrs.append( [((W*2/3-1, H*2/3-T-1.2),  90), BezierRound, [1]] )# mid right
+        midcnrs.append( [((W*2/3-1, H*2/3-T-1.2), 90), BezierRound, [1]] )# mid right
         midcnrs.append( [((W/2,     H*2/3-T  ), 180), BezierRound, [1]] )# mid bottom
         midcnrs.append( [((W/3+6,   H*2/3-T-2), -90), BezierRound, [1]] )# mid left
         midcnrs.append( [((W/3,     22.4     ), 180), BezierRound, [1]] )# mid left horizontal
@@ -193,7 +193,8 @@ def drawEdgeCuts( board ):
     r = 4.5
     for idx, ctr in enumerate( [(r, r), (W-r, r), (W-r, H-r), (r, H-r), (W/3-r-mgn, H-r), (W*2/3+r+mgn, H-r)] ):
         sign = +1 if idx % 2 == 0 else -1
-        if board in [BZT, BZB, BZM]:# move hole mods
+        #if board in [BZT, BZB, BZM]:# move hole mods
+        if board in [BZT, BZB]:# move hole mods
             kad.set_mod_pos_angle( 'H{}'.format( idx + 1 ), ctr, 0 )
         if board in [BZL, BZR]:
             corners = []
@@ -206,7 +207,8 @@ def drawEdgeCuts( board ):
             for brd, rad in [(BZT, 1.6), (BZB, 1.7)]:
                 if board == brd:
                     kad.add_arc( ctr, vec2.add( ctr, (rad, 0) ), 360, layer, width )
-        kad.add_arc( ctr, vec2.add( ctr, (3.0, 0) ), 360, 'F.Fab', width )
+        layer = 'F.Fab' if board != BZM else 'Edge.Cuts'# holes by edge.cuts
+        kad.add_arc( ctr, vec2.add( ctr, (5.96/2, 0) ), 360, layer, width )
 
 def divide_line( a, b, pitch ):
     v = vec2.sub( b, a )
@@ -951,6 +953,8 @@ def main():
     for offset_length, offset_angle, text_angle, mod_names in refs:
         for mod_name in mod_names:
             mod = kad.get_mod( mod_name )
+            if mod == None:
+                continue
             pos, angle = kad.get_mod_pos_angle( mod_name )
             ref = mod.Reference()
             if text_angle == None:
