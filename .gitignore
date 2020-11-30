@@ -4,6 +4,7 @@ fp-info-cache
 *-cache.lib
 *.gbr
 *.drl
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
