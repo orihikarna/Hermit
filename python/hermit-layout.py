@@ -200,6 +200,24 @@ class keyboard_layout:
         c.showPage()
         c.save()
 
+    def write_scad( self, path: str ):
+        with open( path, 'w' ) as fout:
+            fout.write( 'key_pos_angles = [\n' )
+            xs = list( map( lambda key: key.x, self.keys ) )
+            xctr = (min( xs ) + max( xs )) / 2
+            idx = 0
+            for key in self.keys:
+                (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
+                px = x - rx + w / 2
+                py = y - ry + h / 2
+                if x > xctr:
+                    continue
+                t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+                #
+                fout.write( '    [{}, {}, {}, {}, {}, {}, "{}"],\n'.format( t[0], -t[1], -r, w, h, idx, key.name ) )
+                idx += 1
+            fout.write( '];\n' )
+
     def save( self, path: str ):
         data = []
         data.append( self.meta )
@@ -311,7 +329,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Comma: the origin
     angle_Comm = -12
-    #angle_Comm = 0# For Zoea!
+    angle_Comm = 0# For Zoea!
     org_Comm = vec2( 3.8, 4.3 )
     #org_Comm[1] += 30 / unit# yoffset for A4 paper
 
@@ -442,16 +460,18 @@ if __name__=='__main__':
     dst_path = os.path.join( work_dir, 'hermit-layout.json' )
     dst_png_fmt  = os.path.join( work_dir, 'hermit-layout-{:02d}.png' )
     dst_pdf  = os.path.join( work_dir, 'hermit-layout.pdf' )
+    dst_scad = os.path.join( work_dir, home_dir + '/repos/mywork/hermit-layout.scad' )
 
     # Hermit
-    unit = 17.8
+    #unit = 17.8
+    unit = 19.05
     paper_size = vec2( 297, 210 )
     thickness = 0.3#mm
 
     N = 16
-    #for i in [N]:
+    for i in [N]:
     #for i in [0, N]:
-    for i in range( 2 * N ):
+    #for i in range( 2 * N ):
         ratio = (N - abs( i - N )) / float( N )
         ratio = (1 - math.cos( math.pi * ratio )) / 2
         data = make_kbd_hermit( dst_path, unit, paper_size, ratio )
@@ -462,6 +482,7 @@ if __name__=='__main__':
         kbd = keyboard_layout.load( dst_path )
         kbd.print()
         kbd.write_png( dst_png_fmt.format( i ), unit, thickness, vec2( 297, 170 ) )
-        if i == 10 and ratio == 1:
+        if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
+            kbd.write_scad( dst_scad )
         #break
