@@ -305,9 +305,9 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Left hand
     thumbs2 = ["Alt", "Ctrl", "Lower"]
-    col_Gui = ["Win", "Fn"]
-    col_Tab = ["|\n¥", "Shift", "Tab", "ESC"]
-    col_Z = ["Z", "A", "Q", "!\n1"]
+    col_Gui = ["Shift", "", "Prt\nScrn", "ESC"]
+    col_Tab = ["Z", "Win", "Tab", "|\n¥"]
+    col_Z = ["", "A", "Q", "!\n1"]
     col_X = ["X", "S", "W", "\n2"]
     col_C = ["C", "D", "E", "#\n3"]
     col_V = ["V", "F", "R", "$\n4"]
@@ -320,59 +320,66 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     col_M = ["M", "J", "U", "'\n7"]
     col_Comm = ["<\n,", "K", "I", "(\n8"]
     col_Dot  = [">\n.", "L", "O", ")\n9"]
-    col_Scln = ["?\n/", "+\n;", "P", " \n0"]
-    col_Cln  = ["|\n¥", "_\n\\", "*\n:", "=\n-"]
-    col_Brac  = ["]\n}", "[\n{"]
+    col_Scln = ["", "+\n;", "P", " \n0"]
+    col_Cln  = ["?\n/", "*\n:", "@", "=\n-"]
+    col_Brac  = ["_\n\\", "]\n}", "[\n{", "~\n^"]
     thumbs1 = ["Space", "Shift", "Raise"]
 
     xctr = (paper_size[0] / 2.0) / unit
 
     # Comma: the origin
-    angle_Comm = -12
     angle_Comm = 0# For Zoea!
-    org_Comm = vec2( 3.8, 4.3 )
-    #org_Comm[1] += 30 / unit# yoffset for A4 paper
+    # angle_Comm = 45
+    org_Comm = vec2( 5.6, 4.3 )
+    # org_Comm[1] += 30 / unit# yoffset for A4 paper
+
+    # Dot:
+    angle_Dot = angle_Comm
 
     # parameters
-    dx_Dot_L = -0.12 * ratio
-    dx_Comm_K = dx_Dot_L * 3 / 2
-    dy_Scln = 0.4 * ratio
-    dy_Cln = 0.08 * ratio
-    dy_Entr = 0.3 * ratio
+    #angle_M_Comm = 2 * math.atan2( dx_Comm_8, 3 ) * rad2deg
+    angle_M_Comm = -15 * ratio
+    dx_Comm_8 = 3 * math.tan( angle_M_Comm / 2 * deg2rad )
+    dx_I_8 = 0
+    dx_Comm_K = dx_K_I = (dx_Comm_8 - dx_I_8) / 2
+    print( f'angle_M_Comm = {angle_M_Comm:.6f}' )
 
-    angle_Index_Thmb = 90
-    dangle_Thmb = -6 - 12 * ratio
-    delta_M_Thmb = vec2( -0.8, 2.1 )
-    dy_Thmb = -0.045 - 0.08 * ratio
+    #angle_Dot_Scln = math.asin( -dx_Dot_L / (1 - dy_Scln) ) * rad2deg
+    angle_Dot_Scln = -angle_M_Comm
+
+    dx_Dot_L = dx_Comm_8 / 3
+    #dy_Scln = 0.5 * ratio
+    dy_Scln = 1 + dx_Dot_L / math.sin( angle_Dot_Scln * deg2rad ) 
+    dy_Cln = 0.3 * ratio
+    dy_Entr = 0.5 * ratio
+
+    angle_Index_Thmb = 80
+    dangles_Thmb = [-20 * ratio, -20 * ratio, 0]
+    delta_M_Thmb = vec2( -0.94, 2.1 )
+    dys_Thmb = [-0.24 * ratio, -0.12 * ratio, 0]
 
     # Index columns: M, N, I
-    dx_K_I = dx_Comm_K
-    dx_I_8 = 0
-    dx_Comm_8 = dx_Comm_K + dx_K_I + dx_I_8
-    #angle_Comm = -angle_M_Comm# For Zoea!
-    angle_M_Comm = 2 * math.atan2( dx_Comm_8, 3 ) * rad2deg
-    print( f'angle_M_Comm = {angle_M_Comm:.3f}' )
     dx_M_7 = -dx_Comm_8
     dx_U_7 = -math.sin( angle_M_Comm * deg2rad )
-    dx_J_U = dx_U_7
-    #dx_J_U = (dx_M_7 - dx_U_7) * (1 + 1 / 2)
-    dx_M_J = dx_M_7 - (dx_J_U + dx_U_7)
+    # dx_J_U = dx_U_7
+    # dx_M_J = dx_M_7 - (dx_J_U + dx_U_7)
+    dx_M_J = 0
+    dx_J_U = dx_M_7 - dx_U_7
 
     angle_Index = angle_M_Comm + angle_Comm
     angle_Inner = angle_Index + math.atan2( dx_M_J, 1 - dy_Entr ) * rad2deg
     delta_Index = vec2( -1, 0 ) @ mat2_rot( angle_Index )
     org_M = org_Comm + vec2( -0.5, +0.5 ) @ mat2_rot( angle_Comm ) + vec2( -0.5, -0.5 ) @ mat2_rot( angle_Index )
     org_N = org_M + delta_Index
-    keyh_Inner = 1.25
+    keyh_Inner = 1.0
     org_I = org_N + vec2( -0.5, +0.5 - dy_Entr ) @ mat2_rot( angle_Index ) + vec2( -0.5, -keyh_Inner/2 ) @ mat2_rot( angle_Inner )
 
     # Dot
-    angle_Dot = angle_Comm
     org_Dot = org_Comm + vec2( +1, 0 ) @ mat2_rot( angle_Dot )
 
     ## Pinky top
     # Scln(;)
-    angle_Dot_Scln = math.asin( -dx_Dot_L / (1 - dy_Scln) ) * rad2deg
+    print( f'angle_Dot_Scln = {angle_Dot_Scln:.6f}' )
     angle_PinkyTop = angle_Dot - angle_Dot_Scln
     tr_Dot = org_Dot + vec2( +0.5, -0.5 ) @ mat2_rot( angle_Dot )
     org_Scln = tr_Dot + vec2( +0.5, dy_Scln - 0.5) @ mat2_rot( angle_PinkyTop )
@@ -421,13 +428,13 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     add_col( data, angle_Index, org_N, dxs_Index, col_N, col_B, xctr )
     add_col( data, angle_Inner, org_I, dxs_Index, col_I1, col_I2, xctr, keyh = keyh_Inner )
 
-    add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P] * 3, col_Scln[1:], col_Z[1:], xctr )
-    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P],     col_Cln[2:3], col_Tab[2:3], xctr, keyw = keyw_Cln )
-    add_col( data, angle_PinkyTop, org_Mins, [dx_Scln_P],     col_Cln[3:4], col_Tab[3:4], xctr, keyw = keyw_Mins )
-    add_col( data, angle_PinkyTop, org_LBrc, [0], col_Brac[1:], col_Gui[1:], xctr, ydir = +1 )
+    add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P], col_Scln[1:], col_Z[1:], xctr )
+    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P], col_Cln[1:2], col_Tab[1:2], xctr, keyw = keyw_Cln )
+    add_col( data, angle_PinkyTop, org_Mins, [dx_Scln_P], col_Cln[2:4], col_Tab[2:4], xctr, keyw = keyw_Mins )
+    add_col( data, angle_PinkyTop, org_LBrc, [dx_Scln_P], col_Brac[1:], col_Gui[1:], xctr, ydir = -1 )
 
-    add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
-    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Cln[1:0:-1], col_Tab[1:0:-1], xctr, ydir = +1, keyw = keyw_Cln )
+    # add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Cln[0::-1], col_Tab[0::-1], xctr, ydir = +1, keyw = keyw_Cln )
     add_col( data, angle_PinkyBtm, org_RBrc, [0], col_Brac[0::-1], col_Gui[0::-1], xctr, ydir = +1 )
 
     if False:# left side
@@ -444,12 +451,13 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     angle = angle_Thmb
     org = org_Thmb
-    keyw = 1.25
+    #keyw = 1.25
+    keyw = (1.25 * 19.05 - (19.05 - 17.0)) / 19.05
     for idx, name in enumerate( thumbs1 ):
         add_col( data, angle, org, [0], [name], [thumbs2[idx]], xctr, ydir = -1, keyw = keyw )
         org += vec2( +keyw / 2, +0.5 ) @ mat2_rot( angle )
-        angle += dangle_Thmb
-        org += vec2( -keyw / 2 - dy_Thmb, +0.5 ) @ mat2_rot( angle )
+        angle += dangles_Thmb[idx]
+        org += vec2( -keyw / 2 - dys_Thmb[idx], +0.5 ) @ mat2_rot( angle )
 
     return data
 
@@ -463,9 +471,10 @@ if __name__=='__main__':
     dst_scad = os.path.join( work_dir, home_dir + '/repos/mywork/hermit-layout.scad' )
 
     # Hermit
-    #unit = 17.8
-    unit = 19.05
-    paper_size = vec2( 297, 210 )
+    unit = 17.8
+    #unit = 19.05
+    #paper_size = vec2( 297, 210 )#A4
+    paper_size = vec2( 364, 257 )#B4
     thickness = 0.3#mm
 
     N = 16
@@ -481,7 +490,7 @@ if __name__=='__main__':
 
         kbd = keyboard_layout.load( dst_path )
         kbd.print()
-        kbd.write_png( dst_png_fmt.format( i ), unit, thickness, vec2( 297, 170 ) )
+        kbd.write_png( dst_png_fmt.format( i ), unit, thickness, paper_size )
         if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
             kbd.write_scad( dst_scad )
