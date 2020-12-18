@@ -105,7 +105,8 @@ class keyboard_layout:
                     ps += ", {}={}".format( k, v )
             name = key.name.replace( '\n', ',' )
             #print( "key '{}' {}".format( name, ps[2:] ) )
-            if name in ['M', '<,,', '>,.', '?,/']:
+            # if name in ['M', '<,,', '>,.', '?,/']:# for Zoea
+            if True:
                 (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
                 px = x - rx + w / 2
                 py = y - ry + h / 2
@@ -305,7 +306,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Left hand
     thumbs2 = ["Alt", "Ctrl", "Lower"]
-    col_Gui = ["Shift", "", "Prt\nScrn", "ESC"]
+    col_Gui = ["Shift", " ", "Prt\nScrn", "ESC"]
     col_Tab = ["Z", "Win", "Tab", "|\n¥"]
     col_Z = ["", "A", "Q", "!\n1"]
     col_X = ["X", "S", "W", "\n2"]
@@ -489,9 +490,9 @@ if __name__=='__main__':
             json.dump( data, fout, indent = 4 )
 
         kbd = keyboard_layout.load( dst_path )
-        kbd.print()
+        # kbd.print()
         kbd.write_png( dst_png_fmt.format( i ), unit, thickness, paper_size )
         if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
             kbd.write_scad( dst_scad )
-        #break
+        # break
