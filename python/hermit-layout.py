@@ -330,7 +330,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Comma: the origin
     angle_Comm = 0# For Zoea!
-    # angle_Comm = 45
+    angle_Comm = 45
     org_Comm = vec2( 5.6, 4.3 )
     # org_Comm[1] += 30 / unit# yoffset for A4 paper
 
@@ -339,7 +339,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # parameters
     #angle_M_Comm = 2 * math.atan2( dx_Comm_8, 3 ) * rad2deg
-    angle_M_Comm = -15 * ratio
+    angle_M_Comm = -16 * ratio
     dx_Comm_8 = 3 * math.tan( angle_M_Comm / 2 * deg2rad )
     dx_I_8 = 0
     dx_Comm_K = dx_K_I = (dx_Comm_8 - dx_I_8) / 2
@@ -351,21 +351,22 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     dx_Dot_L = dx_Comm_8 / 3
     #dy_Scln = 0.5 * ratio
     dy_Scln = 1 + dx_Dot_L / math.sin( angle_Dot_Scln * deg2rad ) 
-    dy_Cln = 0.3 * ratio
+    dy_Cln = 0.17 * ratio
     dy_Entr = 0.5 * ratio
 
     angle_Index_Thmb = 80
     dangles_Thmb = [-20 * ratio, -20 * ratio, 0]
-    delta_M_Thmb = vec2( -0.94, 2.1 )
-    dys_Thmb = [-0.24 * ratio, -0.12 * ratio, 0]
+    delta_M_Thmb = vec2( -0.86, 2.22 )
+    dys_Thmb = [-0.1 * ratio, -0.1 * ratio, 0]
 
     # Index columns: M, N, I
     dx_M_7 = -dx_Comm_8
     dx_U_7 = -math.sin( angle_M_Comm * deg2rad )
-    # dx_J_U = dx_U_7
-    # dx_M_J = dx_M_7 - (dx_J_U + dx_U_7)
-    dx_M_J = 0
-    dx_J_U = dx_M_7 - dx_U_7
+    dx_J_U = dx_U_7 * 0.8
+    dx_M_J = dx_M_7 - (dx_J_U + dx_U_7)
+    # dx_M_J = 0
+    # dx_J_U = dx_M_7 - dx_U_7
+    print( f'dx_M_J={dx_M_J:.3f}, dx_J_U={dx_J_U:.3f}, dx_U_7={dx_U_7:.3f}')
 
     angle_Index = angle_M_Comm + angle_Comm
     angle_Inner = angle_Index + math.atan2( dx_M_J, 1 - dy_Entr ) * rad2deg
