@@ -306,8 +306,8 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
 
     # Left hand
     thumbs2 = ["Alt", "Ctrl", "Lower"]
-    col_Gui = ["Shift", " ", "Prt\nScrn", "ESC"]
-    col_Tab = ["Z", "Win", "Tab", "|\n¥"]
+    col_Gui = ["Shift", "Win", "Tab"]
+    col_Tab = ["Z", "~\n^", "|\n¥", "ESC"]
     col_Z = ["", "A", "Q", "!\n1"]
     col_X = ["X", "S", "W", "\n2"]
     col_C = ["C", "D", "E", "#\n3"]
@@ -323,14 +323,14 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     col_Dot  = [">\n.", "L", "O", ")\n9"]
     col_Scln = ["", "+\n;", "P", " \n0"]
     col_Cln  = ["?\n/", "*\n:", "@", "=\n-"]
-    col_Brac  = ["_\n\\", "]\n}", "[\n{", "~\n^"]
+    col_Brac  = ["_\n\\", "]\n}", "[\n{"]
     thumbs1 = ["Space", "Shift", "Raise"]
 
     xctr = (paper_size[0] / 2.0) / unit
 
     # Comma: the origin
     angle_Comm = 0# For Zoea!
-    angle_Comm = 45
+    # angle_Comm = 45
     org_Comm = vec2( 5.6, 4.3 )
     # org_Comm[1] += 30 / unit# yoffset for A4 paper
 
@@ -338,18 +338,15 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     angle_Dot = angle_Comm
 
     # parameters
-    #angle_M_Comm = 2 * math.atan2( dx_Comm_8, 3 ) * rad2deg
     angle_M_Comm = -16 * ratio
     dx_Comm_8 = 3 * math.tan( angle_M_Comm / 2 * deg2rad )
     dx_I_8 = 0
     dx_Comm_K = dx_K_I = (dx_Comm_8 - dx_I_8) / 2
     print( f'angle_M_Comm = {angle_M_Comm:.6f}' )
 
-    #angle_Dot_Scln = math.asin( -dx_Dot_L / (1 - dy_Scln) ) * rad2deg
     angle_Dot_Scln = -angle_M_Comm
 
     dx_Dot_L = dx_Comm_8 / 3
-    #dy_Scln = 0.5 * ratio
     dy_Scln = 1 + dx_Dot_L / math.sin( angle_Dot_Scln * deg2rad ) 
     dy_Cln = 0.17 * ratio
     dy_Entr = 0.5 * ratio
@@ -388,39 +385,24 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     dx_Scln_P = dy_Scln * math.tan( angle_Dot_Scln * deg2rad )
     # Cln(:), LBrc([)
     org_Cln = org_Scln + vec2( +1, dy_Cln ) @ mat2_rot( angle_PinkyTop )
-    org_LBrc = org_Cln + vec2( +1, dy_Cln ) @ mat2_rot( angle_PinkyTop )
+    org_RBrc = org_Cln + vec2( +1, dy_Cln ) @ mat2_rot( angle_PinkyTop )
 
     ## Pinky bottom
-    tx = 2
-    # Bsls(\)
-    br_Dot = org_Dot + vec2( +0.5, +0.5 ) @ mat2_rot( angle_Dot )
-    lb_key = org_Scln + vec2( tx - 0.5, +0.5 + dy_Cln * tx ) @ mat2_rot( angle_PinkyTop )
-    Lt = np.linalg.norm( tr_Dot - lb_key )
-    Lb = np.linalg.norm( br_Dot - lb_key )
-    angle_1 = math.acos( (1 + Lb * Lb - Lt * Lt ) / (2 * Lb)) * rad2deg
-    angle_2 = math.asin( tx / Lb ) * rad2deg
-    angle_Dot_Btm = angle_1 - angle_2
-    angle_PinkyBtm = angle_Dot + angle_Dot_Btm
-    angle_Btm_Top = angle_PinkyBtm - angle_PinkyTop
+    angle_Pinky_Btm_Top = math.atan2( dy_Cln, 1 ) * rad2deg
+    angle_PinkyBtm = angle_PinkyTop + angle_Pinky_Btm_Top
+    print( f'angle_PinkyBtm = {angle_PinkyBtm}' )
+    keyw_Slsh = 1.5
+    keyw_Bsls = 1.25
     # Slsh(/)
+    br_Dot = org_Dot + vec2( +0.5, +0.5 ) @ mat2_rot( angle_Dot )
     bl_Scln = org_Scln + vec2( -0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
-    x, _, _ = vec2_find_intersection( br_Dot, vec2( 0, 1 ) @ mat2_rot( angle_Dot ), bl_Scln, vec2( -1, 0 ) @ mat2_rot( angle_PinkyBtm ) )
-    tl_Slsh = x + (vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm )) * math.sin( angle_Dot_Btm * deg2rad ) * np.linalg.norm( x - br_Dot )
-    org_Slsh = tl_Slsh + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
-    if tx == 2:
-        # RBrc(]), Bsls(\)
-        org_RBrc = lb_key + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
-        org_Bsls = org_RBrc + vec2( -1, math.tan( angle_Btm_Top * deg2rad ) - dy_Cln / math.cos( angle_Btm_Top * deg2rad ) ) @ mat2_rot( angle_PinkyBtm )
-        #org_Bsls = (org_RBrc + org_Slsh) * 0.5
-    elif tx == 1:
-        # RBrc(]), Bsls(\)
-        org_Bsls = lb_key + vec2( +0.5, +0.5 ) @ mat2_rot( angle_PinkyBtm )
-        org_RBrc = org_Bsls + vec2( +1, -math.tan( angle_Btm_Top * deg2rad ) + dy_Cln / math.cos( angle_Btm_Top * deg2rad ) ) @ mat2_rot( angle_PinkyBtm )
-        #org_RBrc = org_Bsls + (org_Bsls - org_Slsh)
+    tl_Slsh = vec2_find_intersection( bl_Scln, vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm ),
+        br_Dot, vec2( 1, 0 ) @ mat2_rot( angle_Dot + 90 ) )[0]
+    org_Slsh = tl_Slsh + vec2( keyw_Slsh / 2, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+    # Bsls(\)
+    org_Bsls = org_Slsh + vec2( (keyw_Slsh + keyw_Bsls) / 2, 0 ) @ mat2_rot( angle_PinkyBtm )
 
-    keyw_Cln = 1.0
-    keyw_Mins = 1.0
-    org_Mins = org_Cln + vec2( dx_Scln_P + (keyw_Mins - 1) / 2, -1 ) @ mat2_rot( angle_PinkyTop )
+    org_Mins = org_Cln + vec2( dx_Scln_P, -1 ) @ mat2_rot( angle_PinkyTop )
 
     add_col( data, angle_Comm, org_Comm, [dx_Comm_K, dx_K_I, dx_I_8], col_Comm, col_C, xctr )
     add_col( data, angle_Dot,  org_Dot,  [dx_Dot_L, dx_Dot_L, dx_Dot_L], col_Dot, col_X, xctr )
@@ -431,13 +413,12 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     add_col( data, angle_Inner, org_I, dxs_Index, col_I1, col_I2, xctr, keyh = keyh_Inner )
 
     add_col( data, angle_PinkyTop, org_Scln, [dx_Scln_P], col_Scln[1:], col_Z[1:], xctr )
-    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P], col_Cln[1:2], col_Tab[1:2], xctr, keyw = keyw_Cln )
-    add_col( data, angle_PinkyTop, org_Mins, [dx_Scln_P], col_Cln[2:4], col_Tab[2:4], xctr, keyw = keyw_Mins )
-    add_col( data, angle_PinkyTop, org_LBrc, [dx_Scln_P], col_Brac[1:], col_Gui[1:], xctr, ydir = -1 )
+    add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P], col_Cln[1:2], col_Tab[1:2], xctr )
+    add_col( data, angle_PinkyTop, org_Mins, [dx_Scln_P], col_Cln[2:4], col_Tab[2:4], xctr )
+    add_col( data, angle_PinkyTop, org_RBrc, [dx_Scln_P], col_Brac[1:], col_Gui[1:], xctr, ydir = -1 )
 
-    # add_col( data, angle_PinkyBtm, org_Slsh, [dx_Scln_P] * 2, col_Scln[0:1], col_Z[0:1], xctr )
-    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Cln[0::-1], col_Tab[0::-1], xctr, ydir = +1, keyw = keyw_Cln )
-    add_col( data, angle_PinkyBtm, org_RBrc, [0], col_Brac[0::-1], col_Gui[0::-1], xctr, ydir = +1 )
+    add_col( data, angle_PinkyBtm, org_Slsh, [0], col_Cln[0::-1], col_Tab[0::-1], xctr, ydir = +1, keyw = keyw_Slsh )
+    add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Brac[0::-1], col_Gui[0::-1], xctr, ydir = +1, keyw = keyw_Bsls )
 
     if False:# left side
         keyw_Cln = 1.25
