@@ -354,7 +354,8 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     angle_Index_Thmb = 80
     dangles_Thmb = [-20 * ratio, -20 * ratio, 0]
     delta_M_Thmb = vec2( -0.86, 2.22 )
-    dys_Thmb = [-0.1 * ratio, -0.1 * ratio, 0]
+    # dys_Thmb = [-0.1 * ratio, -0.1 * ratio, 0]
+    dys_Thmb = [-0.1 * ratio, 0.1 * ratio, 0]
 
     # Index columns: M, N, I
     dx_M_7 = -dx_Comm_8
@@ -391,8 +392,8 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     angle_Pinky_Btm_Top = math.atan2( dy_Cln, 1 ) * rad2deg
     angle_PinkyBtm = angle_PinkyTop + angle_Pinky_Btm_Top
     print( f'angle_PinkyBtm = {angle_PinkyBtm}' )
-    keyw_Slsh = 1.5
-    keyw_Bsls = 1.25
+    keyw_Slsh = 1.25 + 0.1
+    keyw_Bsls = 1.5 + 0.12
     # Slsh(/)
     br_Dot = org_Dot + vec2( +0.5, +0.5 ) @ mat2_rot( angle_Dot )
     bl_Scln = org_Scln + vec2( -0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
@@ -420,24 +421,16 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     add_col( data, angle_PinkyBtm, org_Slsh, [0], col_Cln[0::-1], col_Tab[0::-1], xctr, ydir = +1, keyw = keyw_Slsh )
     add_col( data, angle_PinkyBtm, org_Bsls, [0], col_Brac[0::-1], col_Gui[0::-1], xctr, ydir = +1, keyw = keyw_Bsls )
 
-    if False:# left side
-        keyw_Cln = 1.25
-        org_Cln  += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyTop )
-        org_Bsls += vec2( (keyw_Cln - 1) / 2, 0 ) @ mat2_rot( angle_PinkyBtm )
-        add_col( data, angle_PinkyTop, org_Cln,  [dx_Scln_P], [], col_Tab[2:3], xctr, keyw = keyw_Cln )
-        add_col( data, angle_PinkyBtm, org_Bsls, [0], [],  col_Tab[1:0:-1], xctr, ydir = +1, keyw = keyw_Cln )
-
-    #angle_Thmb = angle_Comm_Thmb + angle_Comm
     angle_Thmb = angle_Index_Thmb + angle_Index
-    #org_Thmb = org_Comm + delta_Comm_Thmb @ mat2_rot( angle_Comm )
     org_Thmb = org_M + delta_M_Thmb @ mat2_rot( angle_Index )
 
     angle = angle_Thmb
     org = org_Thmb
-    #keyw = 1.25
-    keyw = (1.25 * 19.05 - (19.05 - 17.0)) / 19.05
+    keyw12 = (1.25 * 19.05 - (19.05 - 17.0)) / 19.05
+    # keyw12 = 1.25
     for idx, name in enumerate( thumbs1 ):
-        add_col( data, angle, org, [0], [name], [thumbs2[idx]], xctr, ydir = -1, keyw = keyw )
+        keyw = keyw12# if idx < 2 else 1
+        add_col( data, angle, org, [0], [name], [thumbs2[idx]], xctr, ydir = -1, keyw = keyw12 if idx < 2 else 1 )
         org += vec2( +keyw / 2, +0.5 ) @ mat2_rot( angle )
         angle += dangles_Thmb[idx]
         org += vec2( -keyw / 2 - dys_Thmb[idx], +0.5 ) @ mat2_rot( angle )
