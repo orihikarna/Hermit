@@ -201,8 +201,10 @@ class keyboard_layout:
         c.showPage()
         c.save()
 
-    def write_scad( self, path: str ):
+    def write_scad( self, path: str, unit_w: float, unit_h: float ):
         with open( path, 'w' ) as fout:
+            fout.write( f'key_w = {unit_w};\n' )
+            fout.write( f'key_h = {unit_h};\n' )
             fout.write( 'key_pos_angles = [\n' )
             xs = list( map( lambda key: key.x, self.keys ) )
             xctr = (min( xs ) + max( xs )) / 2
@@ -330,7 +332,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     col_Comm = ["<\n,", "K", "I", "(\n8"]
     col_Dot  = [">\n.", "L", "O", ")\n9"]
     col_Scln = ["?\n/", "+\n;", "P", " \n0"]
-    col_Cln  = ["_\n\\", "*\n:", "@", "=\n-"]
+    col_Cln  = ["_\nBsls", "*\n:", "@", "=\n-"]
     col_Brac = ["", "]\n}", "[\n{"]
     thumbs1  = ["Space", "Shift", "Raise"]
 
@@ -477,11 +479,11 @@ if __name__=='__main__':
     thickness = 0.3# mm
 
     N = 16
-    # for i in [N]:
+    for i in [N]:
     # for i in [0, N]:
     # for i in [0, 1, int(N/2)]:
     # for i in range( N + 1 ):
-    for i in range( 2 * N ):
+    # for i in range( 2 * N ):
         ratio = (N - abs( i - N )) / float( N )
         ratio = (1 - math.cos( math.pi * ratio )) / 2
         data = make_kbd_hermit( unit_w, unit_h, paper_size, ratio )
@@ -494,5 +496,5 @@ if __name__=='__main__':
         kbd.write_png( dst_png_fmt.format( i ), unit_w, thickness, paper_size )
         if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
-            kbd.write_scad( dst_scad )
+            kbd.write_scad( dst_scad, unit_w, unit_h )
         # break
