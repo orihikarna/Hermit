@@ -211,7 +211,7 @@ class keyboard_layout:
                 (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
                 px = x - rx + w / 2
                 py = y - ry + h / 2
-                if x > xctr:
+                if x < xctr:
                     continue
                 t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
                 #
@@ -264,7 +264,7 @@ class keyboard_layout:
                                     prop["x"] = val
                                 elif key == "ry":
                                     prop["y"] = val
-                prop["y"] += 1
+                prop["y"] += key.h
         return kbd
 
 def print_for_kicad( idx, prop ):
@@ -281,32 +281,36 @@ def print_for_kicad( idx, prop ):
     print( "['TP{}', {:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}],".format( idx, cx, cy, angle, co, si ) )
 
 class key_layout_maker:
-    def __init__( self, xctr ):
+    def __init__( self, xctr, keyh ):
         self.data = []
         self.xctr = xctr
+        self.keyh = keyh
 
-    def add_col( self, angle, org, dxs, names1, names2, ydir = -1, keyw = 1, keyh = 1 ):
+    def add_col( self, angle, org, dxs, names1, names2, ydir = -1, keyw = 1, keyh = -1 ):
+        if keyh < 0:
+            keyh = self.keyh
         for idx, names in enumerate( [names1, names2 ]):
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
             prop["r"] = xsign * angle
             prop["rx"] = xsign * org[0] + self.xctr
             prop["ry"] = org[1]
-            prop["y"] = -keyh / 2.0
             prop["x"] = -keyw / 2.0
+            prop["y"] = -keyh / 2.0
             prop["w"] = keyw
+            prop["h"] = keyh
             row = [prop]
             x, y = 0, 0
             for idx, name in enumerate( names ):
                 if name == '':
                     continue
-                row.append( { "x" : x, "y" : y, "w" : keyw, "h"  : keyh } )
+                row.append( { "x" : x, "y" : y, "w" : keyw, "h" : keyh } )
                 row.append( name )
                 x = -keyw + dxs[min( idx, len( dxs ) - 1 )] * xsign
                 y = keyh * ydir
             self.data.append( row )
 
-def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
+def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
 
     # Left hand
     thumbs2 = ["Alt", "Ctrl", "Lower"]
@@ -330,9 +334,10 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     col_Brac = ["", "]\n}", "[\n{"]
     thumbs1  = ["Space", "Shift", "Raise"]
 
-    xctr = (paper_size[0] / 2.0) / unit
+    xctr = (paper_size[0] / 2.0) / unit_w
+    keyh = unit_h / unit_w
 
-    maker = key_layout_maker( xctr )
+    maker = key_layout_maker( xctr, keyh )
     maker.data.append( { "name" : "Hermit60", "author" : "orihikarna" } ) # meta
     print( f'ratio = {ratio}')
 
@@ -343,7 +348,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     else:# scad
         angle_Comm = 45
         org_Comm = vec2( 5.6, 4.3 )
-    # org_Comm[1] += 30 / unit# yoffset for A4 paper
+    # org_Comm[1] += 30 / unit_w# yoffset for A4 paper
 
     # parameters
     angle_M_Comm = -16 * ratio
@@ -357,28 +362,28 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     dys_Thmb = [-0.1 * ratio, 0.1 * ratio, 0]
 
     ## Middle finger: Comm(,)
-    dx_Comm_8 = 3 * math.tan( angle_M_Comm / 2 * deg2rad )
+    dx_Comm_8 = 3 * math.tan( angle_M_Comm / 2 * deg2rad * keyh )
     dx_I_8 = 0
     dx_Comm_K = dx_K_I = (dx_Comm_8 - dx_I_8) / 2
 
     ## Index finger: M, N
     angle_Index = angle_M_Comm + angle_Comm
     org_M = org_Comm \
-        + vec2( -0.5, +0.5 ) @ mat2_rot( angle_Comm ) \
-        + vec2( -0.5, -0.5 ) @ mat2_rot( angle_Index )
+        + vec2( -0.5, +0.5 * keyh ) @ mat2_rot( angle_Comm ) \
+        + vec2( -0.5, -0.5 * keyh ) @ mat2_rot( angle_Index )
     org_N = org_M + vec2( -1, 0 ) @ mat2_rot( angle_Index )
 
     dx_M_7 = -dx_Comm_8
-    dx_U_7 = -math.sin( angle_M_Comm * deg2rad )
+    dx_U_7 = -math.sin( angle_M_Comm * deg2rad ) * keyh
     dx_J_U = dx_U_7 * 0.8
     dx_M_J = dx_M_7 - (dx_J_U + dx_U_7)
     # print( f'dx_M_J={dx_M_J:.3f}, dx_J_U={dx_J_U:.3f}, dx_U_7={dx_U_7:.3f}')
 
     ## Inner most
-    keyh_Inner = 1.0
-    angle_Inner = angle_Index + math.atan2( dx_M_J, 1 - dy_Entr ) * rad2deg
+    keyh_Inner = keyh
+    angle_Inner = angle_Index + math.atan2( dx_M_J, (1 - dy_Entr) * keyh ) * rad2deg
     org_Inner = org_N \
-        + vec2( -0.5, +0.5 - dy_Entr ) @ mat2_rot( angle_Index ) \
+        + vec2( -0.5, (+0.5 - dy_Entr) * keyh ) @ mat2_rot( angle_Index ) \
         + vec2( -0.5, -keyh_Inner/2 ) @ mat2_rot( angle_Inner )
 
     ## Ring finger: Dot
@@ -389,34 +394,34 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     ## Pinky finger: top
     angle_Dot_Scln = -angle_M_Comm
     if angle_Dot_Scln == 0:
-        dy_Scln = 0.5
+        dy_Scln = 0.5 * keyh
     else:
-        dy_Scln = 1 + dx_Dot_L / math.sin( angle_Dot_Scln * deg2rad )
-    if True:
+        dy_Scln = keyh + dx_Dot_L / math.sin( angle_Dot_Scln * deg2rad )
+    if False:
         dy_Scln *= ratio
-        angle_Dot_Scln = math.asin( dx_Dot_L / (dy_Scln - 1) ) * rad2deg
+        angle_Dot_Scln = math.asin( dx_Dot_L / (dy_Scln - keyh) ) * rad2deg
     print( f'angle_Dot_Scln={angle_Dot_Scln}, dx_Dot_L={dx_Dot_L}, dy_Scln={dy_Scln}')
     # Scln(;)
     angle_PinkyTop = angle_Dot - angle_Dot_Scln
-    tr_Dot = org_Dot + vec2( +0.5, -0.5 ) @ mat2_rot( angle_Dot )
-    org_Scln = tr_Dot + vec2( +0.5, dy_Scln - 0.5) @ mat2_rot( angle_PinkyTop )
+    tr_Dot = org_Dot + vec2( +0.5, -0.5 * keyh ) @ mat2_rot( angle_Dot )
+    org_Scln = tr_Dot + vec2( +0.5, dy_Scln - 0.5 * keyh) @ mat2_rot( angle_PinkyTop )
     dx_Scln_P = dy_Scln * math.tan( angle_Dot_Scln * deg2rad )
     # Cln(:), RBrc(])
     org_Cln = org_Scln + vec2( +1, dy_Cln ) @ mat2_rot( angle_PinkyTop )
     org_RBrc = org_Cln + vec2( +1, dy_Cln ) @ mat2_rot( angle_PinkyTop )
 
     ## Pinky finger: bottom
-    angle_Pinky_Btm_Top = math.atan2( dy_Cln, 1 ) * rad2deg
+    angle_Pinky_Btm_Top = math.atan2( dy_Cln, 1 ) * rad2deg# 1 == keyw
     angle_PinkyBtm = angle_PinkyTop + angle_Pinky_Btm_Top
     print( f'angle_PinkyBtm = {angle_PinkyBtm}' )
     keyw_Slsh = 1.25 + 0.1
     keyw_Bsls = 1.5 + 0.12
     # Slsh(/)
-    br_Dot = org_Dot + vec2( +0.5, +0.5 ) @ mat2_rot( angle_Dot )
-    bl_Scln = org_Scln + vec2( -0.5, +0.5 ) @ mat2_rot( angle_PinkyTop )
+    br_Dot = org_Dot + vec2( +0.5, +0.5 * keyh ) @ mat2_rot( angle_Dot )
+    bl_Scln = org_Scln + vec2( -0.5, +0.5 * keyh ) @ mat2_rot( angle_PinkyTop )
     tl_Slsh = vec2_find_intersection( bl_Scln, vec2( 1, 0 ) @ mat2_rot( angle_PinkyBtm ),
                                       br_Dot,  vec2( 1, 0 ) @ mat2_rot( angle_Dot + 90 ) )[0]
-    org_Slsh = tl_Slsh + vec2( keyw_Slsh / 2, +0.5 ) @ mat2_rot( angle_PinkyBtm )
+    org_Slsh = tl_Slsh + vec2( keyw_Slsh / 2, +0.5 * keyh ) @ mat2_rot( angle_PinkyBtm )
     # Bsls(\)
     org_Bsls = org_Slsh + vec2( (keyw_Slsh + keyw_Bsls) / 2, 0 ) @ mat2_rot( angle_PinkyBtm )
 
@@ -436,7 +441,7 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     maker.add_col( angle_PinkyTop, org_RBrc, [dx_Scln_P], col_Brac, col_Gui )
 
     # add the thumb row
-    keyw12 = (1.25 * 19.05 - (19.05 - unit)) / 19.05
+    keyw12 = (1.25 * 19.05 - (19.05 - unit_w)) / 19.05
     keyws = [keyw12, keyw12, 1]
     # keyw12 = 1.25
     keyw = keyw12
@@ -445,9 +450,9 @@ def make_kbd_hermit( path: str, unit, paper_size, ratio = 1.0 ):
     org_Thmb = org_M + delta_M_Thmb @ mat2_rot( angle_Index )
     for idx, name in enumerate( thumbs1 ):
         maker.add_col( angle_Thmb, org_Thmb, [0], [name], [thumbs2[idx]], keyw = keyws[idx] )
-        org_Thmb += vec2( +keyw / 2, +0.5 ) @ mat2_rot( angle_Thmb )
+        org_Thmb += vec2( +keyw / 2, +0.5 * keyh ) @ mat2_rot( angle_Thmb )
         angle_Thmb += dangles_Thmb[idx]
-        org_Thmb += vec2( -keyw / 2 - dys_Thmb[idx], +0.5 ) @ mat2_rot( angle_Thmb )
+        org_Thmb += vec2( -keyw / 2 - dys_Thmb[idx], +0.5 * keyh ) @ mat2_rot( angle_Thmb )
 
     # the inner most key (Enter, Del)
     maker.add_col( angle_Inner, org_Inner, [0], col_I1, col_I2, keyh = keyh_Inner )
@@ -464,30 +469,30 @@ if __name__=='__main__':
     dst_scad = os.path.join( work_dir, home_dir + '/repos/mywork/hermit-layout.scad' )
 
     ## Hermit
-    # unit = 19.05
-    unit = 17.3
+    unit_w = 17.4
+    unit_h = 16.8
     # paper_size = vec2( 297, 210 )# A4
     # paper_size = vec2( 364, 257 )# B4
     paper_size = vec2( 340, 170 )
     thickness = 0.3# mm
 
     N = 16
-    for i in [N]:
+    # for i in [N]:
     # for i in [0, N]:
     # for i in [0, 1, int(N/2)]:
     # for i in range( N + 1 ):
-    # for i in range( 2 * N ):
+    for i in range( 2 * N ):
         ratio = (N - abs( i - N )) / float( N )
         ratio = (1 - math.cos( math.pi * ratio )) / 2
-        data = make_kbd_hermit( dst_path, unit, paper_size, ratio )
+        data = make_kbd_hermit( unit_w, unit_h, paper_size, ratio )
         # write to json for keyboard layout editor
         with open( dst_path, 'w' ) as fout:
             json.dump( data, fout, indent = 4 )
 
         kbd = keyboard_layout.load( dst_path )
         # kbd.print()
-        kbd.write_png( dst_png_fmt.format( i ), unit, thickness, paper_size )
+        kbd.write_png( dst_png_fmt.format( i ), unit_w, thickness, paper_size )
         if i == N and ratio == 1:
-            kbd.write_pdf( dst_pdf, unit, thickness, paper_size )
+            kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
             kbd.write_scad( dst_scad )
         # break
