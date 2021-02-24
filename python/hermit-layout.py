@@ -2,6 +2,7 @@ import json
 import math
 import numpy as np
 import os
+import sys
 import collections
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.pdfgen import canvas
@@ -221,6 +222,35 @@ class keyboard_layout:
                 idx += 1
             fout.write( '];\n' )
 
+    def write_kicad( self, fout, unit_w: float ):
+        fout.write( 'key_pos_angles = {\n' )
+        # xs = list( map( lambda key: key.x, self.keys ) )
+        # xctr = (min( xs ) + max( xs )) / 2
+        col = 1
+        row = 1
+        for key in self.keys:
+            (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
+            px = x - rx + w / 2
+            py = y - ry + h / 2
+            # if x < xctr:# right only
+            #     continue
+            t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+            t *= unit_w
+            keyidx = f'{col}{row}'
+            row += 1
+            if row == 4:
+                if col == 7 or col == 8:
+                    col += 1
+                    row = 1
+            elif row == 5:
+                if col == 6:
+                    row = 2
+                else:
+                    row = 1
+                col += 1
+            fout.write( '    \'{}\' : [{:.3f}, {:.3f}, {:.1f}], # {}\n'.format( keyidx, t[0], -t[1], -r, key.name[0] ) )
+        fout.write( '}\n' )
+
     def save( self, path: str ):
         data = []
         data.append( self.meta )
@@ -269,19 +299,6 @@ class keyboard_layout:
                 prop["y"] += key.h
         return kbd
 
-def print_for_kicad( idx, prop ):
-    angle = prop["r"]
-    th = angle * deg2rad
-    co = math.cos( th )
-    si = math.sin( th )
-    w = prop["w"]
-    h = prop["h"]
-    dx = prop["x"] + w / 2.0
-    dy = prop["y"] + h / 2.0
-    cx = prop["rx"] + co * dx - si * dy
-    cy = prop["ry"] + si * dx + co * dy
-    print( "['TP{}', {:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}],".format( idx, cx, cy, angle, co, si ) )
-
 class key_layout_maker:
     def __init__( self, xctr, keyh ):
         self.data = []
@@ -291,7 +308,7 @@ class key_layout_maker:
     def add_col( self, angle, org, dxs, names1, names2, ydir = -1, keyw = 1, keyh = -1 ):
         if keyh < 0:
             keyh = self.keyh
-        for idx, names in enumerate( [names1, names2 ]):
+        for idx, names in enumerate( [names1, names2]):
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
             prop["r"] = xsign * angle
@@ -311,6 +328,7 @@ class key_layout_maker:
                 x = -keyw + dxs[min( idx, len( dxs ) - 1 )] * xsign
                 y = keyh * ydir
             self.data.append( row )
+            break# No left
 
 def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
 
@@ -344,12 +362,17 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     print( f'ratio = {ratio}')
 
     # Comma: the origin
-    if True:# png, pdf
+    if False:# png, pdf
         angle_Comm = 0
         org_Comm = vec2( 4.5, 4.3 )
-    else:# scad
+    elif False:# scad
         angle_Comm = 45
         org_Comm = vec2( 5.6, 4.3 )
+    else: #kicad
+        angle_Comm = 0
+        # angle_Comm = 16
+        org_Comm = vec2( -6.0, 3.0 )
+
     # org_Comm[1] += 30 / unit_w# yoffset for A4 paper
 
     # parameters
@@ -497,4 +520,5 @@ if __name__=='__main__':
         if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
             kbd.write_scad( dst_scad, unit_w, unit_h )
+            kbd.write_kicad( sys.stdout, unit_w )
         # break
