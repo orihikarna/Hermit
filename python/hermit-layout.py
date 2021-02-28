@@ -202,40 +202,33 @@ class keyboard_layout:
         c.showPage()
         c.save()
 
-    def write_scad( self, path: str, unit_w: float, unit_h: float ):
+    def write_scad( self, path: str, unit_w: float ):
         with open( path, 'w' ) as fout:
             fout.write( f'key_w = {unit_w};\n' )
             fout.write( f'key_h = {unit_h};\n' )
             fout.write( 'key_pos_angles = [\n' )
-            xs = list( map( lambda key: key.x, self.keys ) )
-            xctr = (min( xs ) + max( xs )) / 2
             idx = 0
             for key in self.keys:
                 (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
                 px = x - rx + w / 2
                 py = y - ry + h / 2
-                if x < xctr:
-                    continue
                 t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
-                #
-                fout.write( '    [{}, {}, {}, {}, {}, {}, "{}"],\n'.format( t[0], -t[1], -r, w, h, idx, key.name ) )
+                t *= unit_w
+                w *= unit_w
+                h *= unit_w
+                fout.write( '    [{:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {}, "{}"],\n'.format( t[0], -t[1], -r, w, h, idx, key.name ) )
                 idx += 1
             fout.write( '];\n' )
 
     def write_kicad( self, fout, unit_w: float ):
-        fout.write( 'key_pos_angles = {\n' )
-        # xs = list( map( lambda key: key.x, self.keys ) )
-        # xctr = (min( xs ) + max( xs )) / 2
+        fout.write( 'keys = {\n' )
         col = 1
         row = 1
         for key in self.keys:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             px = x - rx + w / 2
             py = y - ry + h / 2
-            # if x < xctr:# right only
-            #     continue
             t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
-            t *= unit_w
             keyidx = f'{col}{row}'
             row += 1
             if row == 4:
@@ -248,7 +241,10 @@ class keyboard_layout:
                 else:
                     row = 1
                 col += 1
-            fout.write( '    \'{}\' : [{:.3f}, {:.3f}, {:.1f}], # {}\n'.format( keyidx, t[0], -t[1], -r, key.name[0] ) )
+            t *= unit_w
+            w *= unit_w
+            h *= unit_w
+            fout.write( '    \'{}\' : [{:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.1f}], # {}\n'.format( keyidx, t[0], -t[1], w, h, -r, key.name[0] ) )
         fout.write( '}\n' )
 
     def save( self, path: str ):
@@ -309,6 +305,8 @@ class key_layout_maker:
         if keyh < 0:
             keyh = self.keyh
         for idx, names in enumerate( [names1, names2]):
+            if idx in [0]:
+                continue
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
             prop["r"] = xsign * angle
@@ -328,7 +326,6 @@ class key_layout_maker:
                 x = -keyw + dxs[min( idx, len( dxs ) - 1 )] * xsign
                 y = keyh * ydir
             self.data.append( row )
-            break# No left
 
 def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
 
@@ -362,16 +359,19 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     print( f'ratio = {ratio}')
 
     # Comma: the origin
-    if False:# png, pdf
+    output_type = 'scad'
+    if output_type in ['png', 'pdf']:
         angle_Comm = 0
         org_Comm = vec2( 4.5, 4.3 )
-    elif False:# scad
+    elif output_type in ['scad']:
         angle_Comm = 45
         org_Comm = vec2( 5.6, 4.3 )
-    else: #kicad
+    elif output_type == 'kicad':
         angle_Comm = 0
         # angle_Comm = 16
         org_Comm = vec2( -6.0, 3.0 )
+    else:
+        return
 
     # org_Comm[1] += 30 / unit_w# yoffset for A4 paper
 
@@ -519,6 +519,6 @@ if __name__=='__main__':
         kbd.write_png( dst_png_fmt.format( i ), unit_w, thickness, paper_size )
         if i == N and ratio == 1:
             kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
-            kbd.write_scad( dst_scad, unit_w, unit_h )
+            kbd.write_scad( dst_scad, unit_w )
             kbd.write_kicad( sys.stdout, unit_w )
         # break
