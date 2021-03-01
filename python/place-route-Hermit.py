@@ -470,9 +470,9 @@ def main():
             Dy = 0.6 * sign
             if name != '91':#(board == BDL and idx < 2) or (board == BDR and idx < 3):
                 pos = vec2.mult( mat2.rotate( -angle ), (+Dx, Dy), sw_pos )
-                kad.set_mod_pos_angle( 'D' + name, pos, + 90 * sign - angle )
+                kad.set_mod_pos_angle( 'D' + name, pos, - 90 * sign - angle )
                 # wire to SW
-                kad.wire_mods( [('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0, -1))])
+                kad.wire_mods( [('D' + name, '2', 'SW' + name, '2', 0.5, (Dird, 0, 0, -1))])
             elif False:#idx < 4:
                 pos = vec2.mult( mat2.rotate( -angle ), (-Dx, Dy), sw_pos )
                 kad.set_mod_pos_angle( 'D' + name, pos, - 90 * sign - angle )
@@ -574,11 +574,29 @@ def main():
                 ('RB2', (0, +2), 180),
             ] ),
         ] )
-    return
 
     ###
     ### Wire mods
     ###
+    # ROW lines
+    if board == BDL:
+        for row in ['4', '3', '2', '1']:
+            kad.wire_mods( [
+                ('SW1'+row, '1', 'SW2'+row, '1', 0.5, (Strt)),
+                ('SW2'+row, '1', 'SW3'+row, '1', 0.5, (Dird, 0, 0, -5)),
+                ('SW3'+row, '1', 'SW4'+row, '1', 0.5, (Strt)),
+                ('SW4'+row, '1', 'SW5'+row, '1', 0.5, (ZgZg, 0, 60, -5)),
+                ('SW5'+row, '1', 'SW6'+row, '1', 0.5, (ZgZg, 0, 45, -5)),
+            ] )
+            if '7'+row in keys.keys():
+                kad.wire_mods( [
+                    ('SW6'+row, '1', 'SW7'+row, '1', 0.5, (Dird, 0, 45, -5)),
+                ] )
+       
+    return
+
+
+
     # COL lines
     if board in [BDL, BDR]:
         kad.wire_mods( [

@@ -533,9 +533,9 @@ F 3 "~" H 1175 2300 50  0001 C CNN
 $EndComp
 Text GLabel 1325 2600 3    50   Input ~ 0
 BOOT0
-Text GLabel 6450 1050 2    50   Input ~ 0
+Text GLabel 6450 825  2    50   Input ~ 0
 ROW3
-Text GLabel 6450 725  2    50   Input ~ 0
+Text GLabel 6450 525  2    50   Input ~ 0
 ROW4
 $Comp
 L Device:C_Small C18
@@ -551,34 +551,34 @@ $EndComp
 $Comp
 L Device:D_Small D83
 U 1 1 5F31DFD5
-P 6000 1150
-F 0 "D83" H 6000 1082 50  0000 R CNN
-F 1 "D_Small" V 5955 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 6000 1150 50  0001 C CNN
-F 3 "~" V 6000 1150 50  0001 C CNN
-	1    6000 1150
+P 5700 1150
+F 0 "D83" H 5700 1082 50  0000 R CNN
+F 1 "D_Small" V 5655 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 5700 1150 50  0001 C CNN
+F 3 "~" V 5700 1150 50  0001 C CNN
+	1    5700 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D82
 U 1 1 5F32238F
-P 6000 1475
-F 0 "D82" H 6000 1407 50  0000 R CNN
-F 1 "D_Small" V 5955 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 6000 1475 50  0001 C CNN
-F 3 "~" V 6000 1475 50  0001 C CNN
-	1    6000 1475
+P 5700 1475
+F 0 "D82" H 5700 1407 50  0000 R CNN
+F 1 "D_Small" V 5655 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 5700 1475 50  0001 C CNN
+F 3 "~" V 5700 1475 50  0001 C CNN
+	1    5700 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D81
 U 1 1 5F32239B
-P 6000 1800
-F 0 "D81" H 6000 1732 50  0000 R CNN
-F 1 "D_Small" V 5955 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 6000 1800 50  0001 C CNN
-F 3 "~" V 6000 1800 50  0001 C CNN
-	1    6000 1800
+P 5700 1800
+F 0 "D81" H 5700 1732 50  0000 R CNN
+F 1 "D_Small" V 5655 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 5700 1800 50  0001 C CNN
+F 3 "~" V 5700 1800 50  0001 C CNN
+	1    5700 1800
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -743,16 +743,10 @@ Text GLabel 2275 5100 2    50   Input ~ 0
 LDI
 Text GLabel 825  3625 0    50   Input ~ 0
 5V
-Wire Wire Line
-	6000 1050 6450 1050
-Text GLabel 6450 1375 2    50   Input ~ 0
+Text GLabel 6450 1150 2    50   Input ~ 0
 ROW2
-Text GLabel 6450 1700 2    50   Input ~ 0
+Text GLabel 6450 1475 2    50   Input ~ 0
 ROW1
-Wire Wire Line
-	6000 1700 6450 1700
-Wire Wire Line
-	6000 1375 6450 1375
 $Comp
 L power:VCC #PWR0104
 U 1 1 5F2C5F12
@@ -771,40 +765,35 @@ ROW3
 $Comp
 L key-parts:SW_ChocV2 SW83
 U 1 1 5F361FBB
-P 5800 1250
-F 0 "SW83" H 5800 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 5800 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 5800 1450 50  0001 C CNN
-F 3 "~" H 5800 1450 50  0001 C CNN
-	1    5800 1250
-	1    0    0    -1  
+P 5900 1050
+F 0 "SW83" H 5900 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 5900 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 5900 1250 50  0001 C CNN
+F 3 "~" H 5900 1250 50  0001 C CNN
+	1    5900 1050
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	5600 1250 5600 1575
 $Comp
 L key-parts:SW_ChocV2 SW82
 U 1 1 5F362478
-P 5800 1575
-F 0 "SW82" H 5800 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 5800 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 5800 1775 50  0001 C CNN
-F 3 "~" H 5800 1775 50  0001 C CNN
-	1    5800 1575
-	1    0    0    -1  
+P 5900 1375
+F 0 "SW82" H 5900 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 5900 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 5900 1575 50  0001 C CNN
+F 3 "~" H 5900 1575 50  0001 C CNN
+	1    5900 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 5600 1575
-Wire Wire Line
-	5600 1575 5600 1900
 $Comp
 L key-parts:SW_ChocV2 SW81
 U 1 1 5F362A91
-P 5800 1900
-F 0 "SW81" H 5800 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 5800 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 5800 2100 50  0001 C CNN
-F 3 "~" H 5800 2100 50  0001 C CNN
-	1    5800 1900
-	1    0    0    -1  
+P 5900 1700
+F 0 "SW81" H 5900 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 5900 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 5900 1900 50  0001 C CNN
+F 3 "~" H 5900 1900 50  0001 C CNN
+	1    5900 1700
+	-1   0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR0120
@@ -817,11 +806,6 @@ F 3 "" H 6450 1950 50  0001 C CNN
 	1    6450 1950
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	5900 1950 5900 1625
-Connection ~ 5900 1625
-Wire Wire Line
-	5900 1625 5900 1300
 $Comp
 L key-parts:SW_ChocV2 SW91
 U 1 1 5F3947D1
@@ -1017,9 +1001,6 @@ Wire Wire Line
 Connection ~ 5900 2300
 Wire Wire Line
 	5900 2300 5900 2600
-Wire Wire Line
-	5600 1900 5600 2300
-Connection ~ 5600 1900
 $Comp
 L Device:C_Small C91
 U 1 1 5F2B8856
@@ -1047,56 +1028,47 @@ $EndComp
 $Comp
 L Device:D_Small D73
 U 1 1 5FFA1238
-P 5425 1150
-F 0 "D73" H 5425 1082 50  0000 R CNN
-F 1 "D_Small" V 5380 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 5425 1150 50  0001 C CNN
-F 3 "~" V 5425 1150 50  0001 C CNN
-	1    5425 1150
+P 5125 1150
+F 0 "D73" H 5125 1082 50  0000 R CNN
+F 1 "D_Small" V 5080 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 5125 1150 50  0001 C CNN
+F 3 "~" V 5125 1150 50  0001 C CNN
+	1    5125 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D72
 U 1 1 5FFA123E
-P 5425 1475
-F 0 "D72" H 5425 1407 50  0000 R CNN
-F 1 "D_Small" V 5380 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 5425 1475 50  0001 C CNN
-F 3 "~" V 5425 1475 50  0001 C CNN
-	1    5425 1475
+P 5125 1475
+F 0 "D72" H 5125 1407 50  0000 R CNN
+F 1 "D_Small" V 5080 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 5125 1475 50  0001 C CNN
+F 3 "~" V 5125 1475 50  0001 C CNN
+	1    5125 1475
 	0    -1   -1   0   
 $EndComp
-Connection ~ 5025 2300
 $Comp
 L key-parts:SW_ChocV2 SW73
 U 1 1 5FFA125C
-P 5225 1250
-F 0 "SW73" H 5225 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 5225 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 5225 1450 50  0001 C CNN
-F 3 "~" H 5225 1450 50  0001 C CNN
-	1    5225 1250
-	1    0    0    -1  
+P 5325 1050
+F 0 "SW73" H 5325 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 5325 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 5325 1250 50  0001 C CNN
+F 3 "~" H 5325 1250 50  0001 C CNN
+	1    5325 1050
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	5025 1250 5025 1575
 $Comp
 L key-parts:SW_ChocV2 SW72
 U 1 1 5FFA1264
-P 5225 1575
-F 0 "SW72" H 5225 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 5225 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 5225 1775 50  0001 C CNN
-F 3 "~" H 5225 1775 50  0001 C CNN
-	1    5225 1575
-	1    0    0    -1  
+P 5325 1375
+F 0 "SW72" H 5325 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 5325 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 5325 1575 50  0001 C CNN
+F 3 "~" H 5325 1575 50  0001 C CNN
+	1    5325 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 5025 1575
-Wire Wire Line
-	5325 1950 5325 1625
-Connection ~ 5325 1625
-Wire Wire Line
-	5325 1625 5325 1300
 Text GLabel 5325 2600 3    50   Input ~ 0
 COL7
 $Comp
@@ -1120,29 +1092,16 @@ Connection ~ 5325 2300
 Wire Wire Line
 	5325 2300 5325 2600
 Wire Wire Line
-	5425 1050 6000 1050
-Connection ~ 6000 1050
-Wire Wire Line
-	5425 1375 6000 1375
-Connection ~ 6000 1375
-Connection ~ 6000 1700
-Wire Wire Line
 	5325 2050 5900 2050
-Wire Wire Line
-	6450 1950 5900 1950
-Connection ~ 5900 1950
-Wire Wire Line
-	5900 1950 5325 1950
-Connection ~ 5325 1950
 $Comp
 L Device:D_Small D64
 U 1 1 5FFF61DA
-P 4850 825
-F 0 "D64" H 4850 757 50  0000 R CNN
-F 1 "D_Small" V 4805 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4850 825 50  0001 C CNN
-F 3 "~" V 4850 825 50  0001 C CNN
-	1    4850 825 
+P 4550 825
+F 0 "D64" H 4550 757 50  0000 R CNN
+F 1 "D_Small" V 4505 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 4550 825 50  0001 C CNN
+F 3 "~" V 4550 825 50  0001 C CNN
+	1    4550 825 
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -1170,34 +1129,34 @@ $EndComp
 $Comp
 L Device:D_Small D63
 U 1 1 5FFF61EC
-P 4850 1150
-F 0 "D63" H 4850 1082 50  0000 R CNN
-F 1 "D_Small" V 4805 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4850 1150 50  0001 C CNN
-F 3 "~" V 4850 1150 50  0001 C CNN
-	1    4850 1150
+P 4550 1150
+F 0 "D63" H 4550 1082 50  0000 R CNN
+F 1 "D_Small" V 4505 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 4550 1150 50  0001 C CNN
+F 3 "~" V 4550 1150 50  0001 C CNN
+	1    4550 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D62
 U 1 1 5FFF61F2
-P 4850 1475
-F 0 "D62" H 4850 1407 50  0000 R CNN
-F 1 "D_Small" V 4805 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4850 1475 50  0001 C CNN
-F 3 "~" V 4850 1475 50  0001 C CNN
-	1    4850 1475
+P 4550 1475
+F 0 "D62" H 4550 1407 50  0000 R CNN
+F 1 "D_Small" V 4505 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 4550 1475 50  0001 C CNN
+F 3 "~" V 4550 1475 50  0001 C CNN
+	1    4550 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D61
 U 1 1 5FFF61F8
-P 4850 1800
-F 0 "D61" H 4850 1732 50  0000 R CNN
-F 1 "D_Small" V 4805 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4850 1800 50  0001 C CNN
-F 3 "~" V 4850 1800 50  0001 C CNN
-	1    4850 1800
+P 4550 1800
+F 0 "D61" H 4550 1732 50  0000 R CNN
+F 1 "D_Small" V 4505 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 4550 1800 50  0001 C CNN
+F 3 "~" V 4550 1800 50  0001 C CNN
+	1    4550 1800
 	0    -1   -1   0   
 $EndComp
 Connection ~ 4450 2300
@@ -1206,63 +1165,47 @@ Wire Wire Line
 $Comp
 L key-parts:SW_ChocV2 SW64
 U 1 1 5FFF6206
-P 4650 925
-F 0 "SW64" H 4650 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 4650 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4650 1125 50  0001 C CNN
-F 3 "~" H 4650 1125 50  0001 C CNN
-	1    4650 925 
-	1    0    0    -1  
+P 4750 725
+F 0 "SW64" H 4750 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 4750 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4750 925 50  0001 C CNN
+F 3 "~" H 4750 925 50  0001 C CNN
+	1    4750 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	4450 925  4450 1250
 $Comp
 L key-parts:SW_ChocV2 SW63
 U 1 1 5FFF620D
-P 4650 1250
-F 0 "SW63" H 4650 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 4650 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4650 1450 50  0001 C CNN
-F 3 "~" H 4650 1450 50  0001 C CNN
-	1    4650 1250
-	1    0    0    -1  
+P 4750 1050
+F 0 "SW63" H 4750 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 4750 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4750 1250 50  0001 C CNN
+F 3 "~" H 4750 1250 50  0001 C CNN
+	1    4750 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 4450 1250
-Wire Wire Line
-	4450 1250 4450 1575
 $Comp
 L key-parts:SW_ChocV2 SW62
 U 1 1 5FFF6215
-P 4650 1575
-F 0 "SW62" H 4650 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 4650 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4650 1775 50  0001 C CNN
-F 3 "~" H 4650 1775 50  0001 C CNN
-	1    4650 1575
-	1    0    0    -1  
+P 4750 1375
+F 0 "SW62" H 4750 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 4750 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4750 1575 50  0001 C CNN
+F 3 "~" H 4750 1575 50  0001 C CNN
+	1    4750 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 4450 1575
-Wire Wire Line
-	4450 1575 4450 1900
 $Comp
 L key-parts:SW_ChocV2 SW61
 U 1 1 5FFF621D
-P 4650 1900
-F 0 "SW61" H 4650 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 4650 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4650 2100 50  0001 C CNN
-F 3 "~" H 4650 2100 50  0001 C CNN
-	1    4650 1900
-	1    0    0    -1  
+P 4750 1700
+F 0 "SW61" H 4750 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 4750 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4750 1900 50  0001 C CNN
+F 3 "~" H 4750 1900 50  0001 C CNN
+	1    4750 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	4750 1950 4750 1625
-Connection ~ 4750 1300
-Wire Wire Line
-	4750 1300 4750 975 
-Connection ~ 4750 1625
-Wire Wire Line
-	4750 1625 4750 1300
 Text GLabel 4750 2600 3    50   Input ~ 0
 COL6
 $Comp
@@ -1286,26 +1229,16 @@ Connection ~ 4750 2300
 Wire Wire Line
 	4750 2300 4750 2600
 Wire Wire Line
-	4450 1900 4450 2300
-Connection ~ 4450 1900
-Wire Wire Line
-	4850 1050 5425 1050
-Wire Wire Line
-	4850 1375 5425 1375
-Wire Wire Line
 	4750 2050 5325 2050
-Wire Wire Line
-	5325 1950 4750 1950
-Connection ~ 4750 1950
 $Comp
 L Device:D_Small D54
 U 1 1 60001566
-P 4275 825
-F 0 "D54" H 4275 757 50  0000 R CNN
-F 1 "D_Small" V 4230 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4275 825 50  0001 C CNN
-F 3 "~" V 4275 825 50  0001 C CNN
-	1    4275 825 
+P 3975 825
+F 0 "D54" H 3975 757 50  0000 R CNN
+F 1 "D_Small" V 3930 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3975 825 50  0001 C CNN
+F 3 "~" V 3975 825 50  0001 C CNN
+	1    3975 825 
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -1333,34 +1266,34 @@ $EndComp
 $Comp
 L Device:D_Small D53
 U 1 1 60001578
-P 4275 1150
-F 0 "D53" H 4275 1082 50  0000 R CNN
-F 1 "D_Small" V 4230 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4275 1150 50  0001 C CNN
-F 3 "~" V 4275 1150 50  0001 C CNN
-	1    4275 1150
+P 3975 1150
+F 0 "D53" H 3975 1082 50  0000 R CNN
+F 1 "D_Small" V 3930 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3975 1150 50  0001 C CNN
+F 3 "~" V 3975 1150 50  0001 C CNN
+	1    3975 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D52
 U 1 1 6000157E
-P 4275 1475
-F 0 "D52" H 4275 1407 50  0000 R CNN
-F 1 "D_Small" V 4230 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4275 1475 50  0001 C CNN
-F 3 "~" V 4275 1475 50  0001 C CNN
-	1    4275 1475
+P 3975 1475
+F 0 "D52" H 3975 1407 50  0000 R CNN
+F 1 "D_Small" V 3930 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3975 1475 50  0001 C CNN
+F 3 "~" V 3975 1475 50  0001 C CNN
+	1    3975 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D51
 U 1 1 60001584
-P 4275 1800
-F 0 "D51" H 4275 1732 50  0000 R CNN
-F 1 "D_Small" V 4230 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 4275 1800 50  0001 C CNN
-F 3 "~" V 4275 1800 50  0001 C CNN
-	1    4275 1800
+P 3975 1800
+F 0 "D51" H 3975 1732 50  0000 R CNN
+F 1 "D_Small" V 3930 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3975 1800 50  0001 C CNN
+F 3 "~" V 3975 1800 50  0001 C CNN
+	1    3975 1800
 	0    -1   -1   0   
 $EndComp
 Connection ~ 3875 2300
@@ -1369,63 +1302,47 @@ Wire Wire Line
 $Comp
 L key-parts:SW_ChocV2 SW54
 U 1 1 60001592
-P 4075 925
-F 0 "SW54" H 4075 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 4075 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4075 1125 50  0001 C CNN
-F 3 "~" H 4075 1125 50  0001 C CNN
-	1    4075 925 
-	1    0    0    -1  
+P 4175 725
+F 0 "SW54" H 4175 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 4175 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4175 925 50  0001 C CNN
+F 3 "~" H 4175 925 50  0001 C CNN
+	1    4175 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	3875 925  3875 1250
 $Comp
 L key-parts:SW_ChocV2 SW53
 U 1 1 60001599
-P 4075 1250
-F 0 "SW53" H 4075 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 4075 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4075 1450 50  0001 C CNN
-F 3 "~" H 4075 1450 50  0001 C CNN
-	1    4075 1250
-	1    0    0    -1  
+P 4175 1050
+F 0 "SW53" H 4175 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 4175 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4175 1250 50  0001 C CNN
+F 3 "~" H 4175 1250 50  0001 C CNN
+	1    4175 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 3875 1250
-Wire Wire Line
-	3875 1250 3875 1575
 $Comp
 L key-parts:SW_ChocV2 SW52
 U 1 1 600015A1
-P 4075 1575
-F 0 "SW52" H 4075 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 4075 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4075 1775 50  0001 C CNN
-F 3 "~" H 4075 1775 50  0001 C CNN
-	1    4075 1575
-	1    0    0    -1  
+P 4175 1375
+F 0 "SW52" H 4175 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 4175 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4175 1575 50  0001 C CNN
+F 3 "~" H 4175 1575 50  0001 C CNN
+	1    4175 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 3875 1575
-Wire Wire Line
-	3875 1575 3875 1900
 $Comp
 L key-parts:SW_ChocV2 SW51
 U 1 1 600015A9
-P 4075 1900
-F 0 "SW51" H 4075 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 4075 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 4075 2100 50  0001 C CNN
-F 3 "~" H 4075 2100 50  0001 C CNN
-	1    4075 1900
-	1    0    0    -1  
+P 4175 1700
+F 0 "SW51" H 4175 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 4175 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 4175 1900 50  0001 C CNN
+F 3 "~" H 4175 1900 50  0001 C CNN
+	1    4175 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	4175 1950 4175 1625
-Connection ~ 4175 1300
-Wire Wire Line
-	4175 1300 4175 975 
-Connection ~ 4175 1625
-Wire Wire Line
-	4175 1625 4175 1300
 Text GLabel 4175 2600 3    50   Input ~ 0
 COL5
 $Comp
@@ -1449,38 +1366,18 @@ Connection ~ 4175 2300
 Wire Wire Line
 	4175 2300 4175 2600
 Wire Wire Line
-	3875 1900 3875 2300
-Connection ~ 3875 1900
-Wire Wire Line
-	4275 725  4850 725 
-Wire Wire Line
-	4275 1050 4850 1050
-Wire Wire Line
-	4275 1375 4850 1375
-Wire Wire Line
-	4275 1700 4850 1700
-Wire Wire Line
 	4175 2050 4750 2050
-Wire Wire Line
-	4750 1950 4175 1950
-Connection ~ 4175 1950
 Connection ~ 4750 2050
-Connection ~ 4850 725 
-Connection ~ 4850 1050
-Connection ~ 4850 1375
-Connection ~ 4850 1700
 Connection ~ 5325 2050
-Connection ~ 5425 1050
-Connection ~ 5425 1375
 $Comp
 L Device:D_Small D44
 U 1 1 60056EF7
-P 3700 825
-F 0 "D44" H 3700 757 50  0000 R CNN
-F 1 "D_Small" V 3655 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3700 825 50  0001 C CNN
-F 3 "~" V 3700 825 50  0001 C CNN
-	1    3700 825 
+P 3400 825
+F 0 "D44" H 3400 757 50  0000 R CNN
+F 1 "D_Small" V 3355 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3400 825 50  0001 C CNN
+F 3 "~" V 3400 825 50  0001 C CNN
+	1    3400 825 
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -1508,34 +1405,34 @@ $EndComp
 $Comp
 L Device:D_Small D43
 U 1 1 60056F09
-P 3700 1150
-F 0 "D43" H 3700 1082 50  0000 R CNN
-F 1 "D_Small" V 3655 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3700 1150 50  0001 C CNN
-F 3 "~" V 3700 1150 50  0001 C CNN
-	1    3700 1150
+P 3400 1150
+F 0 "D43" H 3400 1082 50  0000 R CNN
+F 1 "D_Small" V 3355 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3400 1150 50  0001 C CNN
+F 3 "~" V 3400 1150 50  0001 C CNN
+	1    3400 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D42
 U 1 1 60056F0F
-P 3700 1475
-F 0 "D42" H 3700 1407 50  0000 R CNN
-F 1 "D_Small" V 3655 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3700 1475 50  0001 C CNN
-F 3 "~" V 3700 1475 50  0001 C CNN
-	1    3700 1475
+P 3400 1475
+F 0 "D42" H 3400 1407 50  0000 R CNN
+F 1 "D_Small" V 3355 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3400 1475 50  0001 C CNN
+F 3 "~" V 3400 1475 50  0001 C CNN
+	1    3400 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D41
 U 1 1 60056F15
-P 3700 1800
-F 0 "D41" H 3700 1732 50  0000 R CNN
-F 1 "D_Small" V 3655 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3700 1800 50  0001 C CNN
-F 3 "~" V 3700 1800 50  0001 C CNN
-	1    3700 1800
+P 3400 1800
+F 0 "D41" H 3400 1732 50  0000 R CNN
+F 1 "D_Small" V 3355 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 3400 1800 50  0001 C CNN
+F 3 "~" V 3400 1800 50  0001 C CNN
+	1    3400 1800
 	0    -1   -1   0   
 $EndComp
 Connection ~ 3300 2300
@@ -1544,63 +1441,47 @@ Wire Wire Line
 $Comp
 L key-parts:SW_ChocV2 SW44
 U 1 1 60056F23
-P 3500 925
-F 0 "SW44" H 3500 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 3500 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 3500 1125 50  0001 C CNN
-F 3 "~" H 3500 1125 50  0001 C CNN
-	1    3500 925 
-	1    0    0    -1  
+P 3600 725
+F 0 "SW44" H 3600 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 3600 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3600 925 50  0001 C CNN
+F 3 "~" H 3600 925 50  0001 C CNN
+	1    3600 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	3300 925  3300 1250
 $Comp
 L key-parts:SW_ChocV2 SW43
 U 1 1 60056F2A
-P 3500 1250
-F 0 "SW43" H 3500 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 3500 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 3500 1450 50  0001 C CNN
-F 3 "~" H 3500 1450 50  0001 C CNN
-	1    3500 1250
-	1    0    0    -1  
+P 3600 1050
+F 0 "SW43" H 3600 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 3600 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3600 1250 50  0001 C CNN
+F 3 "~" H 3600 1250 50  0001 C CNN
+	1    3600 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 3300 1250
-Wire Wire Line
-	3300 1250 3300 1575
 $Comp
 L key-parts:SW_ChocV2 SW42
 U 1 1 60056F32
-P 3500 1575
-F 0 "SW42" H 3500 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 3500 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 3500 1775 50  0001 C CNN
-F 3 "~" H 3500 1775 50  0001 C CNN
-	1    3500 1575
-	1    0    0    -1  
+P 3600 1375
+F 0 "SW42" H 3600 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 3600 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3600 1575 50  0001 C CNN
+F 3 "~" H 3600 1575 50  0001 C CNN
+	1    3600 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 3300 1575
-Wire Wire Line
-	3300 1575 3300 1900
 $Comp
 L key-parts:SW_ChocV2 SW41
 U 1 1 60056F3A
-P 3500 1900
-F 0 "SW41" H 3500 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 3500 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 3500 2100 50  0001 C CNN
-F 3 "~" H 3500 2100 50  0001 C CNN
-	1    3500 1900
-	1    0    0    -1  
+P 3600 1700
+F 0 "SW41" H 3600 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 3600 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3600 1900 50  0001 C CNN
+F 3 "~" H 3600 1900 50  0001 C CNN
+	1    3600 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	3600 1950 3600 1625
-Connection ~ 3600 1300
-Wire Wire Line
-	3600 1300 3600 975 
-Connection ~ 3600 1625
-Wire Wire Line
-	3600 1625 3600 1300
 Text GLabel 3600 2600 3    50   Input ~ 0
 COL4
 $Comp
@@ -1624,30 +1505,16 @@ Connection ~ 3600 2300
 Wire Wire Line
 	3600 2300 3600 2600
 Wire Wire Line
-	3300 1900 3300 2300
-Connection ~ 3300 1900
-Wire Wire Line
-	3700 725  4275 725 
-Wire Wire Line
-	3700 1050 4275 1050
-Wire Wire Line
-	3700 1375 4275 1375
-Wire Wire Line
-	3700 1700 4275 1700
-Wire Wire Line
 	3600 2050 4175 2050
-Wire Wire Line
-	4175 1950 3600 1950
-Connection ~ 3600 1950
 $Comp
 L Device:D_Small D34
 U 1 1 60069296
-P 3125 825
-F 0 "D34" H 3125 757 50  0000 R CNN
-F 1 "D_Small" V 3080 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3125 825 50  0001 C CNN
-F 3 "~" V 3125 825 50  0001 C CNN
-	1    3125 825 
+P 2825 825
+F 0 "D34" H 2825 757 50  0000 R CNN
+F 1 "D_Small" V 2780 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2825 825 50  0001 C CNN
+F 3 "~" V 2825 825 50  0001 C CNN
+	1    2825 825 
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -1675,99 +1542,82 @@ $EndComp
 $Comp
 L Device:D_Small D33
 U 1 1 600692A8
-P 3125 1150
-F 0 "D33" H 3125 1082 50  0000 R CNN
-F 1 "D_Small" V 3080 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3125 1150 50  0001 C CNN
-F 3 "~" V 3125 1150 50  0001 C CNN
-	1    3125 1150
+P 2825 1150
+F 0 "D33" H 2825 1082 50  0000 R CNN
+F 1 "D_Small" V 2780 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2825 1150 50  0001 C CNN
+F 3 "~" V 2825 1150 50  0001 C CNN
+	1    2825 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D32
 U 1 1 600692AE
-P 3125 1475
-F 0 "D32" H 3125 1407 50  0000 R CNN
-F 1 "D_Small" V 3080 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3125 1475 50  0001 C CNN
-F 3 "~" V 3125 1475 50  0001 C CNN
-	1    3125 1475
+P 2825 1475
+F 0 "D32" H 2825 1407 50  0000 R CNN
+F 1 "D_Small" V 2780 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2825 1475 50  0001 C CNN
+F 3 "~" V 2825 1475 50  0001 C CNN
+	1    2825 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D31
 U 1 1 600692B4
-P 3125 1800
-F 0 "D31" H 3125 1732 50  0000 R CNN
-F 1 "D_Small" V 3080 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 3125 1800 50  0001 C CNN
-F 3 "~" V 3125 1800 50  0001 C CNN
-	1    3125 1800
+P 2825 1800
+F 0 "D31" H 2825 1732 50  0000 R CNN
+F 1 "D_Small" V 2780 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2825 1800 50  0001 C CNN
+F 3 "~" V 2825 1800 50  0001 C CNN
+	1    2825 1800
 	0    -1   -1   0   
 $EndComp
-Connection ~ 2725 2300
 Wire Wire Line
 	2725 2300 2725 2350
 $Comp
 L key-parts:SW_ChocV2 SW34
 U 1 1 600692C2
-P 2925 925
-F 0 "SW34" H 2925 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 2925 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2925 1125 50  0001 C CNN
-F 3 "~" H 2925 1125 50  0001 C CNN
-	1    2925 925 
-	1    0    0    -1  
+P 3025 725
+F 0 "SW34" H 3025 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 3025 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3025 925 50  0001 C CNN
+F 3 "~" H 3025 925 50  0001 C CNN
+	1    3025 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	2725 925  2725 1250
 $Comp
 L key-parts:SW_ChocV2 SW33
 U 1 1 600692C9
-P 2925 1250
-F 0 "SW33" H 2925 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 2925 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2925 1450 50  0001 C CNN
-F 3 "~" H 2925 1450 50  0001 C CNN
-	1    2925 1250
-	1    0    0    -1  
+P 3025 1050
+F 0 "SW33" H 3025 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 3025 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3025 1250 50  0001 C CNN
+F 3 "~" H 3025 1250 50  0001 C CNN
+	1    3025 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 2725 1250
-Wire Wire Line
-	2725 1250 2725 1575
 $Comp
 L key-parts:SW_ChocV2 SW32
 U 1 1 600692D1
-P 2925 1575
-F 0 "SW32" H 2925 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 2925 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2925 1775 50  0001 C CNN
-F 3 "~" H 2925 1775 50  0001 C CNN
-	1    2925 1575
-	1    0    0    -1  
+P 3025 1375
+F 0 "SW32" H 3025 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 3025 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3025 1575 50  0001 C CNN
+F 3 "~" H 3025 1575 50  0001 C CNN
+	1    3025 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 2725 1575
-Wire Wire Line
-	2725 1575 2725 1900
 $Comp
 L key-parts:SW_ChocV2 SW31
 U 1 1 600692D9
-P 2925 1900
-F 0 "SW31" H 2925 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 2925 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2925 2100 50  0001 C CNN
-F 3 "~" H 2925 2100 50  0001 C CNN
-	1    2925 1900
-	1    0    0    -1  
+P 3025 1700
+F 0 "SW31" H 3025 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 3025 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 3025 1900 50  0001 C CNN
+F 3 "~" H 3025 1900 50  0001 C CNN
+	1    3025 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	3025 1950 3025 1625
-Connection ~ 3025 1300
-Wire Wire Line
-	3025 1300 3025 975 
-Connection ~ 3025 1625
-Wire Wire Line
-	3025 1625 3025 1300
 Text GLabel 3025 2600 3    50   Input ~ 0
 COL3
 $Comp
@@ -1791,30 +1641,16 @@ Connection ~ 3025 2300
 Wire Wire Line
 	3025 2300 3025 2600
 Wire Wire Line
-	2725 1900 2725 2300
-Connection ~ 2725 1900
-Wire Wire Line
-	3125 725  3700 725 
-Wire Wire Line
-	3125 1050 3700 1050
-Wire Wire Line
-	3125 1375 3700 1375
-Wire Wire Line
-	3125 1700 3700 1700
-Wire Wire Line
 	3025 2050 3600 2050
-Wire Wire Line
-	3600 1950 3025 1950
-Connection ~ 3025 1950
 $Comp
 L Device:D_Small D24
 U 1 1 6007ADD3
-P 2550 825
-F 0 "D24" H 2550 757 50  0000 R CNN
-F 1 "D_Small" V 2505 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 2550 825 50  0001 C CNN
-F 3 "~" V 2550 825 50  0001 C CNN
-	1    2550 825 
+P 2250 825
+F 0 "D24" H 2250 757 50  0000 R CNN
+F 1 "D_Small" V 2205 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2250 825 50  0001 C CNN
+F 3 "~" V 2250 825 50  0001 C CNN
+	1    2250 825 
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -1842,99 +1678,82 @@ $EndComp
 $Comp
 L Device:D_Small D23
 U 1 1 6007ADE5
-P 2550 1150
-F 0 "D23" H 2550 1082 50  0000 R CNN
-F 1 "D_Small" V 2505 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 2550 1150 50  0001 C CNN
-F 3 "~" V 2550 1150 50  0001 C CNN
-	1    2550 1150
+P 2250 1150
+F 0 "D23" H 2250 1082 50  0000 R CNN
+F 1 "D_Small" V 2205 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2250 1150 50  0001 C CNN
+F 3 "~" V 2250 1150 50  0001 C CNN
+	1    2250 1150
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D22
 U 1 1 6007ADEB
-P 2550 1475
-F 0 "D22" H 2550 1407 50  0000 R CNN
-F 1 "D_Small" V 2505 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 2550 1475 50  0001 C CNN
-F 3 "~" V 2550 1475 50  0001 C CNN
-	1    2550 1475
+P 2250 1475
+F 0 "D22" H 2250 1407 50  0000 R CNN
+F 1 "D_Small" V 2205 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2250 1475 50  0001 C CNN
+F 3 "~" V 2250 1475 50  0001 C CNN
+	1    2250 1475
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:D_Small D21
 U 1 1 6007ADF1
-P 2550 1800
-F 0 "D21" H 2550 1732 50  0000 R CNN
-F 1 "D_Small" V 2505 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 2550 1800 50  0001 C CNN
-F 3 "~" V 2550 1800 50  0001 C CNN
-	1    2550 1800
+P 2250 1800
+F 0 "D21" H 2250 1732 50  0000 R CNN
+F 1 "D_Small" V 2205 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 2250 1800 50  0001 C CNN
+F 3 "~" V 2250 1800 50  0001 C CNN
+	1    2250 1800
 	0    -1   -1   0   
 $EndComp
-Connection ~ 2150 2300
 Wire Wire Line
 	2150 2300 2150 2350
 $Comp
 L key-parts:SW_ChocV2 SW24
 U 1 1 6007ADFF
-P 2350 925
-F 0 "SW24" H 2350 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 2350 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2350 1125 50  0001 C CNN
-F 3 "~" H 2350 1125 50  0001 C CNN
-	1    2350 925 
-	1    0    0    -1  
+P 2450 725
+F 0 "SW24" H 2450 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 2450 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 2450 925 50  0001 C CNN
+F 3 "~" H 2450 925 50  0001 C CNN
+	1    2450 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	2150 925  2150 1250
 $Comp
 L key-parts:SW_ChocV2 SW23
 U 1 1 6007AE06
-P 2350 1250
-F 0 "SW23" H 2350 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 2350 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2350 1450 50  0001 C CNN
-F 3 "~" H 2350 1450 50  0001 C CNN
-	1    2350 1250
-	1    0    0    -1  
+P 2450 1050
+F 0 "SW23" H 2450 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 2450 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 2450 1250 50  0001 C CNN
+F 3 "~" H 2450 1250 50  0001 C CNN
+	1    2450 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 2150 1250
-Wire Wire Line
-	2150 1250 2150 1575
 $Comp
 L key-parts:SW_ChocV2 SW22
 U 1 1 6007AE0E
-P 2350 1575
-F 0 "SW22" H 2350 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 2350 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2350 1775 50  0001 C CNN
-F 3 "~" H 2350 1775 50  0001 C CNN
-	1    2350 1575
-	1    0    0    -1  
+P 2450 1375
+F 0 "SW22" H 2450 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 2450 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 2450 1575 50  0001 C CNN
+F 3 "~" H 2450 1575 50  0001 C CNN
+	1    2450 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 2150 1575
-Wire Wire Line
-	2150 1575 2150 1900
 $Comp
 L key-parts:SW_ChocV2 SW21
 U 1 1 6007AE16
-P 2350 1900
-F 0 "SW21" H 2350 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 2350 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 2350 2100 50  0001 C CNN
-F 3 "~" H 2350 2100 50  0001 C CNN
-	1    2350 1900
-	1    0    0    -1  
+P 2450 1700
+F 0 "SW21" H 2450 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 2450 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 2450 1900 50  0001 C CNN
+F 3 "~" H 2450 1900 50  0001 C CNN
+	1    2450 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	2450 1950 2450 1625
-Connection ~ 2450 1300
-Wire Wire Line
-	2450 1300 2450 975 
-Connection ~ 2450 1625
-Wire Wire Line
-	2450 1625 2450 1300
 Text GLabel 2450 2600 3    50   Input ~ 0
 COL2
 $Comp
@@ -1958,47 +1777,10 @@ Connection ~ 2450 2300
 Wire Wire Line
 	2450 2300 2450 2600
 Wire Wire Line
-	2150 1900 2150 2300
-Connection ~ 2150 1900
-Wire Wire Line
-	2550 725  3125 725 
-Wire Wire Line
-	2550 1050 3125 1050
-Wire Wire Line
-	2550 1375 3125 1375
-Wire Wire Line
-	2550 1700 3125 1700
-Wire Wire Line
 	2450 2050 3025 2050
-Wire Wire Line
-	3025 1950 2450 1950
-Connection ~ 2450 1950
 Connection ~ 3025 2050
-Connection ~ 3125 725 
-Connection ~ 3125 1050
-Connection ~ 3125 1375
-Connection ~ 3125 1700
 Connection ~ 3600 2050
-Connection ~ 3700 725 
-Connection ~ 3700 1050
-Connection ~ 3700 1375
-Connection ~ 3700 1700
 Connection ~ 4175 2050
-Connection ~ 4275 725 
-Connection ~ 4275 1050
-Connection ~ 4275 1375
-Connection ~ 4275 1700
-$Comp
-L Device:D_Small D14
-U 1 1 600B40EA
-P 1975 825
-F 0 "D14" H 1975 757 50  0000 R CNN
-F 1 "D_Small" V 1930 757 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 1975 825 50  0001 C CNN
-F 3 "~" V 1975 825 50  0001 C CNN
-	1    1975 825 
-	0    -1   -1   0   
-$EndComp
 $Comp
 L Device:R_Small R12
 U 1 1 600B40F0
@@ -2021,102 +1803,52 @@ F 3 "~" H 1875 2150 50  0001 C CNN
 	1    1875 2150
 	-1   0    0    -1  
 $EndComp
-$Comp
-L Device:D_Small D13
-U 1 1 600B40FC
-P 1975 1150
-F 0 "D13" H 1975 1082 50  0000 R CNN
-F 1 "D_Small" V 1930 1082 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 1975 1150 50  0001 C CNN
-F 3 "~" V 1975 1150 50  0001 C CNN
-	1    1975 1150
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:D_Small D12
-U 1 1 600B4102
-P 1975 1475
-F 0 "D12" H 1975 1407 50  0000 R CNN
-F 1 "D_Small" V 1930 1407 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 1975 1475 50  0001 C CNN
-F 3 "~" V 1975 1475 50  0001 C CNN
-	1    1975 1475
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:D_Small D11
-U 1 1 600B4108
-P 1975 1800
-F 0 "D11" H 1975 1732 50  0000 R CNN
-F 1 "D_Small" V 1930 1732 50  0001 R CNN
-F 2 "key-parts:D_SMD" V 1975 1800 50  0001 C CNN
-F 3 "~" V 1975 1800 50  0001 C CNN
-	1    1975 1800
-	0    -1   -1   0   
-$EndComp
-Connection ~ 1575 2300
 Wire Wire Line
 	1575 2300 1575 2350
 $Comp
 L key-parts:SW_ChocV2 SW14
 U 1 1 600B4116
-P 1775 925
-F 0 "SW14" H 1775 1075 50  0000 C CNN
-F 1 "SW_ChocV2" H 1775 865 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 1775 1125 50  0001 C CNN
-F 3 "~" H 1775 1125 50  0001 C CNN
-	1    1775 925 
-	1    0    0    -1  
+P 1875 725
+F 0 "SW14" H 1875 875 50  0000 C CNN
+F 1 "SW_ChocV2" H 1875 665 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 1875 925 50  0001 C CNN
+F 3 "~" H 1875 925 50  0001 C CNN
+	1    1875 725 
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	1575 925  1575 1250
 $Comp
 L key-parts:SW_ChocV2 SW13
 U 1 1 600B411D
-P 1775 1250
-F 0 "SW13" H 1775 1400 50  0000 C CNN
-F 1 "SW_ChocV2" H 1775 1190 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 1775 1450 50  0001 C CNN
-F 3 "~" H 1775 1450 50  0001 C CNN
-	1    1775 1250
-	1    0    0    -1  
+P 1875 1050
+F 0 "SW13" H 1875 1200 50  0000 C CNN
+F 1 "SW_ChocV2" H 1875 990 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 1875 1250 50  0001 C CNN
+F 3 "~" H 1875 1250 50  0001 C CNN
+	1    1875 1050
+	-1   0    0    -1  
 $EndComp
-Connection ~ 1575 1250
-Wire Wire Line
-	1575 1250 1575 1575
 $Comp
 L key-parts:SW_ChocV2 SW12
 U 1 1 600B4125
-P 1775 1575
-F 0 "SW12" H 1775 1725 50  0000 C CNN
-F 1 "SW_ChocV2" H 1775 1515 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 1775 1775 50  0001 C CNN
-F 3 "~" H 1775 1775 50  0001 C CNN
-	1    1775 1575
-	1    0    0    -1  
+P 1875 1375
+F 0 "SW12" H 1875 1525 50  0000 C CNN
+F 1 "SW_ChocV2" H 1875 1315 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 1875 1575 50  0001 C CNN
+F 3 "~" H 1875 1575 50  0001 C CNN
+	1    1875 1375
+	-1   0    0    -1  
 $EndComp
-Connection ~ 1575 1575
-Wire Wire Line
-	1575 1575 1575 1900
 $Comp
 L key-parts:SW_ChocV2 SW11
 U 1 1 600B412D
-P 1775 1900
-F 0 "SW11" H 1775 2050 50  0000 C CNN
-F 1 "SW_ChocV2" H 1775 1840 50  0001 C CNN
-F 2 "key-parts:ChocV2" H 1775 2100 50  0001 C CNN
-F 3 "~" H 1775 2100 50  0001 C CNN
-	1    1775 1900
-	1    0    0    -1  
+P 1875 1700
+F 0 "SW11" H 1875 1850 50  0000 C CNN
+F 1 "SW_ChocV2" H 1875 1640 50  0001 C CNN
+F 2 "key-parts:ChocV2" H 1875 1900 50  0001 C CNN
+F 3 "~" H 1875 1900 50  0001 C CNN
+	1    1875 1700
+	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	1875 1950 1875 1625
-Connection ~ 1875 1300
-Wire Wire Line
-	1875 1300 1875 975 
-Connection ~ 1875 1625
-Wire Wire Line
-	1875 1625 1875 1300
 Text GLabel 1875 2600 3    50   Input ~ 0
 COL1
 $Comp
@@ -2140,32 +1872,12 @@ Connection ~ 1875 2300
 Wire Wire Line
 	1875 2300 1875 2600
 Wire Wire Line
-	1575 1900 1575 2300
-Connection ~ 1575 1900
-Wire Wire Line
-	1975 725  2550 725 
-Wire Wire Line
-	1975 1050 2550 1050
-Wire Wire Line
-	1975 1375 2550 1375
-Wire Wire Line
-	1975 1700 2550 1700
-Wire Wire Line
 	1875 2050 2450 2050
-Wire Wire Line
-	2450 1950 1875 1950
-Connection ~ 1875 1950
 Wire Wire Line
 	1325 2050 1875 2050
 Connection ~ 1325 2050
 Connection ~ 1875 2050
-Wire Wire Line
-	1325 1950 1875 1950
 Connection ~ 2450 2050
-Connection ~ 2550 725 
-Connection ~ 2550 1050
-Connection ~ 2550 1375
-Connection ~ 2550 1700
 Wire Wire Line
 	1025 1900 1025 2300
 Wire Wire Line
@@ -3488,12 +3200,6 @@ Wire Wire Line
 	8375 5225 8600 5225
 Connection ~ 8600 5225
 Wire Wire Line
-	4850 725  6450 725 
-Wire Wire Line
-	5025 1575 5025 2300
-Wire Wire Line
-	4850 1700 6000 1700
-Wire Wire Line
 	4525 3700 5000 3700
 Wire Wire Line
 	4125 4675 5250 4675
@@ -3567,4 +3273,435 @@ Connection ~ 1875 4325
 Connection ~ 975  4325
 Wire Wire Line
 	975  4325 975  4575
+Connection ~ 1575 2300
+Wire Wire Line
+	1325 1950 1775 1950
+Wire Wire Line
+	1575 925  1575 1250
+$Comp
+L Device:D_Small D11
+U 1 1 600B4108
+P 1675 1800
+F 0 "D11" H 1675 1732 50  0000 R CNN
+F 1 "D_Small" V 1630 1732 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 1675 1800 50  0001 C CNN
+F 3 "~" V 1675 1800 50  0001 C CNN
+	1    1675 1800
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:D_Small D12
+U 1 1 600B4102
+P 1675 1475
+F 0 "D12" H 1675 1407 50  0000 R CNN
+F 1 "D_Small" V 1630 1407 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 1675 1475 50  0001 C CNN
+F 3 "~" V 1675 1475 50  0001 C CNN
+	1    1675 1475
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:D_Small D13
+U 1 1 600B40FC
+P 1675 1150
+F 0 "D13" H 1675 1082 50  0000 R CNN
+F 1 "D_Small" V 1630 1082 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 1675 1150 50  0001 C CNN
+F 3 "~" V 1675 1150 50  0001 C CNN
+	1    1675 1150
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:D_Small D14
+U 1 1 600B40EA
+P 1675 825
+F 0 "D14" H 1675 757 50  0000 R CNN
+F 1 "D_Small" V 1630 757 50  0001 R CNN
+F 2 "key-parts:D_SMD" V 1675 825 50  0001 C CNN
+F 3 "~" V 1675 825 50  0001 C CNN
+	1    1675 825 
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	1675 925  1575 925 
+Wire Wire Line
+	1675 1250 1575 1250
+Connection ~ 1575 1250
+Wire Wire Line
+	1575 1250 1575 1575
+Wire Wire Line
+	1675 1575 1575 1575
+Connection ~ 1575 1575
+Wire Wire Line
+	1575 1575 1575 1900
+Wire Wire Line
+	1675 1900 1575 1900
+Connection ~ 1575 1900
+Wire Wire Line
+	1575 1900 1575 2300
+Wire Wire Line
+	1775 775  1775 1100
+Connection ~ 1775 1950
+Connection ~ 1775 1100
+Wire Wire Line
+	1775 1100 1775 1425
+Connection ~ 1775 1425
+Wire Wire Line
+	1775 1425 1775 1750
+Connection ~ 1775 1750
+Wire Wire Line
+	1775 1750 1775 1950
+Wire Wire Line
+	1775 1950 2350 1950
+Wire Wire Line
+	2150 2300 2150 1900
+Wire Wire Line
+	2150 925  2250 925 
+Connection ~ 2150 2300
+Wire Wire Line
+	2250 1250 2150 1250
+Connection ~ 2150 1250
+Wire Wire Line
+	2150 1250 2150 925 
+Wire Wire Line
+	2150 1575 2250 1575
+Connection ~ 2150 1575
+Wire Wire Line
+	2150 1575 2150 1250
+Wire Wire Line
+	2250 1900 2150 1900
+Connection ~ 2150 1900
+Wire Wire Line
+	2150 1900 2150 1575
+Wire Wire Line
+	2350 775  2350 1100
+Connection ~ 2350 1950
+Wire Wire Line
+	2350 1950 2925 1950
+Connection ~ 2350 1100
+Wire Wire Line
+	2350 1100 2350 1425
+Connection ~ 2350 1425
+Wire Wire Line
+	2350 1425 2350 1750
+Connection ~ 2350 1750
+Wire Wire Line
+	2350 1750 2350 1950
+Wire Wire Line
+	2725 2300 2725 1900
+Wire Wire Line
+	2725 925  2825 925 
+Connection ~ 2725 2300
+Wire Wire Line
+	2825 1250 2725 1250
+Connection ~ 2725 1250
+Wire Wire Line
+	2725 1250 2725 925 
+Wire Wire Line
+	2825 1575 2725 1575
+Connection ~ 2725 1575
+Wire Wire Line
+	2725 1575 2725 1250
+Wire Wire Line
+	2825 1900 2725 1900
+Connection ~ 2725 1900
+Wire Wire Line
+	2725 1900 2725 1575
+Wire Wire Line
+	2925 775  2925 1100
+Connection ~ 2925 1950
+Wire Wire Line
+	2925 1950 3500 1950
+Connection ~ 2925 1100
+Wire Wire Line
+	2925 1100 2925 1425
+Connection ~ 2925 1425
+Wire Wire Line
+	2925 1425 2925 1750
+Connection ~ 2925 1750
+Wire Wire Line
+	2925 1750 2925 1950
+Wire Wire Line
+	3300 925  3400 925 
+Wire Wire Line
+	3300 925  3300 1250
+Wire Wire Line
+	3400 1250 3300 1250
+Connection ~ 3300 1250
+Wire Wire Line
+	3300 1250 3300 1575
+Wire Wire Line
+	3400 1575 3300 1575
+Connection ~ 3300 1575
+Wire Wire Line
+	3300 1575 3300 1900
+Wire Wire Line
+	3400 1900 3300 1900
+Connection ~ 3300 1900
+Wire Wire Line
+	3300 1900 3300 2300
+Wire Wire Line
+	3875 925  3975 925 
+Wire Wire Line
+	3875 925  3875 1250
+Wire Wire Line
+	3975 1250 3875 1250
+Connection ~ 3875 1250
+Wire Wire Line
+	3875 1250 3875 1575
+Wire Wire Line
+	3975 1575 3875 1575
+Connection ~ 3875 1575
+Wire Wire Line
+	3875 1575 3875 1900
+Wire Wire Line
+	3975 1900 3875 1900
+Connection ~ 3875 1900
+Wire Wire Line
+	3875 1900 3875 2300
+Wire Wire Line
+	3500 775  3500 1100
+Connection ~ 3500 1950
+Wire Wire Line
+	3500 1950 4075 1950
+Connection ~ 3500 1100
+Wire Wire Line
+	3500 1100 3500 1425
+Connection ~ 3500 1425
+Wire Wire Line
+	3500 1425 3500 1750
+Connection ~ 3500 1750
+Wire Wire Line
+	3500 1750 3500 1950
+Wire Wire Line
+	4075 775  4075 1100
+Connection ~ 4075 1950
+Wire Wire Line
+	4075 1950 4650 1950
+Connection ~ 4075 1100
+Wire Wire Line
+	4075 1100 4075 1425
+Connection ~ 4075 1425
+Wire Wire Line
+	4075 1425 4075 1750
+Connection ~ 4075 1750
+Wire Wire Line
+	4075 1750 4075 1950
+Wire Wire Line
+	4450 925  4550 925 
+Wire Wire Line
+	4450 925  4450 1250
+Wire Wire Line
+	4550 1250 4450 1250
+Connection ~ 4450 1250
+Wire Wire Line
+	4450 1250 4450 1575
+Wire Wire Line
+	4550 1575 4450 1575
+Connection ~ 4450 1575
+Wire Wire Line
+	4450 1575 4450 1900
+Wire Wire Line
+	4550 1900 4450 1900
+Connection ~ 4450 1900
+Wire Wire Line
+	4450 1900 4450 2300
+Wire Wire Line
+	4650 775  4650 1100
+Connection ~ 4650 1950
+Wire Wire Line
+	4650 1950 5225 1950
+Connection ~ 4650 1100
+Wire Wire Line
+	4650 1100 4650 1425
+Connection ~ 4650 1425
+Wire Wire Line
+	4650 1425 4650 1750
+Connection ~ 4650 1750
+Wire Wire Line
+	4650 1750 4650 1950
+Wire Wire Line
+	5025 2300 5025 1575
+Wire Wire Line
+	5025 1250 5125 1250
+Connection ~ 5025 2300
+Wire Wire Line
+	5125 1575 5025 1575
+Connection ~ 5025 1575
+Wire Wire Line
+	5025 1575 5025 1250
+Wire Wire Line
+	5225 1100 5225 1425
+Connection ~ 5225 1950
+Wire Wire Line
+	5225 1950 5800 1950
+Connection ~ 5225 1425
+Wire Wire Line
+	5225 1425 5225 1950
+Wire Wire Line
+	5800 1100 5800 1425
+Connection ~ 5800 1950
+Wire Wire Line
+	5800 1950 6450 1950
+Connection ~ 5800 1425
+Wire Wire Line
+	5800 1425 5800 1750
+Connection ~ 5800 1750
+Wire Wire Line
+	5800 1750 5800 1950
+Wire Wire Line
+	5600 1250 5700 1250
+Wire Wire Line
+	5600 1250 5600 1575
+Wire Wire Line
+	5700 1575 5600 1575
+Connection ~ 5600 1575
+Wire Wire Line
+	5600 1575 5600 1900
+Wire Wire Line
+	5700 1900 5600 1900
+Connection ~ 5600 1900
+Wire Wire Line
+	5600 1900 5600 2300
+Wire Wire Line
+	6450 525  4950 525 
+Wire Wire Line
+	2075 525  2075 725 
+Wire Wire Line
+	2650 725  2650 525 
+Connection ~ 2650 525 
+Wire Wire Line
+	2650 525  2075 525 
+Wire Wire Line
+	3225 725  3225 525 
+Connection ~ 3225 525 
+Wire Wire Line
+	3225 525  2650 525 
+Wire Wire Line
+	3800 725  3800 525 
+Connection ~ 3800 525 
+Wire Wire Line
+	3800 525  3225 525 
+Wire Wire Line
+	4375 725  4375 525 
+Connection ~ 4375 525 
+Wire Wire Line
+	4375 525  3800 525 
+Wire Wire Line
+	4950 725  4950 525 
+Connection ~ 4950 525 
+Wire Wire Line
+	4950 525  4375 525 
+Wire Wire Line
+	2075 1050 2075 825 
+Wire Wire Line
+	2075 825  2650 825 
+Wire Wire Line
+	2650 1050 2650 825 
+Connection ~ 2650 825 
+Wire Wire Line
+	2650 825  3225 825 
+Wire Wire Line
+	3225 1050 3225 825 
+Connection ~ 3225 825 
+Wire Wire Line
+	3225 825  3800 825 
+Wire Wire Line
+	3800 1050 3800 825 
+Connection ~ 3800 825 
+Wire Wire Line
+	3800 825  4375 825 
+Wire Wire Line
+	4375 1050 4375 825 
+Connection ~ 4375 825 
+Wire Wire Line
+	4375 825  4950 825 
+Wire Wire Line
+	4950 1050 4950 825 
+Connection ~ 4950 825 
+Wire Wire Line
+	4950 825  5525 825 
+Wire Wire Line
+	5525 1050 5525 825 
+Connection ~ 5525 825 
+Wire Wire Line
+	5525 825  6100 825 
+Wire Wire Line
+	6100 1050 6100 825 
+Connection ~ 6100 825 
+Wire Wire Line
+	6100 825  6450 825 
+Wire Wire Line
+	2075 1150 2650 1150
+Wire Wire Line
+	2075 1700 2075 1475
+Wire Wire Line
+	2075 1475 2650 1475
+Wire Wire Line
+	6100 1700 6100 1475
+Connection ~ 6100 1475
+Wire Wire Line
+	6100 1475 6450 1475
+Wire Wire Line
+	6100 1375 6100 1150
+Connection ~ 6100 1150
+Wire Wire Line
+	6100 1150 6450 1150
+Wire Wire Line
+	5525 1375 5525 1150
+Connection ~ 5525 1150
+Wire Wire Line
+	5525 1150 6100 1150
+Wire Wire Line
+	4950 1700 4950 1475
+Connection ~ 4950 1475
+Wire Wire Line
+	4950 1475 6100 1475
+Wire Wire Line
+	4375 1700 4375 1475
+Connection ~ 4375 1475
+Wire Wire Line
+	4375 1475 4950 1475
+Wire Wire Line
+	3800 1375 3800 1150
+Connection ~ 3800 1150
+Wire Wire Line
+	3800 1700 3800 1475
+Connection ~ 3800 1475
+Wire Wire Line
+	3800 1475 4375 1475
+Wire Wire Line
+	3225 1700 3225 1475
+Connection ~ 3225 1475
+Wire Wire Line
+	3225 1475 3800 1475
+Wire Wire Line
+	3225 1375 3225 1150
+Connection ~ 3225 1150
+Wire Wire Line
+	3225 1150 3800 1150
+Wire Wire Line
+	2650 1375 2650 1150
+Connection ~ 2650 1150
+Wire Wire Line
+	2650 1150 3225 1150
+Wire Wire Line
+	2650 1700 2650 1475
+Connection ~ 2650 1475
+Wire Wire Line
+	2650 1475 3225 1475
+Wire Wire Line
+	2075 1150 2075 1375
+Wire Wire Line
+	3800 1150 4375 1150
+Wire Wire Line
+	4375 1375 4375 1150
+Connection ~ 4375 1150
+Wire Wire Line
+	4375 1150 4950 1150
+Wire Wire Line
+	4950 1375 4950 1150
+Connection ~ 4950 1150
+Wire Wire Line
+	4950 1150 5525 1150
 $EndSCHEMATC
