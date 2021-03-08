@@ -236,7 +236,7 @@ class keyboard_layout:
                     col += 1
                     row = 1
             elif row == 5:
-                if col == 6:
+                if col == 5:
                     row = 2
                 else:
                     row = 1
@@ -331,8 +331,8 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
 
     # Left hand
     thumbs2 = ["Alt", "Ctrl", "Lower"]
-    col_Gui = ["", "Tab", "Win"]
-    col_Tab = ["Shift", "~\n^", "|\n¥", "ESC"]
+    col_Gui = ["Shift", "Tab", "Win"]
+    col_Tab = ["", "~\n^", "|\n¥", "ESC"]
     col_Z = ["Z", "A", "Q", "!\n1"]
     col_X = ["X", "S", "W", "\n2"]
     col_C = ["C", "D", "E", "#\n3"]
@@ -347,8 +347,8 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     col_Comm = ["<\n,", "K", "I", "(\n8"]
     col_Dot  = [">\n.", "L", "O", ")\n9"]
     col_Scln = ["?\n/", "+\n;", "P", " \n0"]
-    col_Cln  = ["_\nBsls", "*\n:", "@", "=\n-"]
-    col_Brac = ["", "]\n}", "[\n{"]
+    col_Cln  = ["", "*\n:", "@", "=\n-"]
+    col_Brac = ["_\nBsls", "]\n}", "[\n{"]
     thumbs1  = ["Space", "Shift", "Raise"]
 
     xctr = (paper_size[0] / 2.0) / unit_w
@@ -367,9 +367,9 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
         angle_Comm = 45
         org_Comm = vec2( 5.6, 4.3 )
     elif output_type in ['kicad']:
-        angle_Comm = 0
-        # angle_Comm = 16
-        org_Comm = vec2( -5.6, 3.8 )
+        # angle_Comm = 0
+        angle_Comm = 16
+        org_Comm = vec2( -5.0, 3.8 )
     else:
         return
 
@@ -460,10 +460,10 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     maker.add_col( angle_PinkyBtm, org_Slsh, [0], col_Scln[0:1], col_Z[0:1], keyw = keyw_Slsh )
     maker.add_col( angle_PinkyTop, org_Scln, [dx_Scln_P], col_Scln[1:], col_Z[1:] )
     #
-    maker.add_col( angle_PinkyBtm, org_Bsls, [0], col_Cln[0:1], col_Tab[0:1], keyw = keyw_Bsls )
     maker.add_col( angle_PinkyTop, org_Cln,  [dx_Scln_P], col_Cln[1:], col_Tab[1:] )
     #
-    maker.add_col( angle_PinkyTop, org_RBrc, [dx_Scln_P], col_Brac, col_Gui )
+    maker.add_col( angle_PinkyBtm, org_Bsls, [0], col_Brac[0:1], col_Gui[0:1], keyw = keyw_Bsls )
+    maker.add_col( angle_PinkyTop, org_RBrc, [dx_Scln_P], col_Brac[1:], col_Gui[1:] )
 
     # add the thumb row
     keyw12 = (1.25 * 19.05 - (19.05 - unit_w)) / 19.05
@@ -474,7 +474,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     angle_Thmb = angle_Index_Thmb + angle_Index
     org_Thmb = org_M + delta_M_Thmb @ mat2_rot( angle_Index )
     for idx, name in enumerate( thumbs1 ):
-        maker.add_col( angle_Thmb, org_Thmb, [0], [name], [thumbs2[idx]], keyw = keyws[idx] )
+        maker.add_col( angle_Thmb + 180, org_Thmb, [0], [name], [thumbs2[idx]], keyw = keyws[idx] )
         org_Thmb += vec2( +keyw / 2, +0.5 * keyh ) @ mat2_rot( angle_Thmb )
         angle_Thmb += dangles_Thmb[idx]
         org_Thmb += vec2( -keyw / 2 - dys_Thmb[idx], +0.5 * keyh ) @ mat2_rot( angle_Thmb )
