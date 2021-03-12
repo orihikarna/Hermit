@@ -42,8 +42,8 @@ PCB_Width  = 170
 PCB_Height = 140
 
 J1_x, J1_y = 20, 84
-J2_x, J2_y = 95, 96
-J3_x, J3_y = 66, 106
+J2_x, J2_y = 96, 99
+J3_x, J3_y = 66, 108
 D1_x, D1_y = 62, 106
 
 keys = {
@@ -73,9 +73,9 @@ keys = {
     '71' : [143.797, -87.675, 28.188, 16.800, -9.6], # _
     '72' : [153.904, -70.993, 17.400, 16.800, -0.0], # ]
     '73' : [156.266, -54.193, 17.400, 16.800, -0.0], # [
-    '81' : [48.658, -102.025, 20.243, 16.800, -260.0], # S
-    '82' : [30.678, -110.392, 20.243, 16.800, -240.0], # S
-    '83' : [13.978, -122.168, 17.400, 16.800, -220.0], # R
+    '82' : [48.658, -102.025, 20.243, 16.800, -260.0], # S
+    '83' : [30.678, -110.392, 20.243, 16.800, -240.0], # S
+    '84' : [13.978, -122.168, 17.400, 16.800, -220.0], # R
     '91' : [27.676, -56.375, 17.400, 16.800, 8.5], # E
 }
 
@@ -486,7 +486,7 @@ def main():
                 # wire to SW
                 kad.wire_mods( [('D' + name, '1', 'SW' + name, '2', 0.5, (Dird, 0, 0, -1))])
             ## D0
-            if name == '81':
+            if name == '82':
                 pos = vec2.mult( mat2.rotate( -angle ), (-6, -0.6), sw_pos )
                 kad.set_mod_pos_angle( 'D0', pos, - 90 - angle )
                 # wire to SW
@@ -501,45 +501,38 @@ def main():
     if board == BDL:
         kad.move_mods( (0, 0), 0, [
             # mcu
-            (None, (70, 84), 0, [
+            (None, (63, 85), 0, [
                 ('U1', (0, 0), 0),
                 # pass caps
-                (None, (-5.8, -4.2), 0, [
-                    ('C3', (0, -0.2), 0),
-                    ('C5', (-2.9, 0), 90),
+                (None, (0, 0), 0, [
+                    ('C4', (+5.8, +4.4), 180),
+                    ('C3', (-5.8, -4.4), 0),
+                    ('C5', (-8.7, -4.2), 90),
                 ] ),
-                # C4 & regulators
-                (None, (6.8, 3.3), -90, [
-                    ('C4', (0, 0), 0),
-                    (None, (0, -4.7), 0, [
-                        ('C1', (0, -2.7), 0),
-                        ('U2', (-0.25, 0), 0),
-                        ('C2', (0, +2.7), 0),
-                    ] ),
-                ] ),
-                # NRST
-                ('C6', (-7.5, 4.2), 180),
-                # R1
-                ('R1', (-7.5, 2.2), 180),
-                # USB DM/DP
-                ('R4', (8.5, +0.2), 180),
-                ('R5', (8.5, -1.8), 180),
             ] ),
-            # I2C pull-ups
-            (None, (2.62, PCB_Height/2), 0, [
-                ('R2', (12, -1.9), +90),
-                ('R3', (12, +1.9), -90),
+            # regulators
+            (None, (72, 100), -90 - 9.6, [
+                ('C1', (0, -2.7), 0),
+                ('U2', (-0.2, 0), 0),
+                ('C2', (0, +2.7), 0),
             ] ),
             # USB (PC) connector
-            (None, (J2_x, J2_y), 0, [
+            (None, (J2_x, J2_y), -9.6, [
                 ('J2', (0, 0), 90),
                 ('R8', (-7.5, +5.2), 0),
                 ('R9', (-7.5, -5.2), 0),
-                ('F1', (-12, -3), 90),
-                ('L1', (-14, -3), 90),
+                ('R5', (-12.4, -1), 180),# USB DM/DP
+                ('R4', (-12.4, +1), 180),# USB DM/DP
+                ('F1', (-12.4, +3), 180),
+                ('L1', (-12.4, +5), 180),
             ] ),
             # Pin headers
-            ('J3', (J3_x, J3_y), 90),
+            (None, (J3_x, J3_y), 0, [
+                ('J3', (0, 0), 90),
+                ('C6', (1.27, -2.4), 180),# NRST
+                ('D1', (-3.6, 0), 180),# LED
+                ('R1', (-3.6, -2.0), 180),
+            ] ),
         ] )
     elif board == BDR:
         kad.move_mods( (PCB_Width/2, 28.5), 0, [
@@ -553,7 +546,7 @@ def main():
             # Pin headers
             ('J3', (J3_x + 1.27, PCB_Height*2/3 - 1.27), 90),
         ] )
-    # Split (USB) connector & D1
+    # Split (USB) connector
     if board in [BDL, BDR]:
         # Split (USB) connector
         sign = [+1, -1][board]
@@ -563,10 +556,11 @@ def main():
                 ('R6', (7.5, -5.2 * sign), 180),
                 ('R7', (7.5, +5.2 * sign), 180),
             ] ),
-        ] )
-        # D1
-        kad.move_mods( (0, 0), 0, [
-            ('D1', (D1_x, D1_y), 180),
+            # I2C pull-ups
+            (None, (3, 0), 0, [
+                ('R2', (12, -1.9), +90),
+                ('R3', (12, +1.9), -90),
+            ] ),
         ] )
     # Debounce RRCs
     if board in [BDL]:#[BDL, BDR]:
@@ -574,6 +568,9 @@ def main():
             if col == '6':
                 mod_sw = 'SW71'
                 dx, dy = 8.0, -3.6
+            elif col == '8':
+                mod_sw = 'SW82'
+                dx, dy = -9.4, 0
             elif col == '9':
                 mod_sw = 'SW91'
                 dx, dy = -9, -10
@@ -606,24 +603,55 @@ def main():
                 kad.wire_mods( [('SW5'+row, '1', 'SW6'+row, '1', 0.5, (ZgZg, 0, 45, -1))] )
             if '6'+row in keys.keys() and '7' + row in keys.keys():
                 kad.wire_mods( [('SW6'+row, '1', 'SW7'+row, '1', 0.5, (ZgZg, 0, 45, -1))] )
+        # Row to mcu
+        pos, angle, _, _ = kad.get_pad_pos_angle_layer_net( 'SW31', '1' )
+        via_row4_top = kad.add_via( vec2.mult( mat2.rotate( angle ), (-6.0, +3), pos ), kad.get_pad_pos_net( 'U1',  '8' )[1], VIA_Size[2] )
+        via_row3_top = kad.add_via( vec2.mult( mat2.rotate( angle ), (-3.5, +5), pos ), kad.get_pad_pos_net( 'U1', '13' )[1], VIA_Size[2] )
+        via_row2_top = kad.add_via( vec2.mult( mat2.rotate( angle ), (-2.0, +3), pos ), kad.get_pad_pos_net( 'U1', '12' )[1], VIA_Size[2] )
+        kad.wire_mods( [
+            ('SW34', '1', 'U1', via_row4_top, 0.5, (Dird, ([(4, 180), (6, 135), (20, 90)], 74), 0), 'F.Cu'),# Row4
+            ('SW33', '1', 'U1', via_row3_top, 0.5, (Dird, ([(4, 180), (4, 135), (4, 90)], 74), 0), 'F.Cu'),# Row3
+            ('SW32', '1', 'U1', via_row2_top, 0.5, (Dird, ([(2, 180), (3, 135), (3, 90)], 74), 0), 'F.Cu'),# Row2
+        ])
+        # Thumb Rows to mcu
+        via_row3_btm = kad.add_via_relative( 'U1', '12', (0, 4), VIA_Size[3] )
+        via_row2_btm = kad.add_via_relative( 'U1', '11', (0, 3), VIA_Size[3] )
+        via_row1_btm = kad.add_via_relative( 'U1', '10', (0, 2), VIA_Size[3] )
+        kad.wire_mods( [
+            ('SW31', via_row3_top, 'U1', via_row3_btm, 0.5, (Dird, -30, 90), 'B.Cu'),# Row3
+            ('SW31', via_row2_top, 'U1', via_row2_btm, 0.5, (Dird, -30, 90), 'B.Cu'),# Row2
+            # ('SW31', via_row1_top, 'U1', via_row1_btm, 0.5, (Dird, -30, 90), 'B.Cu'),# Row1
+            ('U1', '12', 'U1', via_row3_btm, 0.5, (Strt)),# Row3
+            ('U1', '11', 'U1', via_row2_btm, 0.5, (Strt)),# Row2
+            ('U1', '10', 'U1', via_row1_btm, 0.5, (Strt)),# Row1
+            ('SW84', '1', 'U1', via_row3_btm, 0.5, (Dird, ([(9, 180), (20, 110), (16, 130)], 74), 0), 'B.Cu'),# Row4
+            ('SW83', '1', 'U1', via_row2_btm, 0.5, (Dird, ([(6, 180), (16, 110)], 54), 0), 'B.Cu'),# Row3
+            ('SW82', '1', 'U1', via_row1_btm, 0.5, (Dird, 34, 0), 'B.Cu'),# Row2
+        ])
     # COL lines
     if board == BDL:
         wires = []
         for col in map( str, range( 1, 9 ) ):
             mod_dio = 'D' + col
             if col == '8':
-                prm_12 = (Dird, 0, ([(2, 90)], 0), -0.4)
-                prm_23 = (Dird, ([(2, 90)], 0), ([(2, 90)], 0), -0.4)
+                prm_23 = (Dird, 0, ([(2, 90)], 0), -0.4)
+                prm_34 = (Dird, ([(2, 90)], 0), ([(2, 90)], 0), -0.4)
             else:
                 prm_12 = (Dird, ([(8, 180)], 90), ([(2, 90)], 0), -0.4)
                 prm_23 = (Dird, ([(7, 180)], 90), ([(2, 90)], 0), -0.4)
                 prm_34 = (Dird, ([(7, 180)], 90), ([(2, 90)], 0), -0.4)
-            if col not in['6']:
+            if col not in['6', '8']:
                 wires.append( (mod_dio + '1', '1', mod_dio + '2', '1', 0.5, prm_12) )
             if True:
                 wires.append( (mod_dio + '2', '1', mod_dio + '3', '1', 0.5, prm_23) )
-            if col not in ['7', '8']:
+            if col not in ['7']:
                 wires.append( (mod_dio + '3', '1', mod_dio + '4', '1', 0.5, prm_34) )
+        # 62
+        wires.append( ('D62', '1', 'R62', '2', 0.5, (Dird, ([(2, 90), (10, 0)], 90), 90, -0.4)) )
+        # 91
+        wires.append( ('R92', '2', 'SW91', '2', 0.5, (Dird, 90, 0, -0.4)) )
+        wires.append( ('C91', '2', 'SW91', '1', 0.5, (Dird, ([(1.6, 0)], 90), 0, -0.4)) )
+        #
         kad.wire_mods( wires )
     elif board == BDR:
         kad.wire_mods( [
@@ -636,22 +664,28 @@ def main():
     # Debounce (common, internal)
     via_cap_vccs = {}
     if board in [BDL, BDR]:
-        wires = []
         for col in map( str, range( 1, 10 ) ):
             mod_cap = 'C' + col + '1'
             mod_r1 = 'R' + col + '1'
             mod_r2 = 'R' + col + '2'
-            wires.append( (mod_r1, '2', mod_r2,  '2', 0.5, (Strt)) )
-            wires.append( (mod_r1, '1', mod_cap, '1', 0.5, (Strt)) )
+            kad.wire_mods( [
+                (mod_r1, '2', mod_r2,  '2', 0.5, (Strt)),
+                (mod_r1, '1', mod_cap, '1', 0.5, (Strt)),
+            ])
             if col not in ['6', '9']:
-                wires.append( (mod_r2, '2', 'D' + col + '1', '1', 0.5, (Dird, 90, 90)) )
+                kad.wire_mods( [
+                    (mod_r2, '2', 'D' + col + ('2' if col == '8' else '1'), '1', 0.5, (Dird, 90, 90)),
+                ] )
             via_cap_vccs[col] = kad.add_via_relative( mod_cap, '2', (0, -1.8), VIA_Size[1] )
-            wires.append( (mod_cap, via_cap_vccs[col], mod_cap, '2', 0.6, (Strt)) )
+            kad.wire_mods( [
+                (mod_cap, via_cap_vccs[col], mod_cap, '2', 0.6, (Strt)),
+            ] )
         for cidx in range( 0, 7 ):
             ccurr = '9' if cidx == 0 else str( cidx )
             cnext = str( cidx + 1 )
-            wires.append( ('C' + ccurr + '1', via_cap_vccs[ccurr], 'C' + cnext + '1', via_cap_vccs[cnext], 0.6, (Strt), 'B.Cu') )
-        kad.wire_mods( wires )
+            kad.wire_mods( [
+                ('C' + ccurr + '1', via_cap_vccs[ccurr], 'C' + cnext + '1', via_cap_vccs[cnext], 0.6, (Strt), 'B.Cu'),
+            ] )
     # LED
     via_led_pwrLs = {}
     via_led_pwrRs = {}
@@ -695,9 +729,12 @@ def main():
             else:
                 kad.wire_mods( [
                     (mod_cap, cap_pwrR, mod_cap, via_led_pwrRs[idx], 0.6, (Dird, 0, 90), 'F.Cu'),
-                    (mod_cap, cap_pwrL, mod_led, via_led_pwrLs[idx], 0.6, (Strt), 'F.Cu'),
                     (mod_led, led_pwrR, mod_led, via_led_pwrRs[idx], 0.6, (Strt), 'F.Cu'),
                 ] )
+                if col not in ['9']:
+                    kad.wire_mods( [
+                        (mod_cap, cap_pwrL, mod_led, via_led_pwrLs[idx], 0.6, (Strt), 'F.Cu'),
+                    ] )
 
         wires = []
         for idx in keys.keys():
@@ -745,37 +782,26 @@ def main():
         wires.append( ('CL73', via_led_datRs['73'], 'CL64', via_led_datRs['64'], 0.5, (Dird, ([(7, -90), (9, 0)], 90), 0, -1), 'F.Cu') )# data
         # Col9 --> Col1
         wires.append( ('CL91', via_led_pwrLs['91'], 'CL11', via_led_pwrLs['11'], 0.6, (Dird, ([(6, 180)], -45), 0, -1), 'B.Cu') )# GNDD
-        wires.append( ('CL91', via_led_pwrRs['91'], 'CL11', via_led_pwrRs['11'], 0.6, (Dird, ([(2, 180)], -45), 0, -1), 'B.Cu') )# GNDD
-        wires.append( ('CL91', via_led_datRs['91'], 'CL11', via_led_datLs['11'], 0.5, (Dird, ([(2, 180)], -45), 0, -1), 'B.Cu') )# GNDD
+        wires.append( ('CL91', via_led_pwrLs['91'], 'SW91', '3', 0.6, (Dird, 0, 90, -1), 'B.Cu') )# GNDD
+        wires.append( ('CL91', via_led_pwrRs['91'], 'CL11', via_led_pwrRs['11'], 0.6, (Dird, ([(2, 180)], -45), 0, -1), 'B.Cu') )# 5V
+        wires.append( ('CL91', via_led_datRs['91'], 'CL11', via_led_datLs['11'], 0.5, (Dird, ([(2, 180)], -45), 0, -1), 'B.Cu') )# dat
         ## Col8
         # 5V
-        wires.append( ('D0', '2', 'SW82', '3', 0.6, (Dird, ([(2, -90)], 0), 90, -1)) )
-        wires.append( ('SW82', '3', 'SW83', '3', 0.6, (Dird, 90, 90, -1), 'F.Cu') )
+        wires.append( ('D0', '2', 'SW83', '3', 0.6, (Dird, ([(2, -90)], 0), 90, -1)) )
+        wires.append( ('SW83', '3', 'SW84', '3', 0.6, (Dird, 90, 90, -1), 'F.Cu') )
         # GNDD
-        wires.append( ('CL81', '2', 'L82', '3', 0.6, (Dird, 90, ([(1.6, 0), (6, 90), (2.4, 135)], 90), -1), 'F.Cu') )
-        wires.append( ('L82',  '3', 'L83', '3', 0.6, (Dird, 90, ([(1.6, 0), (6, 90), (2.4, 135)], 90), -1), 'F.Cu') )
+        wires.append( ('CL82', '2', 'L83', '3', 0.6, (Dird, 90, ([(1.6, 0), (6, 90), (2.4, 135)], 90), -1), 'F.Cu') )
+        wires.append( ('L83',  '3', 'L84', '3', 0.6, (Dird, 90, ([(1.6, 0), (6, 90), (2.4, 135)], 90), -1), 'F.Cu') )
         # dat
-        wires.append( ('CL81', via_led_datLs['81'], 'CL82', via_led_datRs['82'], 0.5, (Dird, -45, ([(1, -45), (3.6, -90), (3.6, -135), (3.6, -180)], 90), -1), 'B.Cu') )
-        wires.append( ('CL82', via_led_datLs['82'], 'CL83', via_led_datRs['83'], 0.5, (Dird,  90, ([(1, -45), (3.6, -90), (3.6, -135), (3.6, -180)], 90), -1), 'B.Cu') )
+        wires.append( ('CL82', via_led_datLs['82'], 'CL83', via_led_datRs['83'], 0.5, (Dird, 60, ([(1, -45), (3.8, -90), (1, -135)], 90), -0.2), 'B.Cu') )
+        wires.append( ('CL83', via_led_datLs['83'], 'CL84', via_led_datRs['84'], 0.5, (Dird, 45, ([(1, -45), (3.8, -90), (1, -135)], 90), -1), 'B.Cu') )
+        # Col8 --> Col9
+        wires.append( ('CL84', via_led_datLs['84'], 'CL91', via_led_datLs['91'], 0.5,
+            (Dird, ([(10, 0), (20, -90), (20, -110), (4, -130)], -50), ([(4, 90), (4, 60), (8, 90), (10, 180)], 90), -1), 'B.Cu') )
         #
         kad.wire_mods( wires )
-        # via_ldi = kad.add_via_relative( 'U1', '12', (1.6, -1.4), VIA_Size[3] )
-        # via_lb1_5v = kad.add_via_relative( 'R2', '2', (0, 11.6), VIA_Size[1] )
-        # via_lb1_di = kad.add_via_relative( 'R2', '2', (0, 10.3), VIA_Size[2] )
-        # kad.wire_mods( [
-        #     # 5V
-        #     ('LB1', via_led_vccs['LB1'], 'J1', via_lb1_5v, 0.6, (Dird, ([(2.4, 90), (11.2, 0)], -45), 0, -1)),
-        #     ('J1', via_lb1_5v, 'L14', via_led_vccs['L14'], 0.6, (Dird, 0, 90, -1), 'B.Cu'),
-        #     # DI <-- DO
-        #     ('J1', via_splt_sb1, 'LB1', via_led_dos['LB1'],  0.5, (Dird, 0, ([(5, -135), (5, -90)], -45), -1), 'B.Cu'),
-        #     ('LB1', via_led_dis['LB1'], 'J1', via_lb1_di, 0.5, (Dird, ([(0.3, 90), (3.3, 0)], -45), 0, -1)),
-        #     ('J1', via_lb1_di, 'L14', via_led_dos['L14'], 0.5, (Dird, 0, ([(1.4, 180)], 90), -1), 'B.Cu'),
-        #     ('L11', via_led_dis['L11'], 'U1', via_ldi, 0.4, (Dird, 90, ([(10, 0), (3, -45), (13, 0), (3, +45)], 0), -0.6)),
-        #     ('U1', '12', 'U1', via_ldi, 0.4, (Dird, 90, 0, -0.6)),
-        #     #
-        #     ('R2', '2', 'J1', via_lb1_5v, 0.6, (Dird, 90, 0)),
-        # ] )
         # pcb.Delete( via_lb1_di )
+        pcb.Delete( via_led_pwrLs['91'] )
 
         # # D0
         # pos_c1_1 = kad.get_pad_pos( 'C1', '1' )
@@ -830,14 +856,16 @@ def main():
         via_vcca1 = kad.add_via_relative( 'U1', '1',  (-3.0, -0.15), VIA_Size[2] )
         via_vcca5 = kad.add_via_relative( 'U1', '5',  (-3.0, +0.0), VIA_Size[2] )
         via_nrst  = kad.add_via_relative( 'U1', '4',  (-1.6,  0  ), VIA_Size[3] )
-        via_swdio = kad.add_via_relative( 'U1', '23', (-4.0,  0.8), VIA_Size[3] )
-        via_swclk = kad.add_via_relative( 'U1', '24', (-4.8,  0.8), VIA_Size[3] )
+        via_swclk = kad.add_via_relative( 'U1', '24', (5.0, 0), VIA_Size[3] )
+        via_swdio = kad.add_via_relative( 'U1', '23', (4.0, 0), VIA_Size[3] )
+        via_rx    = kad.add_via_relative( 'U1', '9', (0, 1.0), VIA_Size[3] )
+        via_tx    = kad.add_via_relative( 'U1', '8', (0, 2.0), VIA_Size[3] )
         VCC = pcb.FindNet( 'VCC' )
         via_u1_ctr = kad.add_via( kad.get_mod_pos_angle( 'U1' )[0], VCC, VIA_Size[1] )
         kad.wire_mods( [
             # pass caps
-            ('C4', '1', 'U1', '17', 0.5, (ZgZg, 90, 45)),
-            ('C4', '2', 'U1', '16', 0.5, (Dird, 90, 90, -1)),
+            ('C4', '1', 'U1', '17', 0.5, (Dird, -45, 0, -0.6)),
+            ('C4', '2', 'U1', '16', 0.5, (Dird, 0, 90, -1)),
             ('C3', '1', 'U1',  '1', 0.5, (Dird, -45, 0, -0.6)),
             ('C3', '2', 'U1', '32', 0.5, (Dird, 0, 90, -1)),
             ('C3', '2', 'C5', '2',  0.5, (Dird, ([(1.25, 90)], 0), -45, -1)),
@@ -847,19 +875,21 @@ def main():
             ('U2', '3', 'C2', '2', 0.6, (ZgZg, 90, 30, -1)),# Gnd
             ('U2', '2', 'C2', '1', 0.6, (ZgZg, 90, 30)),# Vcc
             #
-            ('C4', '1', 'C2', '1', 0.6, (Dird, 0, 90)),# Vcc
-            ('C4', '2', 'C2', '2', 0.6, (Dird, 0, 90)),# Gnd
+            ('C4', '1', 'C2', '1', 0.6, (Dird, 90, 90)),# Vcc
+            ('C4', '2', 'C2', '2', 0.6, (Dird, 90, 90)),# Gnd
             # VCC
-            ('U1',  '1', None, via_u1_ctr, 0.5, (Dird, 0, -45, -0.4)),
-            ('U1', '17', None, via_u1_ctr, 0.5, (Dird, 0, -45, -0.4)),
-            ('U1',  '5', None, via_u1_ctr, 0.5, (Dird, 0, -45)),
+            ('U1', '1', 'U1', '17', 0.5, (Dird, 0, ([(1.4, 180)], 90), -0.4)),
+            ('U1', '1', 'U1',  '5', 0.5, (Dird, 0, ([(1.4,   0)], 90), -0.4)),
+            # ('U1',  '1', None, via_u1_ctr, 0.5, (Dird, 0, -45, -0.4)),
+            # ('U1', '17', None, via_u1_ctr, 0.5, (Dird, 0, -45, -0.4)),
+            # ('U1',  '5', None, via_u1_ctr, 0.5, (Dird, 0, -45)),
             # VCCA
             ('U1', '5', None, via_vcca5, 0.5, (Strt)),
             ('C5', '1', None, via_vcca1, 0.5, (Dird, 45, 90)),
             ('U1', via_vcca1, None, via_vcca5, 0.6, (Strt), 'B.Cu'),
             # USB
-            ('U1', '21', 'R4', '2', 0.5, (Dird, 0, ([(1, 0)], -45), -0.3)),
-            ('U1', '22', 'R5', '2', 0.5, (Dird, 0, ([(1, 0)], +45), -0.3)),
+            ('U1', '21', 'R4', '2', 0.5, (Dird, 0, ([(1, 0)], -30), -0.3)),
+            ('U1', '22', 'R5', '2', 0.5, (Dird, 0, ([(2, 0)], -30), -0.3)),
             # # I2C pull-up's
             # ('U1', '2', 'R2', '1', 0.5, (Dird, 180, ([(-2, 90), (1.4, -45), (-12.5, 90)], -45), -0.8)),
             # ('U1', '3', 'R3', '1', 0.5, (Dird, 180, ([(+2, 90), (2.4, 135), (+12, 90)], -45), -0.8)),
@@ -868,15 +898,17 @@ def main():
             ('J3', '2', None, via_nrst, 0.4, (Dird, ([(1.4, 0)], 90), 0, -1), 'B.Cu'),
             ('J3', '2', 'C6', '1', 0.4, (Dird, ([(1.4, 0)], 90), 90, -1)),
             # SWCLK/DIO
-            ('U1', '23', None, via_swdio, 0.4, (Dird, 0, 45, -0.4)),
-            ('U1', '24', None, via_swclk, 0.4, (Dird, 0, 45, -0.4)),
-            ('J3', '3', 'U1', via_swclk, 0.4, (Dird, ([(2.2, 0)], 90), ([(2.0, -135)], 90), -1), 'B.Cu'),
-            ('J3', '4', 'U1', via_swdio, 0.4, (Dird, ([(3.0, 0)], 90), ([(1.6, -135)], 90), -1), 'B.Cu'),
+            ('U1', '24', None, via_swclk, 0.4, (Strt)),
+            ('U1', '23', None, via_swdio, 0.4, (Strt)),
+            ('J3', '6', 'U1', via_swclk, 0.4, (Dird, 45, 90, -1), 'B.Cu'),
+            ('J3', '5', 'U1', via_swdio, 0.4, (Dird, 45, 90, -1), 'B.Cu'),
             # TX/RX
-            ('J3', '5', 'U1', '8', 0.4, (Dird, ([(2.2, 0)], 90), 90, -1)),
-            ('J3', '6', 'U1', '9', 0.4, (Dird, ([(3.0, 0)], 90), 90, -1)),
+            ('U1', '9', None, via_rx, 0.4, (Strt)),
+            ('U1', '8', None, via_tx, 0.4, (Strt)),
+            ('J3', '4', 'U1', via_rx, 0.4, (Dird, +45, 90, -1), 'B.Cu'),
+            ('J3', '3', 'U1', via_tx, 0.4, (Dird, +45, 90, -1), 'B.Cu'),
             # D1
-            ('U1', '7', 'R1', '1', 0.5, (Dird, 0, 90, -1)),
+            # ('U1', '7', 'R1', '1', 0.5, (Dird, 0, 90, -1)),
             ('R1', '2', 'D1', '2', 0.5, (Dird, 0, 90, -1)),
             ('J3', '1', 'D1', '1', 0.5, (Dird, 0, 0, -1)),
         ] )
@@ -973,6 +1005,7 @@ def main():
             ('J2', via_usb_vba, 'J2', 'A4', 0.8, (Dird, +60, ([(1.6, 90), (0.5, 135)], 90))),
             ('J2', via_usb_vbb, 'J2', 'B4', 0.8, (Dird, -60, ([(1.6, 90), (0.5,  45)], 90))),
             ('J2', via_usb_vba, 'J2', via_usb_vbb, 0.8, (Strt), 'Opp'),
+            ('J2', via_usb_vbb, 'F1', '1', 0.6, (ZgZg, 90, 45)),
             # dm/dp
             ('J2', via_usb_dpa, 'J2', 'A6', 0.3, (Dird, 90, ([(2.4, 90)], -45), -0.2)),
             ('J2', via_usb_dpb, 'J2', 'B6', 0.3, (Dird, 0, 90)),
@@ -980,8 +1013,8 @@ def main():
             ('J2', via_usb_dma, 'J2', 'A7', 0.3, (Dird, 0, 90)),
             ('J2', via_usb_dmb, 'J2', 'B7', 0.3, (Dird, 0, 90)),
             ('J2', via_usb_dma, 'J2', via_usb_dmb, 0.4, (Dird, 90, 0), 'Opp'),
-            ('J2', via_usb_dpb, 'R5', '1', 0.5, (Dird, ([(7.0, 90)], 45), ([(-1, 0), (-0.8, -45)], 0), -0.3)),
-            ('J2', via_usb_dmb, 'R4', '1', 0.5, (Dird, ([(8.2, 90)], 45), ([(-1, 0), (-0.8, +45)], 0), -0.3)),
+            ('J2', via_usb_dpb, 'R5', '1', 0.5, (Dird, 90, 45, -0.3)),
+            ('J2', via_usb_dmb, 'R4', '1', 0.5, (Dird, 90, 45, -0.3)),
             # cc1/2
             ('J2', via_usb_cc1, 'J2', 'A5', 0.3, (Dird, 0, 90)),
             ('J2', via_usb_cc2, 'J2', 'B5', 0.3, (Dird, 0, 90)),
@@ -995,8 +1028,6 @@ def main():
             ('R9', '2', 'J2', 'S2', 0.8, (Dird, 90, 90)),
         ] )
 
-    return
-
     # J1/J2
     if board == BDL:
         kad.wire_mods( [
@@ -1006,8 +1037,8 @@ def main():
             ('J1', via_splt_dmb, 'R2', '1', 0.4, (Dird, 90, ([(1.2, +90)], -45), -0.6)),
             ('J1', via_splt_dpb, 'R3', '1', 0.4, (Dird, 90, ([(1.2, -90)], +45), -0.6)),
             # VBUS
-            ('F1', '1', 'J2', via_usb_vbb, 0.6, (Dird, 0, 90)),
             ('F1', '2', 'L1', '2', 0.6, (Dird, 0, 90)),
+            ('C1', '1', 'L1', '1', 0.6, (Dird, 90, 90)),
         ] )
     elif board == BDR:
         via_scl = kad.add_via_relative( 'U1', '12', (2.8 - 0.2, -0.2), VIA_Size[3] )
@@ -1023,6 +1054,9 @@ def main():
             ('J1', via_splt_dmb, 'U1', via_sda, 0.45, (Dird, ([(2, 90)], 45), ([(0.2, 0), (19.4, 90), (1.2, 135)], 90), -1)),
             ('J1', via_splt_dpb, 'U1', via_scl, 0.45, (Dird, ([(1, 90)], 45), ([(0.2, 0), (18.4, 90), (1.2, 135)], 90), -1)),
         ] )
+
+    return
+
     # J3 Gnd
     if board in []:#[BDL, BDR]:
         via_gnd = kad.add_via_relative( 'J3', '1', (0, -4), VIA_Size[3] )

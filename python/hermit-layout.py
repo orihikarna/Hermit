@@ -232,12 +232,14 @@ class keyboard_layout:
             keyidx = f'{col}{row}'
             row += 1
             if row == 4:
-                if col == 7 or col == 8:
+                if col == 7:
                     col += 1
-                    row = 1
+                    row = 2
             elif row == 5:
                 if col == 5:
                     row = 2
+                elif col == 8:
+                    row = 1
                 else:
                     row = 1
                 col += 1
