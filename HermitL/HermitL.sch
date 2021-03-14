@@ -689,11 +689,11 @@ $EndComp
 Connection ~ 5600 2500
 Text GLabel 6600 5400 0    50   Input ~ 0
 LDI
-Text GLabel 6600 5700 0    50   Input ~ 0
+Text GLabel 6600 5800 0    50   Input ~ 0
 COL1
-Text GLabel 7800 5000 2    50   Input ~ 0
-ROW2
 Text GLabel 7800 4900 2    50   Input ~ 0
+ROW2
+Text GLabel 6600 5700 0    50   Input ~ 0
 ROW1
 $Comp
 L Device:R_Small R6
@@ -747,9 +747,9 @@ Text GLabel 6450 1350 2    50   Input ~ 0
 ROW2
 Text GLabel 6450 1675 2    50   Input ~ 0
 ROW1
-Text GLabel 6600 5800 0    50   Input ~ 0
-ROW4
 Text GLabel 7800 5100 2    50   Input ~ 0
+ROW4
+Text GLabel 7800 5000 2    50   Input ~ 0
 ROW3
 $Comp
 L key-parts:SW_ChocV2 SW82
@@ -3321,11 +3321,6 @@ Connection ~ 6100 1350
 Wire Wire Line
 	6100 1350 6450 1350
 Wire Wire Line
-	5525 1575 5525 1350
-Connection ~ 5525 1350
-Wire Wire Line
-	5525 1350 6100 1350
-Wire Wire Line
 	4375 1900 4375 1675
 Connection ~ 4375 1675
 Wire Wire Line
@@ -3368,8 +3363,6 @@ Wire Wire Line
 Wire Wire Line
 	4950 1575 4950 1350
 Connection ~ 4950 1350
-Wire Wire Line
-	4950 1350 5525 1350
 Wire Wire Line
 	1775 1950 2350 1950
 Connection ~ 2350 1950
@@ -3549,9 +3542,6 @@ Wire Wire Line
 Connection ~ 5025 2100
 Wire Wire Line
 	5025 2100 5025 1775
-Wire Wire Line
-	5525 1575 5525 1900
-Connection ~ 5525 1575
 Wire Wire Line
 	4075 4925 5000 4925
 Wire Wire Line
@@ -3750,7 +3740,7 @@ Connection ~ 6100 725
 Wire Wire Line
 	6100 725  4950 725 
 Wire Wire Line
-	4375 1675 6450 1675
+	4375 1675 5525 1675
 Wire Wire Line
 	5375 1625 5225 1625
 Connection ~ 5225 1625
@@ -3762,4 +3752,16 @@ Wire Wire Line
 Connection ~ 3600 5850
 Wire Wire Line
 	4200 6500 4400 6500
+Wire Wire Line
+	4950 1350 5525 1350
+Wire Wire Line
+	5525 1575 5525 1350
+Connection ~ 5525 1350
+Wire Wire Line
+	5525 1350 6100 1350
+Wire Wire Line
+	5525 1900 5525 1675
+Connection ~ 5525 1675
+Wire Wire Line
+	5525 1675 6450 1675
 $EndSCHEMATC
