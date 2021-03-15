@@ -632,7 +632,7 @@ Wire Wire Line
 Wire Wire Line
 	10675 5325 10675 5225
 Connection ~ 10675 5225
-Text GLabel 10300 3225 0    50   Input ~ 0
+Text GLabel 10300 3425 0    50   Input ~ 0
 NRST
 $Comp
 L power:GND #PWR0125
@@ -671,9 +671,9 @@ F 3 "~" H 10500 3325 50  0001 C CNN
 	1    10500 3325
 	1    0    0    -1  
 $EndComp
-Text GLabel 10300 3325 0    50   Input ~ 0
+Text GLabel 10300 3225 0    50   Input ~ 0
 TX
-Text GLabel 10300 3425 0    50   Input ~ 0
+Text GLabel 10300 3325 0    50   Input ~ 0
 RX
 $Comp
 L power:VCC #PWR0126
