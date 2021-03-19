@@ -746,32 +746,54 @@ def main():
             ])
             # wire to column diodes
             mod_dio = 'D' + col + ('2' if cidx in [6, 8] else '1')
+            prm = None
             if cidx == 6:
+                prm = (Dird, 90, ([(2, 90), (10, 0)], 90), r_dbn)
+            elif cidx not in [6, 9]:
+                prm = (Dird, 90, 90, r_dbn)
+            if prm:
                 kad.wire_mods( [
-                    (mod_r2, '2', mod_dio, '1', w_dbn, (Dird, 90, ([(2, 90), (10, 0)], 90, r_dbn))),# 62
-                ] )
-            if cidx not in [6, 9]:
-                kad.wire_mods( [
-                    (mod_r2, '2', mod_dio, '1', w_dbn, (Dird, 90, 90, r_dbn)),
+                    (mod_r2, '2', mod_dio, '1', w_dbn, prm),
                 ] )
             # Vcc/Gnd vias
-            if cidx in [8]:
-                pos = (-1.8, 0)
+            if cidx == 9:
+                pos_gnd = (-1.8, -9.8)
+            elif cidx in [2]:
+                pos_gnd = (-1.8, -7.9)
+            elif cidx in [4]:
+                pos_gnd = (-1.8, -8.6)
+            elif cidx in [8]:
+                pos_gnd = (-1.8, 0)
             else:
-                pos = (-1.6, -7.0)
-            via_dbn_gnds[col] = kad.add_via_relative( mod_r2,  '1', pos, VIA_Size[1] )
+                pos_gnd = (-1.6, -7.0)
+            via_dbn_gnds[col] = kad.add_via_relative( mod_r2,  '1', pos_gnd, VIA_Size[1] )
             via_dbn_vccs[col] = kad.add_via_relative( mod_cap, '2', (0, -1.8), VIA_Size[1] )
             kad.wire_mods( [
                 (mod_r2,  '1', mod_r2,  via_dbn_gnds[col], w_dbn, (Dird, 0, 90, r_dbn)),
                 (mod_cap, '2', mod_cap, via_dbn_vccs[col], w_dbn, (Strt)),
             ] )
         # wire Vcc/Gnd via rows
+        w_pwr = 0.6
+        r_pwr = -1
         for cidx in range( 0, 7 ):
             ccurr = '9' if cidx == 0 else str( cidx )
             cnext = str( cidx + 1 )
+            if cidx in [0]:
+                prm_vcc = prm_gnd = (Dird, 90, 0, r_pwr)
+            elif cidx in [1]:
+                prm_vcc = prm_gnd = (Dird, 0, -16, r_pwr)
+            elif cidx in [2]:
+                prm_vcc = prm_gnd = (Dird, 0, 0, r_pwr)
+            elif cidx in [3]:
+                prm_vcc = prm_gnd = (Dird, 0, -45 + 9.6, r_pwr)
+            elif cidx in [4]:
+                prm_vcc = (Dird, ([(2, 180)], -45 + 9.6), 0, r_pwr)
+                prm_gnd = (Dird, -45 + 9.6, 0, r_pwr)
+            elif cidx in [5, 6]:
+                prm_vcc = prm_gnd = (Strt)
             kad.wire_mods( [
-                ('C' + ccurr + '1', via_dbn_vccs[ccurr], 'C' + cnext + '1', via_dbn_vccs[cnext], 0.6, (Strt), 'B.Cu'),
-                ('R' + ccurr + '2', via_dbn_gnds[ccurr], 'R' + cnext + '2', via_dbn_gnds[cnext], 0.6, (Strt), 'B.Cu'),
+                ('C' + ccurr + '1', via_dbn_vccs[ccurr], 'C' + cnext + '1', via_dbn_vccs[cnext], w_pwr, prm_vcc, 'B.Cu'),
+                ('R' + ccurr + '2', via_dbn_gnds[ccurr], 'R' + cnext + '2', via_dbn_gnds[cnext], w_pwr, prm_gnd, 'B.Cu'),
             ] )
         # Vcc from mcu
         kad.wire_mods( [
@@ -832,25 +854,41 @@ def main():
             ('SW84', '1', 'U1', via_row4_btm, w_row, (Dird, ([(9, 180), (20, 110), (14, 130), (8, 74)], 40), ([(2, 180)], 45)), 'B.Cu'),# Row4
         ])
     # COL lines
+    w_col = 0.5
+    r_col = -1
     if board == BDL:
-        for col in map( str, range( 1, 9 ) ):
+        col_dio_offset = (1.6, 90)
+        for cidx in range( 1, 9 ):
+            col = str( cidx )
             mod_dio = 'D' + col
-            if col == '8':
-                prm_23 = (Dird, 0, ([(2, 90)], 0), -0.4)
-                prm_34 = (Dird, ([(2, 90)], 0), ([(2, 90)], 0), -0.4)
-            else:
-                prm_12 = (Dird, ([(8, 180)], 90), ([(2, 90)], 0), -0.4)
-                prm_23 = (Dird, ([(7, 180)], 90), ([(2, 90)], 0), -0.4)
-                prm_34 = (Dird, ([(7, 180)], 90), ([(2, 90)], 0), -0.4)
-            if col not in['6', '8']:
-                kad.wire_mods( [(mod_dio + '1', '1', mod_dio + '2', '1', 0.5, prm_12)] )
-            if True:
-                kad.wire_mods( [(mod_dio + '2', '1', mod_dio + '3', '1', 0.5, prm_23)] )
-            if col not in ['7']:
-                kad.wire_mods( [(mod_dio + '3', '1', mod_dio + '4', '1', 0.5, prm_34)] )
+            for ridx in range( 1, 4 ):
+                row = str( ridx )
+                prm_col = None
+                if cidx in [8]:
+                    if ridx in [2]:
+                        prm_col = (Dird, 0, ([col_dio_offset], 0), r_col)
+                    elif ridx in [3]:
+                        prm_col = (Dird, ([col_dio_offset], 0), ([col_dio_offset], 0), r_col)
+                else:
+                    # default
+                    idx_curr = col + str( ridx )
+                    idx_next = col + str( ridx + 1 )
+                    if idx_curr not in keys.keys() or idx_next not in keys.keys():
+                        continue
+                    pos_curr, angle_curr = kad.get_mod_pos_angle( 'SW' + idx_curr )
+                    pos_next, _          = kad.get_mod_pos_angle( 'SW' + idx_next )
+                    sign_col = +1 if vec2.dot( vec2.sub( pos_curr, pos_next ), vec2.rotate( -angle_curr ) ) > 1.6 else -1
+                    prm_col = (Dird, 180, ([col_dio_offset, (7.4, 0)], [None, 30, 45, 45][ridx] * sign_col), r_col)
+                    # overwrite
+                    if cidx == 5 and ridx == 1:
+                        prm_col = (Dird, 180, ([col_dio_offset], 0), r_col)
+                    elif cidx == 7 and ridx == 1:
+                        prm_col = (Dird, 180, ([col_dio_offset, (7.4, 0), (4, -45)], -90), r_col)
+                if prm_col:
+                    kad.wire_mods( [(mod_dio + row, '1', mod_dio + str( ridx + 1 ), '1', w_col, prm_col)] )
         kad.wire_mods( [
-            ('R92', '2', 'SW91', '2', 0.5, (Dird, 90, 0, -0.4)),# 91
-            ('C91', '2', 'SW91', '1', 0.5, (Dird, ([(1.6, 0)], 90), 0, -0.4)),# 91
+            ('R92', '2', 'SW91', '2', w_col, (Dird, 90, 0, r_col)),# 91
+            ('C91', '2', 'SW91', '1', w_col, (Dird, ([(1.6, 0)], 90), 0, r_col)),# 91
         ] )
         via_col8_1 = kad.add_via_relative( 'U1', '7', (-3, 0), VIA_Size[2] )
         via_col8_2 = kad.add_via_relative( 'U1', '7', (-6, 0), VIA_Size[2] )
