@@ -14,7 +14,7 @@ from reportlab.lib.units import mm
 rad2deg = 180 / math.pi
 deg2rad = math.pi / 180
 
-anti_alias_scaling = 3
+anti_alias_scaling = 4
 
 fontpath = "/System/Library/Fonts/Courier.dfont"
 font = ImageFont.truetype( fontpath, size = 28 * anti_alias_scaling )
@@ -150,7 +150,7 @@ class keyboard_layout:
 
             if True:
                 dim = vec2( w - 2 * Th, h - 2 * Th ) * L
-                key_image, rsz = get_key_image( (int( dim[0] ), int( dim[1] )), int( L/4 ), key.name, "DarkTurquoise" )
+                key_image, rsz = get_key_image( (int( dim[0] ), int( dim[1] )), int( L/12 ), key.name, "DarkTurquoise" )
                 key_image = key_image.rotate( -r )
                 pos = t - vec2( rsz, rsz ) / 2
                 image.paste( key_image, (int( pos[0] ), int( pos[1] )), key_image )
@@ -307,7 +307,7 @@ class key_layout_maker:
         if keyh < 0:
             keyh = self.keyh
         for idx, names in enumerate( [names1, names2]):
-            if idx in [1]:
+            if idx in []:
                 continue
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
@@ -336,7 +336,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     col_Gui = ["Shift", "Tab", "Win"]
     col_Tab = ["", "~\n^", "|\n¥", "ESC"]
     col_Z = ["Z", "A", "Q", "!\n1"]
-    col_X = ["X", "S", "W", "\n2"]
+    col_X = ["X", "S", "W", "\"\n2"]
     col_C = ["C", "D", "E", "#\n3"]
     col_V = ["V", "F", "R", "$\n4"]
     col_B = ["B", "G", "T", "%\n5"]
@@ -344,12 +344,12 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
 
     # Right hand
     col_I1 = ["Entr"]
-    col_N = ["N", "H", "Y", "^\n6"]
+    col_N = ["N", "H", "Y", "&\n6"]
     col_M = ["M", "J", "U", "'\n7"]
     col_Comm = ["<\n,", "K", "I", "(\n8"]
     col_Dot  = [">\n.", "L", "O", ")\n9"]
     col_Scln = ["?\n/", "+\n;", "P", " \n0"]
-    col_Cln  = ["", "*\n:", "@", "=\n-"]
+    col_Cln  = ["", "*\n:", "`\n@", "=\n-"]
     col_Brac = ["_\nBsls", "]\n}", "[\n{"]
     thumbs1  = ["Space", "Shift", "Raise"]
 
@@ -361,7 +361,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     print( f'ratio = {ratio}')
 
     # Comma: the origin
-    output_type = 'kicad'
+    output_type = 'png'
     if output_type in ['png', 'pdf']:
         angle_Comm = 0
         org_Comm = vec2( 4.5, 4.3 )
@@ -500,10 +500,10 @@ if __name__=='__main__':
     unit_h = 16.8
     # paper_size = vec2( 297, 210 )# A4
     # paper_size = vec2( 364, 257 )# B4
-    paper_size = vec2( 340, 170 )
+    paper_size = vec2( 330, 165 )
     thickness = 0.3# mm
 
-    N = 16
+    N = 32
     for i in [N]:
     # for i in [0, N]:
     # for i in [0, 1, int(N/2)]:
