@@ -247,7 +247,7 @@ L Device:C_Small C5
 U 1 1 5D5B2561
 P 9450 3550
 F 0 "C5" H 9250 3550 50  0000 L CNN
-F 1 "0.1uF" H 9200 3450 50  0000 L CNN
+F 1 "1uF" H 9200 3450 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 9450 3550 50  0001 C CNN
 F 3 "~" H 9450 3550 50  0001 C CNN
 	1    9450 3550
@@ -398,8 +398,6 @@ Wire Wire Line
 	10275 2100 10275 2025
 Wire Wire Line
 	10200 950  10350 950 
-Wire Wire Line
-	10550 950  10650 950 
 $Comp
 L Device:Polyfuse_Small F1
 U 1 1 5D958CA7
@@ -411,7 +409,7 @@ F 3 "~" H 10450 950 50  0001 C CNN
 	1    10450 950 
 	0    1    1    0   
 $EndComp
-Text GLabel 10650 950  2    50   Input ~ 0
+Text GLabel 10750 950  2    50   Input ~ 0
 VBUS
 $Comp
 L power:PWR_FLAG #FLG0101
@@ -3764,4 +3762,6 @@ Wire Wire Line
 Connection ~ 5525 1675
 Wire Wire Line
 	5525 1675 6450 1675
+Wire Wire Line
+	10550 950  10750 950 
 $EndSCHEMATC
