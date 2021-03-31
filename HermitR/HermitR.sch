@@ -212,7 +212,7 @@ F 3 "" H 10075 6025 50  0001 C CNN
 $EndComp
 Text GLabel 10675 4525 2    50   Input ~ 0
 5V
-Text GLabel 6675 5200 3    50   Input ~ 0
+Text GLabel 6475 5050 0    50   Input ~ 0
 RDI
 Text GLabel 10725 5125 2    50   Input ~ 0
 SDA
@@ -228,38 +228,6 @@ Wire Wire Line
 Wire Wire Line
 	10675 5325 10675 5225
 Connection ~ 10675 5225
-Text GLabel 10300 3425 0    50   Input ~ 0
-NRST
-$Comp
-L power:GND #PWR0125
-U 1 1 5F40307C
-P 10300 3125
-F 0 "#PWR0125" H 10300 2875 50  0001 C CNN
-F 1 "GND" H 10305 2952 50  0000 C CNN
-F 2 "" H 10300 3125 50  0001 C CNN
-F 3 "" H 10300 3125 50  0001 C CNN
-	1    10300 3125
-	0    1    1    0   
-$EndComp
-Text GLabel 10300 3525 0    50   Input ~ 0
-SWDIO
-Text GLabel 10300 3625 0    50   Input ~ 0
-SWCLK
-$Comp
-L Connector_Generic:Conn_01x06 J3
-U 1 1 5F441FB8
-P 10500 3325
-F 0 "J3" H 10580 3317 50  0000 L CNN
-F 1 "Conn_01x06" H 10580 3226 50  0000 L CNN
-F 2 "key-parts:PinHeader_1x06_P2.54mm_Vertical" H 10500 3325 50  0001 C CNN
-F 3 "~" H 10500 3325 50  0001 C CNN
-	1    10500 3325
-	1    0    0    -1  
-$EndComp
-Text GLabel 10300 3225 0    50   Input ~ 0
-TX
-Text GLabel 10300 3325 0    50   Input ~ 0
-RX
 Connection ~ 5600 2500
 $Comp
 L Device:R_Small R6
@@ -2499,7 +2467,7 @@ Wire Wire Line
 Wire Wire Line
 	4975 4575 5075 4575
 Connection ~ 4975 4575
-Text GLabel 6675 5850 3    50   Input ~ 0
+Text GLabel 6875 5050 2    50   Input ~ 0
 NRST
 Wire Wire Line
 	1875 4325 1775 4325
@@ -3171,10 +3139,10 @@ NoConn ~ 7600 5175
 Text GLabel 7500 5375 0    50   Input ~ 0
 NRST
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0101
 U 1 1 60A7641B
 P 8300 6375
-F 0 "#PWR?" H 8300 6125 50  0001 C CNN
+F 0 "#PWR0101" H 8300 6125 50  0001 C CNN
 F 1 "GND" H 8305 6202 50  0000 C CNN
 F 2 "" H 8300 6375 50  0001 C CNN
 F 3 "" H 8300 6375 50  0001 C CNN
@@ -3182,10 +3150,10 @@ F 3 "" H 8300 6375 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0102
 U 1 1 60A769C2
 P 7600 5875
-F 0 "#PWR?" H 7600 5625 50  0001 C CNN
+F 0 "#PWR0102" H 7600 5625 50  0001 C CNN
 F 1 "GND" H 7605 5702 50  0000 C CNN
 F 2 "" H 7600 5875 50  0001 C CNN
 F 3 "" H 7600 5875 50  0001 C CNN
@@ -3193,10 +3161,10 @@ F 3 "" H 7600 5875 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0103
 U 1 1 60ABDC2C
 P 7600 5975
-F 0 "#PWR?" H 7600 5725 50  0001 C CNN
+F 0 "#PWR0103" H 7600 5725 50  0001 C CNN
 F 1 "GND" H 7605 5802 50  0000 C CNN
 F 2 "" H 7600 5975 50  0001 C CNN
 F 3 "" H 7600 5975 50  0001 C CNN
@@ -3204,29 +3172,29 @@ F 3 "" H 7600 5975 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0104
 U 1 1 60ABDDE8
 P 7600 6075
-F 0 "#PWR?" H 7600 5825 50  0001 C CNN
+F 0 "#PWR0104" H 7600 5825 50  0001 C CNN
 F 1 "GND" H 7605 5902 50  0000 C CNN
 F 2 "" H 7600 6075 50  0001 C CNN
 F 3 "" H 7600 6075 50  0001 C CNN
 	1    7600 6075
 	0    1    1    0   
 $EndComp
-Text GLabel 9000 4575 2    50   Input ~ 0
-ROW3
-Text GLabel 9000 4475 2    50   Input ~ 0
-ROW4
 Text GLabel 9000 4675 2    50   Input ~ 0
-ROW2
+ROW3
+Text GLabel 9000 4575 2    50   Input ~ 0
+ROW4
 Text GLabel 9000 4775 2    50   Input ~ 0
+ROW2
+Text GLabel 9000 4875 2    50   Input ~ 0
 ROW1
 Wire Wire Line
 	5525 1675 6100 1675
 Text GLabel 6225 1625 2    50   Input ~ 0
 5V
-Text GLabel 9000 4875 2    50   Input ~ 0
+Text GLabel 9000 4475 2    50   Input ~ 0
 LED
 Wire Wire Line
 	5800 1625 5225 1625
@@ -3317,14 +3285,14 @@ U 1 1 613CB3A2
 P 6675 5050
 F 0 "JP1" H 6675 5255 50  0000 C CNN
 F 1 "SolderJumper_3_Open" H 6675 5164 50  0000 C CNN
-F 2 "" H 6675 5050 50  0001 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5050 50  0001 C CNN
 F 3 "~" H 6675 5050 50  0001 C CNN
 	1    6675 5050
 	1    0    0    -1  
 $EndComp
-Text GLabel 6475 5050 0    50   Input ~ 0
+Text GLabel 6675 5200 3    50   Input ~ 0
 SBU1
-Text GLabel 6875 5050 2    50   Input ~ 0
+Text GLabel 6675 5850 3    50   Input ~ 0
 SBU2
 $Comp
 L Jumper:SolderJumper_3_Open JP2
@@ -3332,13 +3300,13 @@ U 1 1 61451EB0
 P 6675 5700
 F 0 "JP2" H 6675 5905 50  0000 C CNN
 F 1 "SolderJumper_3_Open" H 6675 5814 50  0000 C CNN
-F 2 "" H 6675 5700 50  0001 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5700 50  0001 C CNN
 F 3 "~" H 6675 5700 50  0001 C CNN
 	1    6675 5700
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
 Text GLabel 6475 5700 0    50   Input ~ 0
-SBU1
+RDI
 Text GLabel 6875 5700 2    50   Input ~ 0
-SBU2
+NRST
 $EndSCHEMATC
