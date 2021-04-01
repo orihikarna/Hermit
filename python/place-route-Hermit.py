@@ -457,7 +457,7 @@ def main():
             kad.set_mod_pos_angle( 'SW' + name, sw_pos, angle )
             ## LED
             sign = [+1, -1][board]
-            led_base_angle = 180 if name in L2R else 0
+            led_base_angle = 180 if name in [L2R, R2L][board] else 0
             pos = vec2.scale( 4.93, vec2.rotate( - angle - 90 * sign ), sw_pos )
             kad.set_mod_pos_angle( 'L' + name, pos, led_base_angle + angle )
             if True:# LED holes
@@ -794,7 +794,7 @@ def main():
     r_dbn = -1
     via_dbn_vccs = {}
     via_dbn_gnds = {}
-    if board in [BDL, BDR]:
+    if board in [BDL, BDR]:# vias
         for cidx in range( 1, [10, 9][board] ):
             col = str( cidx )
             # wire islands
@@ -835,7 +835,7 @@ def main():
                 (mod_r2,  '1', mod_r2,  via_dbn_gnds[col], w_pwr, (Dird, 0, 90, r_pwr)),
                 (mod_cap, '2', mod_cap, via_dbn_vccs[col], w_pwr, (Dird, 90, -8.5, r_pwr)),
             ] )
-        return
+    if board in [BDL]:# wires
         # wire Vcc/Gnd via rows
         prm_gnd_right = ([(4, 90), (0, 90), (6.8, 0), (2.8, 40)], 0)
         prm_vcc_offset = (0.4, 90)
@@ -876,12 +876,10 @@ def main():
             ('C5', via_gnd_c5, 'R92', via_dbn_gnds['9'], w_pwr, (Dird, 90, ([(2, 0)], 90), r_pwr), ('B.Cu')),
         ] )
 
-    return
-
     # ROW lines
-    if board == BDL:
-        w_row = 0.6
-        r_row = -1
+    w_row = 0.6
+    r_row = -1
+    if board in [BDL]:# horizontal wires
         for ridx in range( 1, 5 ):
             row = str( ridx )
             for cidx in range( 1, 7 ):
@@ -908,6 +906,7 @@ def main():
                 kad.wire_mods( [
                     ('SW'+idx, '1', 'SW'+nidx, '1', w_row, prm_row),
                 ] )
+    if board in [BDL]:
         # Row to mcu
         pos, angle, _, _ = kad.get_pad_pos_angle_layer_net( 'SW31', '1' )
         via_row4_top = kad.add_via( vec2.mult( mat2.rotate( angle ), (-4.2, +6.0), pos ), kad.get_pad_pos_net( 'U1', '12' )[1], VIA_Size[2] )
@@ -1007,7 +1006,7 @@ def main():
             ('U1', via_col8_1, 'C81', via_col8_2, w_col, (ZgZg, 0, 45, r_col), 'B.Cu'),
             ('U1', '7', 'U1', via_col8_1, w_mcu, (Strt)),
         ] )
-    elif board == BDR:
+    elif board == BDM:
         kad.wire_mods( [
             ('D11', '2', 'U1', '5', 0.45, (Dird, ([(6, 0), (14, 90)], -45), ([(2.2, 180)], -90), -1)),
             ('D12', '2', 'U1', '4', 0.45, (Dird, 0, ([(3.0, 180)], 90), -1.6)),
@@ -1022,75 +1021,84 @@ def main():
     w_dat = 0.5
     r_pwr = -1
     r_dat = -0.75
-    via_led_pwrLs = {}
-    via_led_pwrRs = {}
-    via_led_datLs = {}
-    via_led_datRs = {}
-    if board == BDL:
-        # LED vias
+    via_led_pwrSs = {}# SW 3 side
+    via_led_pwrTs = {}# the other side
+    via_led_datSs = {}# SW 3 side
+    via_led_datTs = {}# the other side
+    layer = ['F.Cu', 'B.Cu'][board]
+    if board in [BDL, BDR]:# vias
         for idx in keys.keys():
             col = idx[0]
             mod_led = 'L' + idx
             mod_cap = 'CL' + idx
-            if idx in L2R:
+            if idx in [L2R, R2L][board]:
                 sign = +1
-                cap_pwrL, cap_pwrR = '2', '1'
-                led_pwrL, led_pwrR = '3', '1'
-                led_datL, led_datR = '4', '2'
+                cap_pwrS, cap_pwrT = '2', '1'
+                led_pwrS, led_pwrT = '3', '1'
+                led_datS, led_datT = '4', '2'
             else:# R2L
                 sign = -1
-                cap_pwrL, cap_pwrR = '1', '2'
-                led_pwrL, led_pwrR = '1', '3'
-                led_datL, led_datR = '2', '4'
+                cap_pwrS, cap_pwrT = '1', '2'
+                led_pwrS, led_pwrT = '1', '3'
+                led_datS, led_datT = '2', '4'
             # thumb column (Col8)
             if col == '8':
-                # datR via
+                # datT via
                 if idx not in ['82']:
-                    via_led_datRs[idx] = kad.add_via_relative( mod_led, led_datR, (0, +sign * 1.5), VIA_Size[1] )
-                # pwrR: cap <--> led
-                r = 0 if idx in ['83', '84'] else r_dat
+                    via_led_datTs[idx] = kad.add_via_relative( mod_led, led_datT, (0, +sign * 1.5), VIA_Size[1] )
+                # pwrT: cap <--> led
+                r_tmp = r_dat
+                if board == BDL and idx in ['83', '84']:
+                    r_tmp = 0
                 kad.wire_mods( [
-                    (mod_cap, cap_pwrR, mod_led, led_pwrR, w_pwr2, (Dird, 0, 90, r), 'F.Cu'),
+                    (mod_cap, cap_pwrT, mod_led, led_pwrT, w_pwr2, (Dird, 0, 90, r_tmp), layer),
                 ] )
             else:# other fingers
-                # pwrL/R via
-                via_led_pwrRs[idx] = kad.add_via_relative( mod_led, led_pwrR, (0, -sign * 1.8), VIA_Size[0] )
-                if idx not in ['14', '91']:
-                    via_led_pwrLs[idx] = kad.add_via_relative( mod_cap, cap_pwrL, (0, +sign * 1.7), VIA_Size[0] )
-                # datR via
-                if idx not in ['64', '71', '72', '73']:
-                    via_led_datRs[idx] = kad.add_via_relative( mod_led, led_datR, (-sign * 1.5, 0), VIA_Size[1] )
-                # pwrL: via <--> cap
-                if idx in via_led_pwrLs:
+                # pwrS/T via
+                via_led_pwrTs[idx] = kad.add_via_relative( mod_led, led_pwrT, (0, -sign * 1.8), VIA_Size[0] )
+                if (board == BDL and idx not in ['14']) or idx not in ['91']:
+                    via_led_pwrSs[idx] = kad.add_via_relative( mod_cap, cap_pwrS, (0, +sign * 1.7), VIA_Size[0] )
+                # datT via
+                if board != BDL or idx not in ['64', '71', '72', '73']:
+                    via_led_datTs[idx] = kad.add_via_relative( mod_led, led_datT, (-sign * 1.5, 0), VIA_Size[1] )
+                # pwrS: via <--> cap
+                if idx in via_led_pwrSs:
                     kad.wire_mods( [
-                        (mod_cap, cap_pwrL, mod_led, via_led_pwrLs[idx], w_pwr2, (Strt), 'F.Cu'),
+                        (mod_cap, cap_pwrS, mod_led, via_led_pwrSs[idx], w_pwr2, (Strt), layer),
                     ] )
-                # pwrR: via <--> cap & led
+                # pwrT: via <--> cap & led
                 kad.wire_mods( [
-                    (mod_cap, cap_pwrR, mod_cap, via_led_pwrRs[idx], w_pwr2, (Dird, 0, 90), 'F.Cu'),
-                    (mod_led, led_pwrR, mod_led, via_led_pwrRs[idx], w_pwr2, (Strt), 'F.Cu'),
+                    (mod_cap, cap_pwrT, mod_cap, via_led_pwrTs[idx], w_pwr2, (Dird, 0, 90), layer),
+                    (mod_led, led_pwrT, mod_led, via_led_pwrTs[idx], w_pwr2, (Strt), layer),
                 ] )
-            # datL via
-            if idx not in ['14']:
-                via_led_datLs[idx] = kad.add_via_relative( mod_led, led_datL, (0, -sign * 1.1), VIA_Size[1] )
-            # pwrL: SW '3' <--> cap & led
-            r = 0 if idx in ['83'] else r_dat
+            # datS via
+            if board != BDL or idx not in ['14']:
+                via_led_datSs[idx] = kad.add_via_relative( mod_led, led_datS, (0, -sign * 1.1), VIA_Size[1] )
+            # pwrS: SW '3' <--> cap & led
+            r_tmp = r_dat
+            if (board == BDL and idx in ['83']):
+                r_tmp = 0
             kad.wire_mods( [
-                (mod_cap, cap_pwrL, 'SW' + idx, '3', w_pwr2, (Dird, 90, ([(2.3, -90)], 0), r)),
-                (mod_led, led_pwrL, 'SW' + idx, '3', w_pwr2, (Dird, 0, 90, r), ['F.Cu', 'B.Cu'][board]),
+                (mod_cap, cap_pwrS, 'SW' + idx, '3', w_pwr2, (Dird, 90, ([(2.3, -90)], 0), r_tmp)),
+                (mod_led, led_pwrS, 'SW' + idx, '3', w_pwr2, (Dird, 0, 90, r_tmp), layer),
             ] )
-            # datR: led <--> via
-            if idx in via_led_datRs:
+            # datT: led <--> via
+            if idx in via_led_datTs:
                 kad.wire_mods( [
-                    (mod_led, led_datR, mod_led, via_led_datRs[idx], w_dat, (Strt), 'F.Cu'),
+                    (mod_led, led_datT, mod_led, via_led_datTs[idx], w_dat, (Strt), layer),
                 ] )
-            # datL: led <--> via
-            if idx in via_led_datLs:
+            # datS: led <--> via
+            if idx in via_led_datSs:
                 kad.wire_mods( [
-                    (mod_led, led_datL, mod_led, via_led_datLs[idx], w_dat, (Strt), 'F.Cu'),
+                    (mod_led, led_datS, mod_led, via_led_datSs[idx], w_dat, (Strt), layer),
                 ] )
+    layer = ['B.Cu', 'F.Cu'][board]
+    if board in [BDL, BDR]:# wires
         # pwrL, pwrR, data lines
-        prm_pwrL_left = ([(3.6, -90), (12.1, 0)], 45 + 8.5)
+        if board == BDL:
+            prm_pwrL_left = ([(3.6, -90), (12.1, 0)], 45 + 8.5)
+        else:# BDR
+            prm_pwrL_left = ([(3.6, -90), (2.8, 180)], 125 - 8.5)
         for idx in keys.keys():
             ccurr = idx[0]
             rcurr = idx[1]
@@ -1103,65 +1111,99 @@ def main():
             else:
                 cnext = str( cidx + (2 if cidx == 5 and ridx == 1 else 1) )
             nidx = cnext + rcurr
-            sign = +1 if idx in L2R else -1
             if nidx not in keys.keys():
                 continue
-            pwrR_offset = (sign * 0.5, 90)
-            data_offset = (sign * 0.25, 90)
+            sign_led = +1 if idx in [L2R, R2L][board] else -1
+            pwrT_offset = (sign_led * 0.5, 90)
+            data_offset = (sign_led * 0.25, 90)
             if cidx in [1, 3] or (cidx == 5 and ridx == 1):
-                prm_pwrL = (Dird, 90, 0, r_pwr)
-                prm_pwrR = (Dird, 90, ([pwrR_offset], 0), r_pwr)
+                prm_pwrS = (Dird, 90, 0, r_pwr)
+                prm_pwrT = (Dird, 90, ([pwrT_offset], 0), r_pwr)
                 prm_data = (Dird, 90, ([data_offset], 0), r_dat)
             elif cidx in [2]:
-                prm_pwrL = (Dird, 0, 0, r_pwr)
-                prm_pwrR = (Dird, ([pwrR_offset], 0), ([pwrR_offset], 0), r_pwr)
-                prm_data = (Dird, ([(sign * 2.8, 90)], 0), ([data_offset], 0), r_dat)
-            elif cidx in [4, 9]:
+                prm_pwrS = (Dird, 0, 0, r_pwr)
+                prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset], 0), r_pwr)
+                prm_data = (Dird, ([(sign_led * 2.8, 90)], 0), ([data_offset], 0), r_dat)
+            elif cidx in [4]:
                 dangle = 15 if ridx == 1 else 0
-                if cidx in [9]:
-                    prm_pwrL = (Dird, prm_pwrL_left, 0, r_pwr)
-                else:
-                    prm_pwrL = (Dird, 0, ([(sign * 3.8, 0)], 120 + dangle), r_pwr)
-                prm_pwrR = (Dird, 0, ([pwrR_offset, (sign * 8.2, 0)], 60 - dangle), r_pwr)
-                prm_data = (Dird, 0, ([data_offset, (sign * 3.8, 0)], 60 - dangle), r_dat)
+                if board == BDL:
+                    prm_pwrS = (Dird, 0, ([(sign_led * 3.8, 0)], 120 + dangle), r_pwr)
+                    prm_pwrT = (Dird, 0, ([pwrT_offset, (sign_led * 8.2, 0)], 60 - dangle), r_pwr)
+                    prm_data = (Dird, 0, ([data_offset, (sign_led * 3.8, 0)], 60 - dangle), r_dat)
+                else:# BDR
+                    one_row1 = 1 if ridx == 1 else 0
+                    prm_pwrS = (Dird, 0, ([(-sign_led * (5.3 + 1.92 * one_row1), 0)], 70 - dangle), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (-sign_led * (2.5 + 1.8 * one_row1), 0)], 110 + dangle), r_pwr)
+                    prm_data = (Dird, 0, ([data_offset, (sign_led * 3.6, 0)], 110 + 16 + (15 - 9.6) * one_row1), r_dat)
             elif cidx in [5, 6]:
-                prm_pwrL = (Dird, ([(sign * 6.4, 180)], 150), 0, r_pwr)
-                prm_pwrR = (Dird, ([(sign * 3.2, 180)], 30), ([pwrR_offset], 0), r_pwr)
-                prm_data = (Dird, 90, ([data_offset], 0), r_dat)
+                if board == BDL:
+                    prm_pwrS = (Dird, ([(sign_led * 6.4, 180)], 150), 0, r_pwr)
+                    prm_pwrT = (Dird, ([(sign_led * 3.2, 180)], 30), ([pwrT_offset], 0), r_pwr)
+                    prm_data = (Dird, 90, ([data_offset], 0), r_dat)
+                else:# BDR
+                    prm_pwrS = (Dird, ([(-sign_led * 6.4, 180)], 30), 0, r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset, (-sign_led *  9.2, 180)], 150), ([pwrT_offset], 0), r_pwr)
+                    if ridx == 1:
+                        prm_data = (Dird, 90, ([data_offset], 0), r_dat)
+                    else:
+                        prm_data = (Dird, 90, ([data_offset, (sign_led * 3.6, 0)], -30), r_dat)
+            elif cidx in [9]:
+                if board == BDL:
+                    prm_pwrS = (Dird, prm_pwrL_left, 0, r_pwr)
+                    prm_pwrT = (Dird, 0, ([pwrT_offset, (sign_led * 8.2, 0)], 45), r_pwr)
+                    prm_data = (Dird, 0, ([data_offset, (sign_led * 3.8, 0)], 45), r_dat)
+                else:# BDR
+                    prm_pwrS = (Dird, prm_pwrL_left, 0, r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (-sign_led * 4.6, 0)], 125), r_pwr)
+                    prm_data = (Dird, 0, ([data_offset, (sign_led * 3.6, 0)], 125 - 8.5), r_dat)
+            # pwrT
             kad.wire_mods( [
-                ('L' + idx, via_led_pwrRs[idx], 'L' + nidx, via_led_pwrRs[nidx], w_pwr, prm_pwrR),
-                ('L' + idx, via_led_datRs[idx], 'L' + nidx, via_led_datLs[nidx], w_dat, prm_data),
+                ('L' + idx, via_led_pwrTs[idx], 'L' + nidx, via_led_pwrTs[nidx], w_pwr, prm_pwrT),
             ] )
-            if idx in via_led_pwrLs:
+            # pwrS
+            if idx in via_led_pwrSs:
                 kad.wire_mods( [
-                    ('CL' + idx, via_led_pwrLs[idx], 'CL' + nidx, via_led_pwrLs[nidx], w_pwr, prm_pwrL, 'B.Cu'),
+                    ('CL' + idx, via_led_pwrSs[idx], 'CL' + nidx, via_led_pwrSs[nidx], w_pwr, prm_pwrS, layer),
                 ] )
-            else:
+            elif board == BDR:
                 kad.wire_mods( [
-                    ('SW' + idx, '3', 'CL' + nidx, via_led_pwrLs[nidx], w_pwr, prm_pwrL, 'B.Cu'),
+                    ('SW' + idx, '3', 'CL' + nidx, via_led_pwrSs[nidx], w_pwr, prm_pwrS, layer),
                 ] )
+            # data
+            if board == BDL:
+                kad.wire_mods( [
+                    ('L' + idx, via_led_datTs[idx], 'L' + nidx, via_led_datSs[nidx], w_dat, prm_data),
+                ] )
+            elif board == BDR:
+                kad.wire_mods( [
+                    ('L' + nidx, via_led_datTs[nidx], 'L' + idx, via_led_datSs[idx], w_dat, prm_data),
+                ] )
+    if board in [BDR]:
+        return
+
+    if board in [BDL]:# wires between rows
         # Row1 --> Row2
-        prm_pwrL = (Dird, prm_pwrL_left, ([(5, -90), (2, -45), (2.4, -90), (3.4, -135)], 0), r_pwr)
-        prm_pwrR = (Dird, 0, 90, r_pwr)
+        prm_pwrS = (Dird, prm_pwrL_left, ([(5, -90), (2, -45), (2.4, -90), (3.4, -135)], 0), r_pwr)
+        prm_pwrT = (Dird, 0, 90, r_pwr)
         kad.wire_mods( [
-            ('SW91', '3', 'CL12', via_led_pwrRs['12'], w_pwr, prm_pwrL, 'B.Cu'),# GNDD
-            ('CL91', via_led_pwrRs['91'], 'SW12', '3', w_pwr, prm_pwrR, 'F.Cu'),
+            ('SW91', '3', 'CL12', via_led_pwrTs['12'], w_pwr, prm_pwrS, 'B.Cu'),# GNDD
+            ('CL91', via_led_pwrTs['91'], 'SW12', '3', w_pwr, prm_pwrT, 'F.Cu'),
             ('L71', '2', 'L72', '4', w_dat, (Dird, ([(1.6, 180)], 90), ([(1.6, 0), (5.2, 90), (4.0, 135)], 0), r_dat), 'F.Cu'),# data
         ] )
         # Row2 --> Row3
-        prm_pwrL = (Dird, 90, ([(5, +90), (2, 135), (2.4, +90), (3.4, 45)], 0), r_pwr)
-        prm_pwrR = (Dird, ([(1.5, +90)], -45), 90, r_pwr)
+        prm_pwrS = (Dird, 90, ([(5, +90), (2, 135), (2.4, +90), (3.4, 45)], 0), r_pwr)
+        prm_pwrT = (Dird, ([(1.5, +90)], -45), 90, r_pwr)
         kad.wire_mods( [
-            ('CL12', via_led_pwrLs['12'], 'CL13', via_led_pwrRs['13'], w_pwr, prm_pwrL, 'B.Cu'),
-            ('CL12', via_led_pwrRs['12'], 'SW13', '3', w_pwr, prm_pwrR, 'F.Cu'),
-            ('CL12', via_led_datLs['12'], 'CL13', via_led_datLs['13'], w_dat, (Dird, 90, ([(4, 90)], 60), r_dat), 'B.Cu'),# data
+            ('CL12', via_led_pwrSs['12'], 'CL13', via_led_pwrTs['13'], w_pwr, prm_pwrS, 'B.Cu'),
+            ('CL12', via_led_pwrTs['12'], 'SW13', '3', w_pwr, prm_pwrT, 'F.Cu'),
+            ('CL12', via_led_datSs['12'], 'CL13', via_led_datSs['13'], w_dat, (Dird, 90, ([(4, 90)], 60), r_dat), 'B.Cu'),# data
         ] )
         # Row3 --> Row4
-        prm_pwrL = (Dird, 90, ([(5, -90), (2, -45), (2.4, -90), (3.4, -135)], 0), r_pwr)
-        prm_pwrR = (Dird, ([(2.4, -90)], -60), 90, r_pwr)
+        prm_pwrS = (Dird, 90, ([(5, -90), (2, -45), (2.4, -90), (3.4, -135)], 0), r_pwr)
+        prm_pwrT = (Dird, ([(2.4, -90)], -60), 90, r_pwr)
         kad.wire_mods( [
-            ('CL13', via_led_pwrLs['13'], 'CL14', via_led_pwrRs['14'], w_pwr, prm_pwrL, 'B.Cu'),
-            ('CL13', via_led_pwrRs['13'], 'SW14', '3', w_pwr, prm_pwrR, 'F.Cu'),
+            ('CL13', via_led_pwrSs['13'], 'CL14', via_led_pwrTs['14'], w_pwr, prm_pwrS, 'B.Cu'),
+            ('CL13', via_led_pwrTs['13'], 'SW14', '3', w_pwr, prm_pwrT, 'F.Cu'),
             ('L73', '2', 'L64', '4', w_dat, (Dird, ([(1.6, 180), (6.2, 90)], 0), ([(5.8, 0)], 90), r_dat), 'F.Cu'),# data
         ] )
         # Col9 <-- J1, Col8
@@ -1169,10 +1211,10 @@ def main():
         via_led_84 = kad.add_via_relative( 'CL84', '2', (6.4, 11.4), VIA_Size[0])
         kad.wire_mods( [
             ('SW91', '3', 'J1', 'S4', w_pwr, (Dird, 90, 0, r_pwr), 'B.Cu'),
-            ('J1', via_splt_vba, 'CL91', via_led_pwrRs['91'], w_pwr, (Dird, 0, ([(1.67, -90), (9.8, 0), (12, 90)], 135), r_pwr), 'F.Cu'),
-            ('CL84', via_led_datLs['84'], 'CL84', via_led_84, w_dat, (Dird, ([(0.8, 90), (5, 0)], -45), 90, r_dat), 'B.Cu'),
+            ('J1', via_splt_vba, 'CL91', via_led_pwrTs['91'], w_pwr, (Dird, 0, ([(1.67, -90), (9.8, 0), (12, 90)], 135), r_pwr), 'F.Cu'),
+            ('CL84', via_led_datSs['84'], 'CL84', via_led_84, w_dat, (Dird, ([(0.8, 90), (5, 0)], -45), 90, r_dat), 'B.Cu'),
             ('CL84', via_led_84, 'CL83', via_led_83, w_dat, (Dird, 90, 90, r_dat), 'B.Cu'),
-            ('CL83', via_led_83, 'CL91', via_led_datLs['91'], w_dat,
+            ('CL83', via_led_83, 'CL91', via_led_datSs['91'], w_dat,
                 (Dird, ([(2, -90)], 70), ([(4, 90), (1.8, 60), (9, 90), (10, 180), (16, 90)], 90 - 8.5), r_dat), 'B.Cu'),
         ] )
         pcb.Delete( via_led_83 )
@@ -1204,8 +1246,8 @@ def main():
         pcb.Delete( via_gnd_83 )
         # Col8 dat
         kad.wire_mods( [
-            ('CL82', via_led_datLs['82'], 'CL83', via_led_datRs['83'], w_dat, (Dird, ([(1.6, 90)], 60), ([(1, -45), (3.8, -90), (1, -135)], 90), r_dat), 'B.Cu'),
-            ('CL83', via_led_datLs['83'], 'CL84', via_led_datRs['84'], w_dat, (Dird, ([(1.6, 90)], 45), ([(1, -45), (3.8, -90), (1, -135)], 90), r_dat), 'B.Cu'),
+            ('CL82', via_led_datSs['82'], 'CL83', via_led_datTs['83'], w_dat, (Dird, ([(1.6, 90)], 60), ([(1, -45), (3.8, -90), (1, -135)], 90), r_dat), 'B.Cu'),
+            ('CL83', via_led_datSs['83'], 'CL84', via_led_datTs['84'], w_dat, (Dird, ([(1.6, 90)], 45), ([(1, -45), (3.8, -90), (1, -135)], 90), r_dat), 'B.Cu'),
         ] )
         kad.wire_mods( [
             # LDI
@@ -1213,7 +1255,7 @@ def main():
             # RDI
             ('U1', '14', 'J1', via_splt_sb1, 0.4, (Dird, ([(6, -90), (5.4, 180)], 135), 90, r_dat), 'F.Cu'),
         ] )
-    elif board == BDR:
+    elif board == BDM:
         # LED vias
         for idx in range( 5 ):
             mod_led = 'L' + get_key_postfix( idx )
@@ -1246,6 +1288,9 @@ def main():
         ] )
         pcb.Delete( via_l14_5v )
         pcb.Delete( via_l14_di )
+
+    if board in [BDR]:
+        return
 
     # USB (PC) connector
     w_delta = 0.01
