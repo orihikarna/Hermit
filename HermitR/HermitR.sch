@@ -254,7 +254,7 @@ $EndComp
 Text GLabel 2275 5100 2    50   Input ~ 0
 RDI
 Text GLabel 5075 3625 2    50   Input ~ 0
-5V
+5VD
 Text GLabel 6450 1350 2    50   Input ~ 0
 ROW2
 Text GLabel 6450 1675 2    50   Input ~ 0
@@ -326,7 +326,7 @@ F 3 "~" H 1725 6925 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 1450 6825 0    50   Input ~ 0
-5V
+5VD
 $Comp
 L Device:C_Small CL21
 U 1 1 5F4E4E05
@@ -2088,7 +2088,7 @@ F 3 "~" H 2700 6600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 1450 6500 0    50   Input ~ 0
-5V
+5VD
 $Comp
 L Device:C_Small CL22
 U 1 1 629F03B4
@@ -2217,7 +2217,7 @@ F 3 "~" H 2700 6275 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 1450 6175 0    50   Input ~ 0
-5V
+5VD
 $Comp
 L Device:C_Small CL23
 U 1 1 62A35F3B
@@ -2349,7 +2349,7 @@ F 3 "~" H 2700 5950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 1450 5850 0    50   Input ~ 0
-5V
+5VD
 $Comp
 L Device:C_Small CL24
 U 1 1 62A7E402
@@ -2809,7 +2809,7 @@ Wire Wire Line
 Wire Wire Line
 	5225 1625 4650 1625
 Text GLabel 5450 1300 2    50   Input ~ 0
-5V
+5VD
 $Comp
 L power:PWR_FLAG #FLG0105
 U 1 1 6043C406
@@ -2939,7 +2939,7 @@ Wire Wire Line
 Wire Wire Line
 	925  4575 1375 4575
 Text GLabel 875  5025 0    50   Input ~ 0
-5V
+5VD
 Wire Wire Line
 	875  5025 975  5025
 Connection ~ 4525 3875
@@ -2994,9 +2994,9 @@ Wire Wire Line
 	4125 3625 5075 3625
 Connection ~ 4125 3625
 Text GLabel 5075 4225 2    50   Input ~ 0
-5V
+5VD
 Text GLabel 5075 4325 2    50   Input ~ 0
-5V
+5VD
 Wire Wire Line
 	4975 4225 5075 4225
 Connection ~ 4975 4225
@@ -3004,7 +3004,7 @@ Wire Wire Line
 	4575 4325 5075 4325
 Connection ~ 4575 4325
 Text GLabel 5075 4925 2    50   Input ~ 0
-5V
+5VD
 Wire Wire Line
 	5075 4925 5000 4925
 Connection ~ 5000 4925
@@ -3142,7 +3142,7 @@ ROW1
 Wire Wire Line
 	5525 1675 6100 1675
 Text GLabel 6225 1950 2    50   Input ~ 0
-5V
+5VD
 Text GLabel 9000 4475 2    50   Input ~ 0
 LED
 Wire Wire Line
@@ -3369,10 +3369,10 @@ Wire Wire Line
 	5450 1300 5225 1300
 Connection ~ 5225 1300
 $Comp
-L power:GNDD #PWR?
+L power:GNDD #PWR0113
 U 1 1 61ED8CF8
 P 6225 1300
-F 0 "#PWR?" H 6225 1050 50  0001 C CNN
+F 0 "#PWR0113" H 6225 1050 50  0001 C CNN
 F 1 "GNDD" V 6229 1190 50  0000 R CNN
 F 2 "" H 6225 1300 50  0001 C CNN
 F 3 "" H 6225 1300 50  0001 C CNN
@@ -3381,4 +3381,17 @@ F 3 "" H 6225 1300 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6225 1300 5800 1300
+$Comp
+L power:PWR_FLAG #FLG?
+U 1 1 606A40CB
+P 8225 2075
+F 0 "#FLG?" H 8225 2150 50  0001 C CNN
+F 1 "PWR_FLAG" V 8225 2202 50  0000 L CNN
+F 2 "" H 8225 2075 50  0001 C CNN
+F 3 "~" H 8225 2075 50  0001 C CNN
+	1    8225 2075
+	0    -1   -1   0   
+$EndComp
+Text GLabel 8225 2075 2    50   Input ~ 0
+5VD
 $EndSCHEMATC
