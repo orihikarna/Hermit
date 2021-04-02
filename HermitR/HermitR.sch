@@ -2786,9 +2786,6 @@ Wire Wire Line
 Connection ~ 4075 975 
 Wire Wire Line
 	4075 975  4650 975 
-Connection ~ 4650 975 
-Wire Wire Line
-	4650 975  5800 975 
 Wire Wire Line
 	6225 1625 5800 1625
 Connection ~ 2350 1625
@@ -3033,7 +3030,6 @@ F 3 "~" H 5900 1450 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 Connection ~ 5225 1950
-Connection ~ 5800 975 
 Wire Wire Line
 	5800 975  6225 975 
 Wire Wire Line
@@ -3145,10 +3141,6 @@ Text GLabel 6225 1950 2    50   Input ~ 0
 5VD
 Text GLabel 9000 4475 2    50   Input ~ 0
 LED
-Wire Wire Line
-	5800 1625 5225 1625
-Connection ~ 5800 1625
-Connection ~ 5225 1625
 $Comp
 L key-parts:SW_ChocV2 SW91
 U 1 1 5F3947D1
@@ -3346,46 +3338,35 @@ Wire Wire Line
 $Comp
 L power:GNDD #PWR0110
 U 1 1 61C7DB8D
-P 6225 975
-F 0 "#PWR0110" H 6225 725 50  0001 C CNN
-F 1 "GNDD" V 6229 865 50  0000 R CNN
-F 2 "" H 6225 975 50  0001 C CNN
-F 3 "" H 6225 975 50  0001 C CNN
-	1    6225 975 
+P 5425 975
+F 0 "#PWR0110" H 5425 725 50  0001 C CNN
+F 1 "GNDD" V 5429 865 50  0000 R CNN
+F 2 "" H 5425 975 50  0001 C CNN
+F 3 "" H 5425 975 50  0001 C CNN
+	1    5425 975 
 	0    -1   -1   0   
 $EndComp
 $Comp
 L power:GNDD #PWR0112
 U 1 1 61C7ED27
-P 6225 1625
-F 0 "#PWR0112" H 6225 1375 50  0001 C CNN
-F 1 "GNDD" V 6229 1515 50  0000 R CNN
-F 2 "" H 6225 1625 50  0001 C CNN
-F 3 "" H 6225 1625 50  0001 C CNN
-	1    6225 1625
+P 5425 1625
+F 0 "#PWR0112" H 5425 1375 50  0001 C CNN
+F 1 "GNDD" V 5429 1515 50  0000 R CNN
+F 2 "" H 5425 1625 50  0001 C CNN
+F 3 "" H 5425 1625 50  0001 C CNN
+	1    5425 1625
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
 	5450 1300 5225 1300
 Connection ~ 5225 1300
-$Comp
-L power:GNDD #PWR0113
-U 1 1 61ED8CF8
-P 6225 1300
-F 0 "#PWR0113" H 6225 1050 50  0001 C CNN
-F 1 "GNDD" V 6229 1190 50  0000 R CNN
-F 2 "" H 6225 1300 50  0001 C CNN
-F 3 "" H 6225 1300 50  0001 C CNN
-	1    6225 1300
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
 	6225 1300 5800 1300
 $Comp
-L power:PWR_FLAG #FLG?
+L power:PWR_FLAG #FLG0101
 U 1 1 606A40CB
 P 8225 2075
-F 0 "#FLG?" H 8225 2150 50  0001 C CNN
+F 0 "#FLG0101" H 8225 2150 50  0001 C CNN
 F 1 "PWR_FLAG" V 8225 2202 50  0000 L CNN
 F 2 "" H 8225 2075 50  0001 C CNN
 F 3 "~" H 8225 2075 50  0001 C CNN
@@ -3393,5 +3374,17 @@ F 3 "~" H 8225 2075 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 Text GLabel 8225 2075 2    50   Input ~ 0
+5VD
+Wire Wire Line
+	5425 975  4650 975 
+Connection ~ 4650 975 
+Text GLabel 6225 975  2    50   Input ~ 0
+5VD
+Wire Wire Line
+	5425 1625 5225 1625
+Connection ~ 5225 1625
+Text GLabel 6225 1625 2    50   Input ~ 0
+5VD
+Text GLabel 6225 1300 2    50   Input ~ 0
 5VD
 $EndSCHEMATC
