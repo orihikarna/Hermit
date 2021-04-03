@@ -3192,21 +3192,21 @@ Wire Wire Line
 Connection ~ 3900 6500
 Text GLabel 9050 2125 1    50   Input ~ 0
 5V
-Text GLabel 9000 6075 2    50   Input ~ 0
-COL8
-Text GLabel 9000 5975 2    50   Input ~ 0
-COL7
-Text GLabel 9000 5875 2    50   Input ~ 0
-COL6
-Text GLabel 9000 5775 2    50   Input ~ 0
-COL5
-Text GLabel 9000 5675 2    50   Input ~ 0
-COL4
-Text GLabel 9000 5575 2    50   Input ~ 0
-COL3
-Text GLabel 9000 5475 2    50   Input ~ 0
-COL2
 Text GLabel 9000 5375 2    50   Input ~ 0
+COL8
+Text GLabel 9000 6075 2    50   Input ~ 0
+COL7
+Text GLabel 9000 5975 2    50   Input ~ 0
+COL6
+Text GLabel 9000 5875 2    50   Input ~ 0
+COL5
+Text GLabel 9000 5775 2    50   Input ~ 0
+COL4
+Text GLabel 9000 5675 2    50   Input ~ 0
+COL3
+Text GLabel 9000 5575 2    50   Input ~ 0
+COL2
+Text GLabel 9000 5475 2    50   Input ~ 0
 COL1
 Text GLabel 10675 5625 2    50   Input ~ 0
 SBU1
