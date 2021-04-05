@@ -3226,24 +3226,24 @@ F 3 "~" H 6675 5050 50  0001 C CNN
 	1    6675 5050
 	1    0    0    -1  
 $EndComp
-Text GLabel 6675 5200 3    50   Input ~ 0
+Text GLabel 6300 5200 0    50   Input ~ 0
 SBU1
-Text GLabel 6675 5850 3    50   Input ~ 0
+Text GLabel 6300 5675 0    50   Input ~ 0
 SBU2
 $Comp
 L Jumper:SolderJumper_3_Open JP2
 U 1 1 61451EB0
-P 6675 5700
-F 0 "JP2" H 6675 5905 50  0000 C CNN
-F 1 "SolderJumper_3_Open" H 6675 5814 50  0000 C CNN
-F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5700 50  0001 C CNN
-F 3 "~" H 6675 5700 50  0001 C CNN
-	1    6675 5700
+P 6675 5525
+F 0 "JP2" H 6675 5730 50  0000 C CNN
+F 1 "SolderJumper_3_Open" H 6675 5639 50  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5525 50  0001 C CNN
+F 3 "~" H 6675 5525 50  0001 C CNN
+	1    6675 5525
 	-1   0    0    -1  
 $EndComp
-Text GLabel 6475 5700 0    50   Input ~ 0
+Text GLabel 6475 5525 0    50   Input ~ 0
 RDI
-Text GLabel 6875 5700 2    50   Input ~ 0
+Text GLabel 6875 5525 2    50   Input ~ 0
 MXRST
 Text GLabel 10050 2475 0    50   Input ~ 0
 MXRST
@@ -3387,4 +3387,8 @@ Text GLabel 6225 1625 2    50   Input ~ 0
 5VD
 Text GLabel 6225 1300 2    50   Input ~ 0
 5VD
+Wire Wire Line
+	6300 5200 6675 5200
+Wire Wire Line
+	6300 5675 6675 5675
 $EndSCHEMATC
