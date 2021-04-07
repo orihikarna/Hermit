@@ -307,7 +307,7 @@ class key_layout_maker:
         if keyh < 0:
             keyh = self.keyh
         for idx, names in enumerate( [names1, names2]):
-            if idx in []:
+            if idx in [1]:
                 continue
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
@@ -361,7 +361,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
     print( f'ratio = {ratio}')
 
     # Comma: the origin
-    output_type = 'png'
+    output_type = 'kicad'
     if output_type in ['png', 'pdf']:
         angle_Comm = 0
         org_Comm = vec2( 4.5, 4.3 )
@@ -370,8 +370,9 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
         org_Comm = vec2( 5.6, 4.3 )
     elif output_type in ['kicad']:
         # angle_Comm = 0
-        angle_Comm = 16
-        org_Comm = vec2( -5.0, 3.8 )
+        # angle_Comm = 16
+        angle_Comm = 6.351954683901843
+        org_Comm = vec2( -5.0, 4.0 )
     else:
         return
 

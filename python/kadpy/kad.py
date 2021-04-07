@@ -28,6 +28,7 @@ Linear = 1
 Bezier = 2
 BezierRound  = 3
 Round  = 4
+Spline = 5
 
 
 def sign( v ):
@@ -542,6 +543,22 @@ def calc_bezier_round_points( apos, avec, bpos, bvec, radius ):
     curv.append( bpos )
     return curv
 
+def h0( t ):    return (1 - t) * (1 - t) * (2 * t + 1)
+def h1( t ):    return t * t * (3 - 2 * t)
+def g0( t ):    return t * (1 - t) * (1 - t)
+def g1( t ):    return t * t * (1 - t)
+
+def calc_spline_points( apos, avec, bpos, bvec, num_divs, vec_scale ):
+    curv = [apos]
+    for i in range( 1, num_divs ):
+        t = float( i ) / num_divs
+        pos = vec2.add( vec2.scale( h0( t ), apos ), vec2.scale( h1( t ), bpos ) )
+        vec = vec2.add( vec2.scale( g0( t ), (avec[1], -avec[0]) ), vec2.scale( g1( t ), (bvec[1], -bvec[0]) ) )
+        pos = vec2.scale( vec_scale, vec, pos )
+        curv.append( pos )
+    curv.append( bpos )
+    return curv
+
 def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
     apos, aangle = a
     bpos, bangle = b
@@ -645,6 +662,13 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
         else:
             ctr = vec2.scale( +radius, aperp, amid )
             add_arc2( ctr, amid, bmid, 180 + angle, layer, width )
+    elif cnr_type == Spline:
+        vec_scale = cnr_data[0]
+        ndivs = int( round( vec2.distance( apos, bpos ) / 2.0 ) )
+        avec = vec2.rotate( aangle + 90 )
+        bvec = vec2.rotate( bangle - 90 )
+        curv = calc_spline_points( apos, avec, bpos, bvec, ndivs, vec_scale )
+        add_lines( curv, layer, width )
     return b
 
 def draw_closed_corners( corners, layer, width ):

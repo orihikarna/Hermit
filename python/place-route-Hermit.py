@@ -31,6 +31,7 @@ Line        = kad.Line
 Linear      = kad.Linear
 Round       = kad.Round
 BezierRound = kad.BezierRound
+Spline      = kad.Spline
 ##
 
 # in mm
@@ -39,44 +40,44 @@ VIA_Size = [(1.1, 0.6), (1.0, 0.5), (0.8, 0.4), (0.6, 0.3)]
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Width  = 170
-PCB_Height = 140
+PCB_Height = 160
 
-J1_x, J1_y = 20, 84
-J2_x, J2_y = 96, 99
-J3_x, J3_y = 66, 108
+J1_x, J1_y, J1_angle = 0, 96, 0
+J2_x, J2_y, J2_angle = 130, 100, 0
+J3_x, J3_y, J3_angle = 85, 118, 10
 D1_x, D1_y = 62, 106
 
 keys = {
-    '11' : [46.222, -63.397, 17.400, 16.800, -0.0], # N
-    '12' : [44.967, -46.597, 17.400, 16.800, -0.0], # H
-    '13' : [48.671, -29.797, 17.400, 16.800, -0.0], # Y
-    '14' : [53.302, -12.997, 17.400, 16.800, -0.0], # ^
-    '21' : [63.622, -63.397, 17.400, 16.800, -0.0], # M
-    '22' : [62.367, -46.597, 17.400, 16.800, -0.0], # J
-    '23' : [66.071, -29.797, 17.400, 16.800, -0.0], # U
-    '24' : [70.702, -12.997, 17.400, 16.800, -0.0], # '
-    '31' : [83.000, -66.120, 17.400, 16.800, -16.0], # <
-    '32' : [84.228, -48.995, 17.400, 16.800, -16.0], # K
-    '33' : [85.456, -31.870, 17.400, 16.800, -16.0], # I
-    '34' : [90.086, -15.721, 17.400, 16.800, -16.0], # (
-    '41' : [99.726, -70.916, 17.400, 16.800, -16.0], # >
-    '42' : [102.088, -54.116, 17.400, 16.800, -16.0], # L
-    '43' : [104.450, -37.317, 17.400, 16.800, -16.0], # O
-    '44' : [106.812, -20.517, 17.400, 16.800, -16.0], # )
-    '51' : [118.323, -83.344, 23.490, 16.800, -9.6], # ?
-    '52' : [119.104, -65.077, 17.400, 16.800, -0.0], # +
-    '53' : [121.466, -48.277, 17.400, 16.800, -0.0], # P
-    '54' : [123.829, -31.477, 17.400, 16.800, -0.0], #  
-    '62' : [136.504, -68.035, 17.400, 16.800, -0.0], # *
-    '63' : [138.866, -51.235, 17.400, 16.800, -0.0], # @
-    '64' : [141.229, -34.435, 17.400, 16.800, -0.0], # =
-    '71' : [143.797, -87.675, 28.188, 16.800, -9.6], # _
-    '72' : [153.904, -70.993, 17.400, 16.800, -0.0], # ]
-    '73' : [156.266, -54.193, 17.400, 16.800, -0.0], # [
-    '82' : [48.658, -102.025, 20.243, 16.800, -260.0], # S
-    '83' : [30.678, -110.392, 20.243, 16.800, -240.0], # S
-    '84' : [13.978, -122.168, 17.400, 16.800, -220.0], # R
-    '91' : [27.676, -56.375, 17.400, 16.800, 8.5], # E
+    '11' : [41.285, -73.079, 17.400, 16.800, 9.6], # N
+    '12' : [37.232, -56.727, 17.400, 16.800, 9.6], # H
+    '13' : [38.069, -39.544, 17.400, 16.800, 9.6], # Y
+    '14' : [39.819, -22.205, 17.400, 16.800, 9.6], # &
+    '21' : [58.439, -70.163, 17.400, 16.800, 9.6], # M
+    '22' : [54.386, -53.811, 17.400, 16.800, 9.6], # J
+    '23' : [55.223, -36.628, 17.400, 16.800, 9.6], # U
+    '24' : [56.972, -19.289, 17.400, 16.800, 9.6], # '
+    '31' : [78.000, -69.600, 17.400, 16.800, -6.4], # <
+    '32' : [76.340, -52.511, 17.400, 16.800, -6.4], # K
+    '33' : [74.681, -35.423, 17.400, 16.800, -6.4], # I
+    '34' : [76.539, -18.726, 17.400, 16.800, -6.4], # (
+    '41' : [95.293, -71.525, 17.400, 16.800, -6.4], # >
+    '42' : [94.806, -54.567, 17.400, 16.800, -6.4], # L
+    '43' : [94.319, -37.609, 17.400, 16.800, -6.4], # O
+    '44' : [93.833, -20.651, 17.400, 16.800, -6.4], # )
+    '51' : [115.710, -80.661, 23.490, 16.800, -0.0], # ?
+    '52' : [113.419, -62.521, 17.400, 16.800, 9.6], # +
+    '53' : [112.932, -45.563, 17.400, 16.800, 9.6], # P
+    '54' : [112.445, -28.605, 17.400, 16.800, 9.6], #  
+    '62' : [131.069, -62.521, 17.400, 16.800, 9.6], # *
+    '63' : [130.582, -45.563, 17.400, 16.800, 9.6], # `
+    '64' : [130.095, -28.605, 17.400, 16.800, 9.6], # =
+    '71' : [141.549, -80.661, 28.188, 16.800, -0.0], # _
+    '72' : [148.718, -62.521, 17.400, 16.800, 9.6], # ]
+    '73' : [148.231, -45.563, 17.400, 16.800, 9.6], # [
+    '82' : [50.161, -110.752, 20.243, 16.800, -250.4], # S
+    '83' : [33.837, -122.015, 20.243, 16.800, -230.4], # S
+    '84' : [19.347, -136.423, 17.400, 16.800, -210.4], # R
+    '91' : [21.825, -69.264, 17.400, 16.800, 18.1], # E
 }
 
 L2R = []
@@ -99,13 +100,81 @@ def drawEdgeCuts( board ):
     USBC_Width  = 4.675
     USBC_Height = 5.73
 
-    corners = []
-    if True:
+    if False:
+        corners = []
         corners.append( [((W/2, 0),   0), Round, [R]] )
         corners.append( [((W, H/2),  90), Round, [R]] )
         corners.append( [((W/2, H), 180), Round, [R]] )
         corners.append( [((0, H/2), 270), Round, [R]] )
         kad.draw_closed_corners( corners, layer, width )
+        # return
+
+    if False:# Bezier
+        key_cnrs = [
+            ('14', (0, +1.4), 0, BezierRound, [10]),
+            ('44', (0, +1.4), 0, BezierRound, [10]),
+            ('64', (+1.8, +0.6), 50, BezierRound, [10]),
+            ('73', (+1.4, 0), 90, BezierRound, [10]),
+            ('72', (+1.2, -1.4), 110, BezierRound, [10]),
+            ('71', (0, -1.4), 180, BezierRound, [4]),
+            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, BezierRound, [1]),
+            ((J3_x, J3_y, J3_angle), (15, 1.27),  180, BezierRound, [2]),
+            ('84', (-1.7, 0.8), -90, BezierRound, [22]),
+            ('84', (0, +1.7), 0, BezierRound, [6]),
+            ('84', (+1.4, 0), 90, BezierRound, [6]),
+            ((J1_x, J1_y, J1_angle), (0, +7), -90, BezierRound, [4]),
+            ((J1_x, J1_y, J1_angle), (0, -7), -90, BezierRound, [2]),
+            ('91', (-1.3, 0), -90, BezierRound, [2]),
+            ('91', (0, +3.2), -51, BezierRound, [10]),
+        ]
+    if False:# Spline
+        key_cnrs = [
+            ('14', (0, +1.4), 0, BezierRound, [4]),
+            ('44', (0, +1.4), 0, Spline, [80]),
+            ('64', (+1.1, +1.1), 35, Spline, [40]),
+            ('73', (+1.4, 0), 90, Spline, [40]),
+            # ('72', (+1.2, -1), 110, Spline, [40]),
+            ('71', (0, -1.4), 180, Spline, [80]),
+            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, BezierRound, [1]),
+            ((J3_x, J3_y, J3_angle), (15, 1.27),  180, BezierRound, [4]),
+            ('84', (-1.7, 1.0), -90, BezierRound, [23]),
+            ('84', (0, +1.7), 0, BezierRound, [4]),
+            ('84', (+1.3, 0), 90, BezierRound, [4]),
+            ((J1_x, J1_y, J1_angle), (0, +7), -90, BezierRound, [4]),
+            ((J1_x, J1_y, J1_angle), (0, -7), -90, BezierRound, [2]),
+            ('91', (-1.3, 0), -90, BezierRound, [2]),
+            ('91', (0, +3.0), -51, BezierRound, [4]),
+        ]
+    if True:# Bezier
+        angle_PB = 9.6
+        angle_M = 16
+        key_cnrs = [
+            ('34', (-1.2, +1.8), angle_PB - angle_M, BezierRound, [60]),
+            ('71', (+1.7, +1.4), 90, BezierRound, [60]),
+            ('71', (0, -1.4), 180, BezierRound, [16]),
+            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, BezierRound, [1]),
+            ((J2_x, J2_y, J2_angle), (-1, 14), 180, BezierRound, [3]),
+            ((J3_x, J3_y, J3_angle), (-7, 1.27), 180, BezierRound, [14]),
+            # ('83', (-2.2, 0.4), -90, BezierRound, [9.9]),
+            # ('84', (-1.0, 2.0), -30.4, BezierRound, [10]),
+            ('84', (-1.2, 1.8), -30.4, Spline, [70]),
+            ((J1_x, J1_y, J1_angle), (0, 0), -90, BezierRound, [20]),
+        ]
+    if True:
+        corners = []
+        for mod, rpos, dangle, cnr_type, prms in key_cnrs:
+            if type( mod ) == str:
+                x, y, w, h, angle = keys[mod]
+                y = -y
+                rpos = rpos[0], -rpos[1]
+            else:
+                x, y, angle = mod
+                w, h = 2, 2
+                # print( x, y, angle )
+            pos = (x, y)
+            pos = vec2.mult( mat2.rotate( angle ), (rpos[0] * w / 2, rpos[1] * h / 2), pos )
+            corners.append( [(pos, -angle + dangle), cnr_type, prms] )
+        kad.draw_closed_corners( corners, layer, 1 )
         return
 
     midcnrs = []
@@ -448,7 +517,7 @@ def main():
     ###
     sw_pos_angles = []
     for name, key in keys.items():
-        px, py, _, _, angle = key
+        px, py, w, h, angle = key
         if board == BDR:
             angle += 180# back side
         sw_pos = (px, -py)
@@ -459,6 +528,20 @@ def main():
         if board in [BDL, BDR]:
             ## SW
             kad.set_mod_pos_angle( 'SW' + name, sw_pos, angle )
+            if True:# SW rectangle
+                corners = []
+                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
+                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
+                    corners.append( [(pt, 0), Line, [0]] )
+                kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
+            if True:# SW rectangle
+                w += 2.5 * 2
+                h += 2.5 * 2
+                corners = []
+                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
+                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
+                    corners.append( [(pt, 0), Line, [0]] )
+                kad.draw_closed_corners( corners, 'F.Fab', 0.8 )
             ## LED
             sign = [+1, -1][board]
             led_base_angle = 180 if name in [L2R, R2L][board] else 0
@@ -518,7 +601,7 @@ def main():
                 ('R1', (-1, 8), 180),
             ] ),
             # USB (PC) connector
-            (None, (J2_x, J2_y), -9.6, [
+            (None, (J2_x, J2_y), J2_angle, [
                 ('J2', (0, 0), 90),
                 ('R8', (-7.5, +5.2), 0),
                 ('R9', (-7.5, -5.2), 0),
@@ -528,7 +611,7 @@ def main():
                 ('L1', (-12.4, +3.6), 180),
             ] ),
             # Pin headers
-            (None, (J3_x, J3_y), 0, [
+            (None, (J3_x, J3_y), J3_angle, [
                 ('J3', (0, 0), 90),
                 ('D1', (-3.6, 0), 180),# LED
             ] ),
@@ -561,7 +644,7 @@ def main():
     if board in [BDL, BDR]:
         # Split (USB) connector
         sign = [+1, -1][board]
-        kad.move_mods( (J1_x, J1_y), 0, [
+        kad.move_mods( (J1_x, J1_y), J1_angle, [
             (None, (2.62, 0), 0, [
                 ('J1', (0, 0), -90 * sign),
                 ('R6', (7.5, -5.2 * sign), 180),
@@ -605,6 +688,19 @@ def main():
                     ('R' + col + '2', (0, +2), [0, 180][board]),
                 ] ),
             ] )
+
+    # draw USB connector rectangle
+    if board == BDL:
+        w, h = 14, 5.2
+        for name in ('J1', 'J2'):
+            pos, angle = kad.get_mod_pos_angle( name )
+            corners = []
+            for pnt in make_rect( (w, h), (-w/2, -h/2) ):
+                pt = vec2.mult( mat2.rotate( angle ), pnt, pos )
+                corners.append( [(pt, 0), Line, [0]] )
+            kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
+
+    return
 
     ###
     ### Wire mods
@@ -821,8 +917,6 @@ def main():
         pcb.Delete( via_exp_scl )
         pcb.Delete( via_exp_sda )
         pcb.Delete( via_exp_5v_a )
-    pcb.Delete( via_splt_sb1 )
-    pcb.Delete( via_splt_sb2 )
 
     # Debounce
     w_pwr, r_pwr = 0.6, -1
@@ -1334,9 +1428,8 @@ def main():
             # pwrS
             if idx in via_led_pwrSs:
                 kad.wire_mods( [
-                    ('CL' + idx, via_led_pwrSs[idx], 'CL' + nidx, via_led_pwrSs[nidx], w_pwr, prm_pwrS, 'F.Cu'),
+                    ('CL' + idx, via_led_pwrSs[idx], 'CL' + nidx, via_led_pwrSs[nidx], w_pwr, prm_pwrS, layer2),
                 ] )
-                layer = None
             # data
             if board == BDL:
                 kad.wire_mods( [
@@ -1499,6 +1592,8 @@ def main():
                 # RDI
                 ('CL82', via_rdi_82, 'CL82', via_led_datTs['82'], w_dat, (Dird, 90, ([(1, -45), (3.8, -90)], -135), r_dat), layer2),
             ] )
+    pcb.Delete( via_splt_sb1 )
+    pcb.Delete( via_splt_sb2 )
 
     # J2: USB (PC) connector
     w_pwr, r_pwr = 0.6, -1
