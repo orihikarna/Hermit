@@ -559,11 +559,12 @@ def calc_spline_points( apos, avec, bpos, bvec, num_divs, vec_scale ):
     curv.append( bpos )
     return curv
 
-def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
+def draw_corner( cnr_type, a, cnr_data, b, layer, width, dump = False ):
     apos, aangle = a
     bpos, bangle = b
     avec = vec2.rotate( aangle )
     bvec = vec2.rotate( bangle + 180 )
+    curv = None
     if cnr_type != Bezier and abs( vec2.dot( avec, bvec ) ) > 0.999:
         cnr_type = Line
         #print( avec, bvec )
@@ -669,15 +670,26 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width ):
         bvec = vec2.rotate( bangle - 90 )
         curv = calc_spline_points( apos, avec, bpos, bvec, ndivs, vec_scale )
         add_lines( curv, layer, width )
-    return b
+    return b, curv
 
 def draw_closed_corners( corners, layer, width ):
     a = corners[-1][0]
+    curvs = []
     for (b, cnr_type, cnr_data) in corners:
-        a = draw_corner( cnr_type, a, cnr_data, b, layer, width )
+        a, curv = draw_corner( cnr_type, a, cnr_data, b, layer, width, True )
+        curvs.append( curv )
         #break
-
-
+    if False:
+        with open( '/Users/akihiro/repos/mywork/hermit-edgecuts.scad', 'w' ) as fout:
+            fout.write( 'edgecuts = [\n' )
+            for curv in curvs:
+                if curv == None:
+                    continue
+                for idx, pnt in enumerate( curv ):
+                    if idx == 0:
+                        continue
+                    fout.write( '    [{}, {}],\n'.format( pnt[0], pnt[1] ) )
+            fout.write( '];\n' )
 
 # zones
 def add_zone( rect, layer, idx = 0, net_name = 'GND' ):
