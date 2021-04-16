@@ -378,25 +378,15 @@ def wire_mods( tracks ):
         mod_a, pad_a, mod_b, pad_b, width, prms = track[:6]
         sign_a, sign_b = +1, +1
         layer = None
+        net = None
         if type( pad_b ) is not pcbnew.VIA:# check b first for layer
-            pos_b, angle_b, layer, net = get_pad_pos_angle_layer_net( mod_b, pad_b )
+            pos_b, angle_b, layer, net_b = get_pad_pos_angle_layer_net( mod_b, pad_b )
             if layer == layer_BCu:
                 sign_b = -1
-        if type( pad_a ) is not pcbnew.VIA:
-            pos_a, angle_a, layer, net = get_pad_pos_angle_layer_net( mod_a, pad_a )
-            if layer == layer_BCu:
-                sign_a = -1
-        if type( pad_a ) is pcbnew.VIA:# pad_a is via
-            pos_a, net = get_via_pos_net( pad_a )
-            if mod_a == None:
-                angle_a = angle_b
-            else:
-                _, angle_a = get_mod_pos_angle( mod_a )
-                layer_a = get_mod_layer( mod_a )
-                if layer_a == layer_BCu:
-                    sign_a = -1
+            if net == None:
+                net = net_b
         if type( pad_b ) is pcbnew.VIA:# pad_b is via
-            pos_b, net = get_via_pos_net( pad_b )
+            pos_b, net_b = get_via_pos_net( pad_b )
             if mod_b == None:# pad_b is via
                 angle_b = angle_a
             else:
@@ -404,6 +394,25 @@ def wire_mods( tracks ):
                 layer_b = get_mod_layer( mod_b )
                 if layer_b == layer_BCu:
                     sign_b = -1
+            if net == None:
+                net = net_b
+        if type( pad_a ) is not pcbnew.VIA:
+            pos_a, angle_a, layer, net_a = get_pad_pos_angle_layer_net( mod_a, pad_a )
+            if layer == layer_BCu:
+                sign_a = -1
+            if net == None:
+                net = net_a
+        if type( pad_a ) is pcbnew.VIA:# pad_a is via
+            pos_a, net_a = get_via_pos_net( pad_a )
+            if mod_a == None:
+                angle_a = angle_b
+            else:
+                _, angle_a = get_mod_pos_angle( mod_a )
+                layer_a = get_mod_layer( mod_a )
+                if layer_a == layer_BCu:
+                    sign_a = -1
+            if net == None:
+                net = net_a
         if layer == None:
             layer = layer_b if layer_a == None else layer_a
         if layer == None:

@@ -190,7 +190,7 @@ F 3 "" H 10075 6025 50  0001 C CNN
 $EndComp
 Text GLabel 10675 4525 2    50   Input ~ 0
 5V
-Text GLabel 6475 5050 0    50   Input ~ 0
+Text GLabel 10725 5625 2    50   Input ~ 0
 RDI
 Text GLabel 10725 5125 2    50   Input ~ 0
 SDA
@@ -2445,8 +2445,6 @@ Wire Wire Line
 Wire Wire Line
 	4975 4575 5075 4575
 Connection ~ 4975 4575
-Text GLabel 6875 5050 2    50   Input ~ 0
-MXRST
 Wire Wire Line
 	1875 4325 1775 4325
 Connection ~ 1875 4325
@@ -3081,8 +3079,6 @@ Text GLabel 7600 4575 0    50   Input ~ 0
 SCL
 NoConn ~ 7600 5075
 NoConn ~ 7600 5175
-Text GLabel 7600 5375 0    50   Input ~ 0
-NRST
 $Comp
 L power:GND #PWR0101
 U 1 1 60A7641B
@@ -3127,14 +3123,6 @@ F 3 "" H 7600 6075 50  0001 C CNN
 	1    7600 6075
 	0    1    1    0   
 $EndComp
-Text GLabel 9000 4675 2    50   Input ~ 0
-ROW3
-Text GLabel 9000 4575 2    50   Input ~ 0
-ROW4
-Text GLabel 9000 4775 2    50   Input ~ 0
-ROW2
-Text GLabel 9000 4875 2    50   Input ~ 0
-ROW1
 Wire Wire Line
 	5525 1675 6100 1675
 Text GLabel 6225 1950 2    50   Input ~ 0
@@ -3208,133 +3196,11 @@ Text GLabel 9000 5575 2    50   Input ~ 0
 COL2
 Text GLabel 9000 5475 2    50   Input ~ 0
 COL1
-Text GLabel 10675 5625 2    50   Input ~ 0
-SBU1
-Text GLabel 10675 5725 2    50   Input ~ 0
-SBU2
 NoConn ~ 9000 4975
 NoConn ~ 9000 5075
 NoConn ~ 9000 5175
-$Comp
-L Jumper:SolderJumper_3_Open JP1
-U 1 1 613CB3A2
-P 6675 5050
-F 0 "JP1" H 6675 5255 50  0000 C CNN
-F 1 "SolderJumper_3_Open" H 6675 5164 50  0000 C CNN
-F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5050 50  0001 C CNN
-F 3 "~" H 6675 5050 50  0001 C CNN
-	1    6675 5050
-	1    0    0    -1  
-$EndComp
-Text GLabel 6300 5200 0    50   Input ~ 0
-SBU1
-Text GLabel 6300 5675 0    50   Input ~ 0
-SBU2
-$Comp
-L Jumper:SolderJumper_3_Open JP2
-U 1 1 61451EB0
-P 6675 5525
-F 0 "JP2" H 6675 5730 50  0000 C CNN
-F 1 "SolderJumper_3_Open" H 6675 5639 50  0000 C CNN
-F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6675 5525 50  0001 C CNN
-F 3 "~" H 6675 5525 50  0001 C CNN
-	1    6675 5525
-	-1   0    0    -1  
-$EndComp
-Text GLabel 6475 5525 0    50   Input ~ 0
-RDI
-Text GLabel 6875 5525 2    50   Input ~ 0
-MXRST
-Text GLabel 10050 2475 0    50   Input ~ 0
-MXRST
-Text GLabel 10350 2025 1    50   Input ~ 0
-5V
-$Comp
-L Device:R_Small R2
-U 1 1 617744FA
-P 10350 2125
-F 0 "R2" V 10450 2125 50  0000 C CNN
-F 1 "10k" V 10350 2125 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 10350 2125 50  0001 C CNN
-F 3 "~" H 10350 2125 50  0001 C CNN
-	1    10350 2125
-	-1   0    0    -1  
-$EndComp
 Text Notes 8975 1825 0    50   ~ 10
 Power
-Text Notes 10225 1825 0    50   ~ 10
-Reset
-$Comp
-L Device:R_Small R3
-U 1 1 6187E071
-P 10500 2275
-F 0 "R3" V 10600 2275 50  0000 C CNN
-F 1 "1k" V 10500 2275 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 10500 2275 50  0001 C CNN
-F 3 "~" H 10500 2275 50  0001 C CNN
-	1    10500 2275
-	0    1    -1   0   
-$EndComp
-$Comp
-L Device:C_Small C2
-U 1 1 6194511A
-P 10650 2425
-F 0 "C2" H 10450 2425 50  0000 L CNN
-F 1 "0.1uF" H 10400 2325 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 10650 2425 50  0001 C CNN
-F 3 "~" H 10650 2425 50  0001 C CNN
-	1    10650 2425
-	-1   0    0    -1  
-$EndComp
-Wire Wire Line
-	10600 2275 10650 2275
-Wire Wire Line
-	10650 2275 10650 2325
-$Comp
-L power:GND #PWR0105
-U 1 1 619890D3
-P 10350 2675
-F 0 "#PWR0105" H 10350 2425 50  0001 C CNN
-F 1 "GND" H 10355 2502 50  0000 C CNN
-F 2 "" H 10350 2675 50  0001 C CNN
-F 3 "" H 10350 2675 50  0001 C CNN
-	1    10350 2675
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	10350 2225 10350 2275
-Connection ~ 10350 2275
-Wire Wire Line
-	10350 2275 10400 2275
-Text GLabel 10700 2275 2    50   Input ~ 0
-NRST
-Wire Wire Line
-	10700 2275 10650 2275
-Connection ~ 10650 2275
-$Comp
-L Transistor_FET:IRLML2060 Q1
-U 1 1 61ADE6B9
-P 10250 2475
-F 0 "Q1" H 10125 2375 50  0000 L CNN
-F 1 "IRLML2060" H 10150 2300 50  0000 L CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 10450 2400 50  0001 L CIN
-F 3 "https://www.infineon.com/dgdl/irlml2060pbf.pdf?fileId=5546d462533600a401535664b7fb25ee" H 10250 2475 50  0001 L CNN
-	1    10250 2475
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR0109
-U 1 1 61B682C1
-P 10650 2675
-F 0 "#PWR0109" H 10650 2425 50  0001 C CNN
-F 1 "GND" H 10655 2502 50  0000 C CNN
-F 2 "" H 10650 2675 50  0001 C CNN
-F 3 "" H 10650 2675 50  0001 C CNN
-	1    10650 2675
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	10650 2675 10650 2525
 $Comp
 L power:GNDD #PWR0110
 U 1 1 61C7DB8D
@@ -3388,7 +3254,18 @@ Text GLabel 6225 1625 2    50   Input ~ 0
 Text GLabel 6225 1300 2    50   Input ~ 0
 5VD
 Wire Wire Line
-	6300 5200 6675 5200
+	10725 5625 10675 5625
 Wire Wire Line
-	6300 5675 6675 5675
+	10675 5725 10675 5625
+Connection ~ 10675 5625
+Text GLabel 7600 5375 0    50   Input ~ 0
+5V
+Text GLabel 9000 4875 2    50   Input ~ 0
+ROW1
+Text GLabel 9000 4775 2    50   Input ~ 0
+ROW2
+Text GLabel 9000 4675 2    50   Input ~ 0
+ROW3
+Text GLabel 9000 4575 2    50   Input ~ 0
+ROW4
 $EndSCHEMATC
