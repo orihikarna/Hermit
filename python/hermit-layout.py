@@ -372,7 +372,7 @@ def make_kbd_hermit( unit_w, unit_h, paper_size, ratio = 1.0 ):
         # angle_Comm = 0
         # angle_Comm = 16
         angle_Comm = 6.351954683901843
-        org_Comm = vec2( -5.0, 4.0 )
+        org_Comm = vec2( -4.9, 4.0 )
     else:
         return
 

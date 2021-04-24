@@ -40,58 +40,59 @@ VIA_Size = [(1.1, 0.6), (1.0, 0.5), (0.8, 0.4), (0.6, 0.3)]
 FourCorners = [(0, 0), (1, 0), (1, 1), (0, 1)]
 FourCorners2 = [(-1, -1), (+1, -1), (+1, +1), (-1, +1)]
 PCB_Width  = 170
-PCB_Height = 160
+PCB_Height = 155
 
+U1_x, U1_y = 82, 95
 J1_x, J1_y, J1_angle = 18, 98, 0
 J2_x, J2_y, J2_angle = 130, 100, 0
 J3_x, J3_y, J3_angle = 85, 118, 10
 D1_x, D1_y = 62, 106
 
 keys = {
-    '11' : [41.285, -73.079, 17.400, 16.800, 9.6], # N
-    '12' : [37.232, -56.727, 17.400, 16.800, 9.6], # H
-    '13' : [38.069, -39.544, 17.400, 16.800, 9.6], # Y
-    '14' : [39.819, -22.205, 17.400, 16.800, 9.6], # &
-    '21' : [58.439, -70.163, 17.400, 16.800, 9.6], # M
-    '22' : [54.386, -53.811, 17.400, 16.800, 9.6], # J
-    '23' : [55.223, -36.628, 17.400, 16.800, 9.6], # U
-    '24' : [56.972, -19.289, 17.400, 16.800, 9.6], # '
-    '31' : [78.000, -69.600, 17.400, 16.800, -6.4], # <
-    '32' : [76.340, -52.511, 17.400, 16.800, -6.4], # K
-    '33' : [74.681, -35.423, 17.400, 16.800, -6.4], # I
-    '34' : [76.539, -18.726, 17.400, 16.800, -6.4], # (
-    '41' : [95.293, -71.525, 17.400, 16.800, -6.4], # >
-    '42' : [94.806, -54.567, 17.400, 16.800, -6.4], # L
-    '43' : [94.319, -37.609, 17.400, 16.800, -6.4], # O
-    '44' : [93.833, -20.651, 17.400, 16.800, -6.4], # )
-    '51' : [115.710, -80.661, 23.490, 16.800, -0.0], # ?
-    '52' : [113.419, -62.521, 17.400, 16.800, 9.6], # +
-    '53' : [112.932, -45.563, 17.400, 16.800, 9.6], # P
-    '54' : [112.445, -28.605, 17.400, 16.800, 9.6], #  
-    '62' : [131.069, -62.521, 17.400, 16.800, 9.6], # *
-    '63' : [130.582, -45.563, 17.400, 16.800, 9.6], # `
-    '64' : [130.095, -28.605, 17.400, 16.800, 9.6], # =
-    '71' : [141.549, -80.661, 28.188, 16.800, -0.0], # _
-    '72' : [148.718, -62.521, 17.400, 16.800, 9.6], # ]
-    '73' : [148.231, -45.563, 17.400, 16.800, 9.6], # [
-    '82' : [50.161, -110.752, 20.243, 16.800, -250.4], # S
-    '83' : [33.837, -122.015, 20.243, 16.800, -230.4], # S
-    '84' : [19.347, -136.423, 17.400, 16.800, -210.4], # R
-    '91' : [21.825, -69.264, 17.400, 16.800, 18.1], # E
+    '11' : [43.025, -73.079, 17.400, 16.800, 9.6], # N
+    '12' : [38.972, -56.727, 17.400, 16.800, 9.6], # H
+    '13' : [39.809, -39.544, 17.400, 16.800, 9.6], # Y
+    '14' : [41.559, -22.205, 17.400, 16.800, 9.6], # &
+    '21' : [60.179, -70.163, 17.400, 16.800, 9.6], # M
+    '22' : [56.126, -53.811, 17.400, 16.800, 9.6], # J
+    '23' : [56.963, -36.628, 17.400, 16.800, 9.6], # U
+    '24' : [58.712, -19.289, 17.400, 16.800, 9.6], # '
+    '31' : [79.740, -69.600, 17.400, 16.800, -6.4], # <
+    '32' : [78.080, -52.511, 17.400, 16.800, -6.4], # K
+    '33' : [76.421, -35.423, 17.400, 16.800, -6.4], # I
+    '34' : [78.279, -18.726, 17.400, 16.800, -6.4], # (
+    '41' : [97.033, -71.525, 17.400, 16.800, -6.4], # >
+    '42' : [96.546, -54.567, 17.400, 16.800, -6.4], # L
+    '43' : [96.059, -37.609, 17.400, 16.800, -6.4], # O
+    '44' : [95.573, -20.651, 17.400, 16.800, -6.4], # )
+    '51' : [117.450, -80.661, 23.490, 16.800, -0.0], # ?
+    '52' : [115.159, -62.521, 17.400, 16.800, 9.6], # +
+    '53' : [114.672, -45.563, 17.400, 16.800, 9.6], # P
+    '54' : [114.185, -28.605, 17.400, 16.800, 9.6], #  
+    '62' : [132.809, -62.521, 17.400, 16.800, 9.6], # *
+    '63' : [132.322, -45.563, 17.400, 16.800, 9.6], # `
+    '64' : [131.835, -28.605, 17.400, 16.800, 9.6], # =
+    '71' : [143.289, -80.661, 28.188, 16.800, -0.0], # _
+    '72' : [150.458, -62.521, 17.400, 16.800, 9.6], # ]
+    '73' : [149.971, -45.563, 17.400, 16.800, 9.6], # [
+    '82' : [51.901, -110.752, 20.243, 16.800, -250.4], # S
+    '83' : [35.577, -122.015, 20.243, 16.800, -230.4], # S
+    '84' : [21.087, -136.423, 17.400, 16.800, -210.4], # R
+    '91' : [23.565, -69.264, 17.400, 16.800, 18.1], # E
 }
 
 SW82_angle = 19.6
 
 holes = [
     ( 13, 149, 90 - 30.4),
-    ( 5, J1_y - 11, 90),
-    ( 5, J1_y + 11, 90),
+    ( 4, J1_y - 11, 90),
+    ( 4, J1_y + 11, 90),
     ( 14, 35, -30),
-    ( 70, 4.5, 90),
-    (102, 4.4, 90),
-    (147, 27.6, 40),
-    (159, 84, -40),
-    (J2_x - 2, J2_y + 10, 90),
+    ( 66, 4.5, 90),
+    (106, 4.4, 90),
+    (151, 27.6, 40),
+    (163, 84, -40),
+    (J2_x - 1.6, J2_y + 10, 90),
     (68, 120, -65),
     (47, 136, -50),
     #
@@ -108,216 +109,202 @@ BDT = 2# Top plate
 BDB = 3# Bottom plate
 BDM = 4# Middle plate
 
+def make_corners( key_cnrs ):
+    corners = []
+    for mod, offset, dangle, cnr_type, prms in key_cnrs:
+        if type( mod ) == str:
+            x, y, _, _, angle = keys[mod]
+            y = -y
+            offset = (offset[0], -offset[1])
+        else:
+            x, y, angle = mod
+            # offset = (offset[0], offset[1])
+        # print( x, y, angle, offset )
+        pos = (x, y)
+        pos = vec2.mult( mat2.rotate( angle ), offset, pos )
+        corners.append( [(pos, -angle + dangle), cnr_type, prms] )
+    return corners
+
 def drawEdgeCuts( board ):
-    layer = 'Edge.Cuts'
-    width = 0.1
-    W = PCB_Width
-    H = PCB_Height
+    width = 0.12
     mgn = 0.1# margin
     R = 2# corner radius
     USBC_Width  = 4.675
     USBC_Height = 5.73
 
-    if False:# Bezier
-        key_cnrs = [
-            ('14', (0, +1.4), 0, BezierRound, [10]),
-            ('44', (0, +1.4), 0, BezierRound, [10]),
-            ('64', (+1.8, +0.6), 50, BezierRound, [10]),
-            ('73', (+1.4, 0), 90, BezierRound, [10]),
-            ('72', (+1.2, -1.4), 110, BezierRound, [10]),
-            ('71', (0, -1.4), 180, BezierRound, [4]),
-            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, BezierRound, [1]),
-            ((J3_x, J3_y, J3_angle), (15, 1.27),  180, BezierRound, [2]),
-            ('84', (-1.7, 0.8), -90, BezierRound, [22]),
-            ('84', (0, +1.7), 0, BezierRound, [6]),
-            ('84', (+1.4, 0), 90, BezierRound, [6]),
-            ((J1_x, J1_y, J1_angle), (0, +7), -90, BezierRound, [4]),
-            ((J1_x, J1_y, J1_angle), (0, -7), -90, BezierRound, [2]),
-            ('91', (-1.3, 0), -90, BezierRound, [2]),
-            ('91', (0, +3.2), -51, BezierRound, [10]),
-        ]
-    elif False:# Spline
-        key_cnrs = [
-            ('14', (0, +1.4), 0, BezierRound, [4]),
-            ('44', (0, +1.4), 0, Spline, [80]),
-            ('64', (+1.1, +1.1), 35, Spline, [40]),
-            ('73', (+1.4, 0), 90, Spline, [40]),
-            # ('72', (+1.2, -1), 110, Spline, [40]),
-            ('71', (0, -1.4), 180, Spline, [80]),
-            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, BezierRound, [1]),
-            ((J3_x, J3_y, J3_angle), (15, 1.27),  180, BezierRound, [4]),
-            ('84', (-1.7, 1.0), -90, BezierRound, [23]),
-            ('84', (0, +1.7), 0, BezierRound, [4]),
-            ('84', (+1.3, 0), 90, BezierRound, [4]),
-            ((J1_x, J1_y, J1_angle), (0, +7), -90, BezierRound, [4]),
-            ((J1_x, J1_y, J1_angle), (0, -7), -90, BezierRound, [2]),
-            ('91', (-1.3, 0), -90, BezierRound, [2]),
-            ('91', (0, +3.0), -51, BezierRound, [4]),
-        ]
-    elif True:# Bezier
-        angle_PB = 9.6
-        angle_M = 16
-        key_cnrs = [
-            ('34', (-1.2, +2.0), angle_PB - angle_M, Round, [68]),
-            ('71', (+1.7, +1.4), 90, Round, [68]),
-            ('71', (0, -1.46), 180, Round, [16]),
-            ((J2_x, J2_y, J2_angle), (2.6, 0), +90, Round, [1]),
-            ((J2_x, J2_y, J2_angle), (-1, 14), 180, Round, [3]),
-            ((J3_x, J3_y, J3_angle), (-7, 1.27), 180, BezierRound, [14]),
-            ('84', (-1.2, 1.8), -30.4, Spline, [70]),
-            ((J1_x, J1_y, J1_angle), (-J1_x,  +10), -90, Round, [20]),
-            ((J1_x, J1_y, J1_angle), (-J1_x/2, +7), 0, Round, [2]),
-            ((J1_x, J1_y, J1_angle), (0, 0), -90, Round, [1]),
-            ((J1_x, J1_y, J1_angle), (-J1_x/2, -7), 180, Round, [1]),
-            ((J1_x, J1_y, J1_angle), (-J1_x,  -10), -90, Round, [2]),
-        ]
-    if True:
-        corners = []
-        for mod, rpos, dangle, cnr_type, prms in key_cnrs:
-            if type( mod ) == str:
-                x, y, w, h, angle = keys[mod]
-                y = -y
-                rpos = rpos[0], -rpos[1]
-            else:
-                x, y, angle = mod
-                w, h = 2, 2
-                # print( x, y, angle )
-            pos = (x, y)
-            pos = vec2.mult( mat2.rotate( angle ), (rpos[0] * w / 2, rpos[1] * h / 2), pos )
-            corners.append( [(pos, -angle + dangle), cnr_type, prms] )
-        kad.draw_closed_corners( corners, layer, 1 )
-        return
+    USBT = 0.8
+    USBM = 6.3 - USBT * 2
+    USBW = 4.0
 
-    midcnrs = []
+    angle_PB = 9.6
+    angle_M = 16
+
+    U1_mod = (U1_x, U1_y, 0)
+    J1_mod = (J1_x, J1_y, J1_angle)
+    J2_mod = (J2_x, J2_y, J2_angle)
+    J3_mod = (J3_x, J3_y, J3_angle)
+
     midcnrs_set = []
-    ## top
-    corners.append( [((W/2, 0), 0), Round, [R]] )
-    midcnrs.append( corners[-1] )
-    ## right
-    corners.append( [((W, R+1), 90), Round, [R]] )
-    midcnrs.append( corners[-1] )
-    USBM = 4.4
-    USBT = 1.0
-    USBW = 12.5
-    ## USB (PC)
-    if board == BDL:
-        corners.append( [((W - 3,           J2_y - USBC_Width), 180), Round, [0.5]] )
-        corners.append( [((W - USBC_Height, J2_y             ),  90), Round, [0.5]] )
-        corners.append( [((W - 3,           J2_y + USBC_Width),   0), Round, [0.5]] )
-        corners.append( [((W,               H - R - 1        ),  90), Round, [0.5]] )
-    if board in [BDL, BDR, BDM]:
-        midcnrs.append( [((W-USBW+2, J2_y - USBM - USBT*2), 180), Round, [0.5]] )
-        midcnrs.append( [((W-USBW,   J2_y - USBM - USBT  ),  90), Round, [0.8]] )
-        midcnrs.append( [((W-USBW+2, J2_y - USBM         ),   0), Round, [0.8]] )
-        midcnrs.append( [((W,        J2_y                ),  90), Round, [0.5]] )
-        midcnrs.append( [((W-USBW+2, J2_y + USBM         ), 180), Round, [0.5]] )
-        midcnrs.append( [((W-USBW,   J2_y + USBM + USBT  ),  90), Round, [0.8]] )
-        midcnrs.append( [((W-USBW+2, J2_y + USBM + USBT*2),   0), Round, [0.8]] )
-        midcnrs.append( [((W,        H - R - 1),             90), Round, [0.5]] )
-    ## bottom
-    corners.append( [((W*5/6, H), 180), Round, [R]] )
-    midcnrs.append( corners[-1] )
-    if True:
-        corners.append( [((W*2/3 + mgn,   H - R - 1  ), -90), Round, [R]] )
-        midcnrs.append( corners[-1] )
-        corners.append( [((W*2/3 - R - 1, H*2/3 - mgn), 180), Round, [R]] )
-        midcnrs.append( corners[-1] )
-        if board in [BDL, BDR, BDM]:
-            # J3 & D1 LED
-            midcnrs.append( [((J3_x + 1.27*11, H*2/3 - 1.27), -90), Round, [0.5]] )
-            midcnrs.append( [((W/2,            H*2/3 - 2.54), 180), Round, [0.5]] )
-            midcnrs.append( [((D1_x - 2.0,     H*2/3 - 1.27),  90), Round, [0.5]] )
-            midcnrs.append( [((D1_x - 3.2,     H*2/3 - mgn ), 180), Round, [0.5]] )
-        corners.append( [((W/3 - mgn, H - R - 1),  90), Round, [R]] )
-        midcnrs.append( corners[-1] )
-        corners.append( [((W/6,       H        ), 180), Round, [R]] )
-        midcnrs.append( corners[-1] )
-    ## left
-    corners.append( [((0, H - R - 1), -90), Round, [R]] )
-    midcnrs.append( corners[-1] )
-    # Split (USB)
-    if board in [BDL, BDR]:
-        corners.append( [((3,           J1_y + USBC_Width),   0), Round, [0.5]] )
-        corners.append( [((USBC_Height, J1_y             ), -90), Round, [0.5]] )
-        corners.append( [((3,           J1_y - USBC_Width), 180), Round, [0.5]] )
-        corners.append( [((0,           R + 1            ), -90), Round, [0.5]] )
-    if board in [BDL, BDR, BDM]:# mid plate
-        Jw = 6.3
-        midcnrs.append( [((2,           J1_y + Jw    ),   0), BezierRound, [1]] )# J1 bottom
-        T = 7.4# thickness for left
-        midcnrs.append( [((T,           J1_y + Jw + 2),  90), BezierRound, [1]] )# left
-        D = 8.5# diagonal left
-        midcnrs.append( [((D,           H - D        ),  45), BezierRound, [1]] )# left bottom corner
-        T = 5.5# thickness for bottom
-        midcnrs.append( [((W/6,         H - T        ),   0), BezierRound, [1]] )# bottom
-        D = 10# diagonal right
-        midcnrs.append( [((W/3 - D,     H - D        ), -45), BezierRound, [1]] )# right bottom corner
-        T = 6# thickness for right
-        midcnrs.append( [((W/3 - T,     H*2/3        ), -90), BezierRound, [1]] )# right
-        midcnrs.append( [((W/6 + R + 1, J1_y - 2     ),-135), BezierRound, [1]] )# diagonal
-        midcnrs.append( [((2,           J1_y - Jw    ), 180), BezierRound, [1]] )# J1 top
-        midcnrs.append( [((0,           R + 1        ), -90), BezierRound, [1]] )# left
-        midcnrs_set.append( midcnrs )
-
-    # mid plate USB hole
-    if board in [BDL, BDR, BDM]:
-        midcnrs = []
-        midcnrs.append( [((W-USBW-2.6, J2_y - USBM - USBT*2),   0), Round, [0.5]] )
-        midcnrs.append( [((W-USBW-2.0, J2_y - USBM - USBT  ),  90), Round, [0.5]] )
-        midcnrs.append( [((W-USBW-2.6, J2_y - USBM         ), 180), Round, [0.5]] )
-        midcnrs.append( [((W-16,       J2_y                ),  90), Round, [0.5]] )
-        midcnrs.append( [((W-USBW-2.6, J2_y + USBM         ),   0), Round, [0.5]] )
-        midcnrs.append( [((W-USBW-2.0, J2_y + USBM + USBT  ),  90), Round, [0.5]] )
-        midcnrs.append( [((W-USBW-2.6, J2_y + USBM + USBT*2), 180), Round, [0.5]] )
-        midcnrs.append( [((W-18,       J2_y                ), -90), Round, [0.5]] )
-        midcnrs_set.append( midcnrs )
-
-    # mid plate main hole
-    if board in [BDL, BDR, BDM]:
-        midcnrs = []
-        T = 4.8# thickness top
-        midcnrs.append( [((W/2,     T        ),   0), BezierRound, [1]] )# top
-        D = 10# diagonal top right
-        midcnrs.append( [((W - D,   D        ),  45), BezierRound, [1]] )# top right diagonal
-        T = 5# thickness right
-        midcnrs.append( [((W-T,     H/3      ),  90), BezierRound, [1]] )# right
-        midcnrs.append( [((W*5/6,   30.6     ), 180), BezierRound, [1]] )# mid horizontal
-        T = 5# thickness mid
-        midcnrs.append( [((W*2/3-1, H*2/3-T-1.2), 90), BezierRound, [1]] )# mid right
-        midcnrs.append( [((W/2,     H*2/3-T  ), 180), BezierRound, [1]] )# mid bottom
-        midcnrs.append( [((W/3+6,   H*2/3-T-2), -90), BezierRound, [1]] )# mid left
-        midcnrs.append( [((W/3,     22.4     ), 180), BezierRound, [1]] )# mid left horizontal
-        midcnrs.append( [((20,      18       ),-135), BezierRound, [1]] )# left bottom
-        midcnrs.append( [((16,      H/6      ), -90), BezierRound, [1]] )# top left
-        midcnrs_set.append( midcnrs )
-    # draw
-    if board in [BDL, BDR, BDT, BDB]:
-        kad.draw_closed_corners( corners, layer, width )
-    for midcnrs in midcnrs_set:
-        l = 'Edge.Cuts' if board == BDM else 'F.Fab'
-        w = width if board == BDM else width * 3
-        kad.draw_closed_corners( midcnrs, l, w )
-
-    # screw holes
-    r = 4.5
-    for idx, ctr in enumerate( [(r, r), (W-r, r), (W-r, H-r), (r, H-r), (W/3-r-mgn, H-r), (W*2/3+r+mgn, H-r)] ):
-        sign = +1 if idx % 2 == 0 else -1
-        #if board in [BDT, BDB, BDM]:# move hole mods
-        if board in [BDT, BDB]:# move hole mods
-            kad.set_mod_pos_angle( 'H{}'.format( idx + 1 ), ctr, 0 )
+    if True:# outer
+        out_cnrs = []
+        mid_cnrs = []
+        # bottom right
+        cnrs = [
+            (J2_mod, (2.62, 10), +90, Round, [0.5]),
+            (J2_mod, (-1, 14), 180, Round, [3]),
+        ]
+        for cnr in cnrs:
+            out_cnrs.append( cnr )
+            mid_cnrs.append( cnr )
+        # LED & J3:
         if board in [BDL, BDR]:
-            corners = []
-            for i in range( 6 ):
-                deg = i * 60 + 15 * sign
-                pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
-                corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
-            kad.draw_closed_corners( corners, layer, width )
-        if False:# draw holes in Edge.Cuts
-            for brd, rad in [(BDT, 1.6), (BDB, 1.7)]:
-                if board == brd:
-                    kad.add_arc( ctr, vec2.add( ctr, (rad, 0) ), 360, layer, width )
-        layer = 'F.Fab' if board != BDM else 'Edge.Cuts'# holes by edge.cuts
-        kad.add_arc( ctr, vec2.add( ctr, (5.96/2, 0) ), 360, layer, width )
+            cnrs = [
+                (J3_mod, (-7, 1.27), 180, BezierRound, [14]),
+            ]
+            for cnr in cnrs:
+                out_cnrs.append( cnr )
+        if board in [BDL, BDR, BDM]:# BDM
+            cnrs = [
+                (J3_mod, (+16, +1.27), 180, BezierRound, [14]),
+                (J3_mod, (+14.5, 0), 270, BezierRound, [0.5]),
+                (J3_mod, (0, -1.27), 180, BezierRound, [0.5]),
+                (J3_mod, (-5.5, 0), 90, BezierRound, [0.5]),
+                (J3_mod, (-7, +1.27), 180, BezierRound, [0.5]),
+            ]
+            for cnr in cnrs:
+                mid_cnrs.append( cnr )
+        # bottom left
+        cnrs = [
+            ('84', (-10.0, 15.0), -30.4, Spline, [70]),
+            (J1_mod, (-J1_x,  +10), 270, Round, [20]),
+            (J1_mod, (-J1_x/2, +7), 0, Round, [2]),
+        ]
+        for cnr in cnrs:
+            out_cnrs.append( cnr )
+            mid_cnrs.append( cnr )
+        # J1: Split
+        cnrs = []
+        if board in [BDL, BDR]:
+            cnrs = [
+                (J1_mod, (0, +USBC_Width+1), 270, Round, [0.5]),
+                (J1_mod, (3, +USBC_Width  ),   0, Round, [0.5]),
+                (J1_mod, (USBC_Height, 0),   270, Round, [0.5]),
+                (J1_mod, (3, -USBC_Width),   180, Round, [0.5]),
+                (J1_mod, (0, -USBC_Width-1), 270, Round, [0.5]),
+            ]
+            for cnr in cnrs:
+                out_cnrs.append( cnr )
+        if board in [BDL, BDR, BDM]:# BDM
+            cnrs = [
+                (J1_mod, (16.4, 0), 270, Round, [1]),
+            ]
+            for cnr in cnrs:
+                mid_cnrs.append( cnr )
+        # top side
+        cnrs = [
+            (J1_mod, (-J1_x/2, -7), 180, Round, [1]),
+            (J1_mod, (-J1_x,  -10), 270, Round, [2]),
+            ('34', (-10.4, 16.8), angle_PB - angle_M, Round, [67]),
+            ('71', (+26.6, 11.7), 90, Round, [67]),
+            ('71', (0, -12.2), 180, Round, [16]),
+        ]
+        for cnr in cnrs:
+            out_cnrs.append( cnr )
+            mid_cnrs.append( cnr )
+        # J2: USB PC
+        if board in [BDL]:
+            cnrs = [
+                (J2_mod, (2.62, -USBC_Width-1),  90, Round, [0.5]),
+                (J2_mod, (2.62-3, -USBC_Width), 180, Round, [0.5]),
+                (J2_mod, (2.62-USBC_Height, 0),  90, Round, [0.5]),
+                (J2_mod, (2.62-3, +USBC_Width),   0, Round, [0.5]),
+                # (J2_mod, (2.62, +USBC_Width+1),  90, Round, [0.5]),
+            ]
+            for cnr in cnrs:
+                out_cnrs.append( cnr )
+        if board in [BDL, BDR, BDM]:# BDM
+            cnrs = [
+                (J2_mod, (2.62, -USBM-USBT*2-0.2),  90, Round, [0.5]),
+                (J2_mod, (-USBW+2, -USBM-USBT*2),  180, Round, [0.2]),
+                (J2_mod, (-USBW,   -USBM-USBT),     90, Round, [0.5]),
+                (J2_mod, (-USBW+2, -USBM     ),      0, Round, [0.5]),
+                (J2_mod, (2.62,    0         ),     90, Round, [0.5]),
+                (J2_mod, (-USBW+2, +USBM     ),    180, Round, [0.5]),
+                (J2_mod, (-USBW,   +USBM+USBT),     90, Round, [0.5]),
+                (J2_mod, (-USBW+2, +USBM+USBT*2),    0, Round, [0.5]),
+            ]
+            for cnr in cnrs:
+                mid_cnrs.append( cnr )
+        # draw
+        corners = make_corners( out_cnrs )
+        kad.draw_closed_corners( corners, 'Edge.Cuts', width )
+        midcnrs_set.append( make_corners( mid_cnrs ) )
+
+    if board in [BDL, BDR, BDM]:# J2 USB PC hole
+        cnrs = [
+            (J2_mod, (-USBW-3.6, -USBM - USBT*2),   0, Round, [0.5]),
+            (J2_mod, (-USBW-2.0, -USBM - USBT  ),  90, Round, [0.5]),
+            (J2_mod, (-USBW-3.6, -USBM         ), 180, Round, [0.5]),
+            (J2_mod, (-13.0,     0             ),  90, Round, [0.5]),
+            (J2_mod, (-USBW-3.6, +USBM         ),   0, Round, [0.5]),
+            (J2_mod, (-USBW-2.0, +USBM + USBT  ),  90, Round, [0.5]),
+            (J2_mod, (-USBW-3.6, +USBM + USBT*2), 180, Round, [0.5]),
+            (J2_mod, (-14.6,     0             ), 270, Round, [0.5]),
+        ]
+        midcnrs_set.append( make_corners( cnrs ) )
+
+    if board in [BDL, BDR, BDM]:# U1
+        cnrs = [
+            (U1_mod, (0, -8), 0, Round, [1]),
+            (U1_mod, (13.6, 0), 90, Round, [1]),
+            (U1_mod, (0, 10.4), 180, Round, [1]),
+            (U1_mod, (-8, 0), 270, Round, [1]),
+        ]
+        midcnrs_set.append( make_corners( cnrs ) )
+
+    if board in [BDL, BDR, BDM]:# mid hole (4-fingers)
+        cnrs = [
+            ('14', (-8, 0), 270, BezierRound, [3]),
+            ('24', (0, +8.8), 0, BezierRound, [5]),
+            ('34', (0, +8.8), 0, BezierRound, [3]),
+            ('54', (-9, +13.6), 90 + angle_PB, BezierRound, [3]),
+            ('64', (0, +9), angle_PB, BezierRound, [3]),
+            ('64', (+7, 0), 90, BezierRound, [3]),
+            ('73', (0, +8.8), 0, BezierRound, [3]),
+            ('73', (+7, 0), 90, BezierRound, [3]),
+            ('72', (+6.2, -7.6), 180, BezierRound, [3]),
+            ('71', (+11.4, 0), 90, BezierRound, [3]),
+            ('71', (0, -7.4), 180, BezierRound, [3]),
+            ('51', (-12, -4), 270, BezierRound, [3]),
+            ('41', (0, -7.4), 180, BezierRound, [3]),
+            ('21', (0, -7.4), 180, BezierRound, [3]),
+            ('11', (-16, -5.4), 180 + angle_PB, BezierRound, [3]),
+            ('91', (-7, 0), 270, BezierRound, [3]),
+            ('91', (0, +8.8), 0, BezierRound, [3]),
+            ('12', (-7, 4), 270, BezierRound, [3]),
+            ('13', (-7, +7.0), 0, BezierRound, [3]),
+        ]
+        midcnrs_set.append( make_corners( cnrs ) )
+
+    if board in [BDL, BDR, BDM]:# mid hole (thumb)
+        cnrs = [
+            ('84', (0, +8.6), 0, BezierRound, [4]),
+            ('84', (+7, 0), 90, BezierRound, [4]),
+            ('83', (+7, 0), 90, BezierRound, [4]),
+            ('82', (+10, 4), 0, BezierRound, [1]),
+            ('82', (+11.6, 0), 90, BezierRound, [1]),
+            ('82', (0, -7.6), 180, BezierRound, [4]),
+            ('82', (-7, 0), 270, BezierRound, [4]),
+            ('83', (-7, 0), 270, BezierRound, [3]),
+            ('84', (-7, 0), 270, BezierRound, [3]),
+        ]
+        midcnrs_set.append( make_corners( cnrs ) )
+
+    if board in [BDL, BDR, BDM]:# draw BDM
+        layer = 'Edge.Cuts' if board == BDM else 'F.Fab'
+        w = width if board == BDM else width / 2
+        for midcnrs in midcnrs_set:
+            kad.draw_closed_corners( midcnrs, layer, w )
 
 def divide_line( a, b, pitch ):
     v = vec2.sub( b, a )
@@ -594,7 +581,7 @@ def main():
     if board == BDL:
         kad.move_mods( (0, 0), 0, [
             # mcu
-            (None, (80, 95), 0, [
+            (None, (U1_x, U1_y), 0, [
                 ('U1', (0, 0), 0),
                 # pass caps
                 (None, (0, 0), 0, [
@@ -631,7 +618,7 @@ def main():
         ] )
     elif board == BDR:
         kad.move_mods( (0, 0), 0, [
-            (None, (80, 95), 0, [
+            (None, (U1_x, U1_y), 0, [
                 # expander
                 ('U1', (0, 0), +90),
                 ('C1', (-1.27, 6.4), 180),
@@ -713,10 +700,14 @@ def main():
             for i in range( 4 ):
                 deg = i * 90 - angle
                 pt = vec2.scale( [4.2, 4.8][i % 2] / 2.0, vec2.rotate( deg ), (x, y) )
-                corners.append( [(pt, deg + 90), BezierRound, [0.5]] )
+                corners.append( [(pt, deg + 90), BezierRound, [1.2]] )
+            # for i in range( 6 ):
+            #     deg = i * 60 + 15 * sign
+            #     pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
+            #     corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
             kad.draw_closed_corners( corners, 'Edge.Cuts', 0.2 )
 
-    return
+    # return
 
     ###
     ### Wire mods
