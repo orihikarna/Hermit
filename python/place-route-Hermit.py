@@ -108,6 +108,7 @@ BDR = 1# Right plate
 BDT = 2# Top plate
 BDB = 3# Bottom plate
 BDM = 4# Middle plate
+BDS = 5# Second Top thin plate
 
 def make_corners( key_cnrs ):
     corners = []
@@ -146,26 +147,24 @@ def drawEdgeCuts( board ):
     if True:# outer
         out_cnrs = []
         mid_cnrs = []
-        # bottom right
-        cnrs = [
-            (J2_mod, (2.62, 10), +90, Round, [0.5]),
-            (J2_mod, (-1, 14), 180, Round, [3]),
-        ]
-        for cnr in cnrs:
-            out_cnrs.append( cnr )
-            mid_cnrs.append( cnr )
         # LED & J3:
-        if board in [BDL, BDR]:
+        if True:
             cnrs = [
                 (J3_mod, (-7, 1.27), 180, BezierRound, [14]),
             ]
             for cnr in cnrs:
                 out_cnrs.append( cnr )
-        if board in [BDL, BDR, BDM]:# BDM
+        if True:
             cnrs = [
-                (J3_mod, (+16, +1.27), 180, BezierRound, [14]),
-                (J3_mod, (+14.5, 0), 270, BezierRound, [0.5]),
-                (J3_mod, (0, -1.27), 180, BezierRound, [0.5]),
+                # J3
+                (J3_mod, (+14.8, +1.27), 180, BezierRound, [14]),
+                (J3_mod, (+14.2, +1.00), 270, BezierRound, [0.2]),
+                (J3_mod, (+13.6, 0), 180, BezierRound, [0.5]),
+                (J3_mod, (+13.0, +1.00), 90, BezierRound, [0.5]),
+                (J3_mod, (+12.4, +1.27), 180, BezierRound, [0.2]),
+                # LED
+                (J3_mod, (-1.5, 0), 270, BezierRound, [0.5]),
+                (J3_mod, (-4, -2.27), 180, BezierRound, [0.5]),
                 (J3_mod, (-5.5, 0), 90, BezierRound, [0.5]),
                 (J3_mod, (-7, +1.27), 180, BezierRound, [0.5]),
             ]
@@ -181,8 +180,7 @@ def drawEdgeCuts( board ):
             out_cnrs.append( cnr )
             mid_cnrs.append( cnr )
         # J1: Split
-        cnrs = []
-        if board in [BDL, BDR]:
+        if board in [BDL, BDR, BDS]:
             cnrs = [
                 (J1_mod, (0, +USBC_Width+1), 270, Round, [0.5]),
                 (J1_mod, (3, +USBC_Width  ),   0, Round, [0.5]),
@@ -190,17 +188,21 @@ def drawEdgeCuts( board ):
                 (J1_mod, (3, -USBC_Width),   180, Round, [0.5]),
                 (J1_mod, (0, -USBC_Width-1), 270, Round, [0.5]),
             ]
-            for cnr in cnrs:
-                out_cnrs.append( cnr )
-        if board in [BDL, BDR, BDM]:# BDM
+        else:
             cnrs = [
-                (J1_mod, (16.4, 0), 270, Round, [1]),
+                (J1_mod, (0, 0),   270, Round, [0.5]),
+            ]
+        for cnr in cnrs:
+            out_cnrs.append( cnr )
+        if True:
+            cnrs = [
+                (J1_mod, (16.4, 0), 270, Round, [0.5]),
             ]
             for cnr in cnrs:
                 mid_cnrs.append( cnr )
         # top side
         cnrs = [
-            (J1_mod, (-J1_x/2, -7), 180, Round, [1]),
+            (J1_mod, (-J1_x/2, -7), 180, Round, [0.5]),
             (J1_mod, (-J1_x,  -10), 270, Round, [2]),
             ('34', (-10.4, 16.8), angle_PB - angle_M, Round, [67]),
             ('71', (+26.6, 11.7), 90, Round, [67]),
@@ -210,7 +212,7 @@ def drawEdgeCuts( board ):
             out_cnrs.append( cnr )
             mid_cnrs.append( cnr )
         # J2: USB PC
-        if board in [BDL]:
+        if board in [BDL, BDS]:
             cnrs = [
                 (J2_mod, (2.62, -USBC_Width-1),  90, Round, [0.5]),
                 (J2_mod, (2.62-3, -USBC_Width), 180, Round, [0.5]),
@@ -220,7 +222,7 @@ def drawEdgeCuts( board ):
             ]
             for cnr in cnrs:
                 out_cnrs.append( cnr )
-        if board in [BDL, BDR, BDM]:# BDM
+        if True:
             cnrs = [
                 (J2_mod, (2.62, -USBM-USBT*2-0.2),  90, Round, [0.5]),
                 (J2_mod, (-USBW+2, -USBM-USBT*2),  180, Round, [0.2]),
@@ -233,10 +235,30 @@ def drawEdgeCuts( board ):
             ]
             for cnr in cnrs:
                 mid_cnrs.append( cnr )
-        # draw
-        corners = make_corners( out_cnrs )
-        kad.draw_closed_corners( corners, 'Edge.Cuts', width )
+        # bottom right
+        cnrs = [
+            (J2_mod, (2.62, 10), +90, Round, [0.5]),
+            (J2_mod, (-1, 14), 180, Round, [3]),
+        ]
+        for cnr in cnrs:
+            out_cnrs.append( cnr )
+            mid_cnrs.append( cnr )
+        # BDM
         midcnrs_set.append( make_corners( mid_cnrs ) )
+        # draw
+        if board is not BDM:
+            corners = make_corners( out_cnrs )
+            kad.draw_closed_corners( corners, 'Edge.Cuts', width )
+
+    if board in [BDL, BDR, BDM]:# J3
+        off_y = -1
+        cnrs = [
+            (J3_mod, (+14.2, off_y - 0.70), 270, BezierRound, [0.5]),
+            (J3_mod, (+10.0, off_y - 1.27), 180, BezierRound, [0.5]),
+            (J3_mod, (-0.70, off_y - 0.70),  90, BezierRound, [0.5]),
+            (J3_mod, (+10.0, off_y - 0.00),   0, BezierRound, [0.5]),
+        ]
+        midcnrs_set.append( make_corners( cnrs ) )
 
     if board in [BDL, BDR, BDM]:# J2 USB PC hole
         cnrs = [
@@ -324,14 +346,16 @@ def get_distance( dist, dist_size, pnt ):
     return 0
 
 def draw_top_bottom( board, sw_pos_angles ):
-    if board == BDT:# keysw holes
+    if board in [BDT, BDS]:# keysw holes
+        length = 13.90 if board == BDT else 14.8
         for sw_pos, angle in sw_pos_angles:
             corners = []
-            for i in range(4):
+            for i in range( 4 ):
                 deg = i * 90 + angle
-                pos = vec2.scale( 13.90 / 2.0, vec2.rotate( deg ), sw_pos )
+                pos = vec2.scale( length / 2.0, vec2.rotate( deg ), sw_pos )
                 corners.append( [(pos, deg + 90), BezierRound, [1]] )
             kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
+    return
 
     # read distance data
     board_type = 'T' if board == BDT else 'B'
@@ -477,10 +501,10 @@ def main():
         return
     boardname = m.group( 1 )
     # print( filename, boardname )
-    for bname, btype in [('L', BDL), ('R', BDR), ('T', BDT), ('B', BDB), ('M', BDM)]:
+    for bname, btype in [('L', BDL), ('R', BDR), ('T', BDT), ('B', BDB), ('M', BDM), ('S', BDS)]:
         if boardname == bname:
             board = btype
-            if board in [BDL, BDR, BDM]:
+            if board in [BDL, BDR, BDM, BDS]:
                 kad.add_text( (86, 2.6), 0, 'Hermit{} by orihikarna 21/05/05'.format( bname ),
                     'F.Cu' if board != BDR else 'B.Cu', (1.2, 1.2), 0.2,
                     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
@@ -505,7 +529,7 @@ def main():
 
     ### zones
     zones = []
-    if board in [BDL, BDR, BDM]:
+    if board in [BDL, BDR, BDM, BDS]:
         add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
         add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
 
@@ -570,8 +594,8 @@ def main():
                 # wire to SW
                 kad.wire_mods( [('D0', '1', 'SW' + name, '3', 0.5, (Dird, 0, 0))])
 
-    # if board in [BDT, BDB]:
-    #     draw_top_bottom( board, sw_pos_angles )
+    if board in [BDT, BDS, BDB]:
+        draw_top_bottom( board, sw_pos_angles )
 
     ###
     ### Set mod positios
@@ -691,19 +715,23 @@ def main():
             kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
 
     # draw mouting holes
-    if board in [BDL, BDR]:
+    if True:
         for idx, prm in enumerate( holes ):
             x, y, angle = prm
-            corners = []
-            for i in range( 4 ):
-                deg = i * 90 - angle
-                pt = vec2.scale( [4.2, 4.8][i % 2] / 2.0, vec2.rotate( deg ), (x, y) )
-                corners.append( [(pt, deg + 90), BezierRound, [1.2]] )
-            # for i in range( 6 ):
-            #     deg = i * 60 + 15 * sign
-            #     pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
-            #     corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
-            kad.draw_closed_corners( corners, 'Edge.Cuts', 0.2 )
+            hole = 'H{}'.format( idx + 1 )
+            if kad.get_mod( hole ):
+                kad.set_mod_pos_angle( hole, (x, y), 0 )
+            else:
+                corners = []
+                for i in range( 4 ):
+                    deg = i * 90 - angle
+                    pt = vec2.scale( [4.2, 4.8][i % 2] / 2.0, vec2.rotate( deg ), (x, y) )
+                    corners.append( [(pt, deg + 90), BezierRound, [1.2]] )
+                # for i in range( 6 ):
+                #     deg = i * 60 + 15 * sign
+                #     pos = vec2.scale( 2.74, vec2.rotate( deg ), ctr )
+                #     corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
+                kad.draw_closed_corners( corners, 'Edge.Cuts', 0.2 )
 
     if board not in [BDL, BDR]:
          return
