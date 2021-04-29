@@ -505,6 +505,8 @@ def calc_bezier_corner_points( apos, avec, bpos, bvec, pitch = 1, ratio = 0.7 ):
     if blen <= 0:
         print( 'BezierCorner: blen = {} < 0, at {}'.format( blen, bpos ) )
         debug = True
+    # if debug:
+    #     return []
     actrl = vec2.scale( alen * ratio, avec, apos )
     bctrl = vec2.scale( blen * ratio, bvec, bpos )
     ndivs = int( round( (alen + blen) / pitch ) )

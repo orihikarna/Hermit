@@ -339,15 +339,22 @@ def divide_line( a, b, pitch ):
 
 def get_distance( dist, dist_size, pnt ):
     x, y = vec2.scale( 10, vec2.sub( pnt, (PCB_Width/2.0, PCB_Height/2.0) ) )
-    x = int( round( x + dist_size[0] / 2.0 ) )
-    y = int( round( y + dist_size[1] / 2.0 ) )
-    if 0 <= x and x < dist_size[0] and 0 <= y and y < dist_size[1]:
-        return dist[y][x] / 10.0
-    return 0
+    x, y = vec2.add( (x, y), (dist_size[0] / 2.0, dist_size[1] / 2.0) )
+    nx = int( math.floor( x ) )
+    ny = int( math.floor( y ) )
+    if nx < 0 or dist_size[0] <= nx + 1 or ny < 0 or dist_size[1] <= ny + 1:
+        return 0
+    dx = x - nx
+    dy = y - ny
+    d = dist[ny][nx] * (1 - dx) * (1 - dy)
+    d += dist[ny][nx+1] * dx * (1 - dy)
+    d += dist[ny+1][nx] * (1 - dx) * dy
+    d += dist[ny+1][nx+1] * dx * dy
+    return d / 10.0
 
 def draw_top_bottom( board, sw_pos_angles ):
     if board in [BDT, BDS]:# keysw holes
-        length = 13.90 if board == BDT else 14.8
+        length = 13.94 if board == BDT else 14.80
         for sw_pos, angle in sw_pos_angles:
             corners = []
             for i in range( 4 ):
@@ -355,11 +362,57 @@ def draw_top_bottom( board, sw_pos_angles ):
                 pos = vec2.scale( length / 2.0, vec2.rotate( deg ), sw_pos )
                 corners.append( [(pos, deg + 90), BezierRound, [1]] )
             kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
-    return
+
+    if False:# screw holes
+        for prm in holes:
+            x, y, angle = prm
+            ctr = (x, y)
+            kad.add_arc( ctr, vec2.add( ctr, (2.5, 0) ), 360, 'Edge.Cuts', 0.1 )
+        return
+
+    ctr_pos_angle_vec = []
+    anchors = [
+        (28, 115),
+        (27, 105),
+        # (29, 0),
+        (1, 0),
+        (5, +2),
+        (9, -2),
+        (13, 0),
+        (17, 24),
+        (20, 26),
+        (24, 28),
+    ]
+    for n in range( 1, len( anchors ) ):
+        anchor_a = anchors[n-1]
+        anchor_b = anchors[n]
+        pos_a, angle_a = sw_pos_angles[anchor_a[0]]
+        pos_b, angle_b = sw_pos_angles[anchor_b[0]]
+        angle_a += anchor_a[1]
+        angle_b += anchor_b[1]
+        if abs( angle_a - angle_b ) > 1:
+            vec_a = vec2.rotate( angle_a + 90 )
+            vec_b = vec2.rotate( angle_b + 90 )
+            ctr, _, _ = vec2.find_intersection( pos_a, vec_a, pos_b, vec_b )
+            if n == 1:
+                angle_a += (angle_a - angle_b) * 2.0
+            elif n + 1 == len( anchors ):
+                angle_b += (angle_b - angle_a) * 2.0
+            if False:
+                layer = 'F.Fab'
+                width = 1.0
+                # print( ctr, ka, kb )
+                kad.add_line( ctr, pos_a, layer, width )
+                kad.add_line( ctr, pos_b, layer, width )
+        else:
+            ctr = None
+        ctr_pos_angle_vec.append( (ctr, pos_a, angle_a, pos_b, angle_b) )
+
+    # return
 
     # read distance data
-    board_type = 'T' if board == BDT else 'B'
-    with open( '/Users/akihiro/repos/Hermit/Zoea{}/Edge_Fill.txt'.format( board_type ) ) as fin:
+    board_type = { BDT : 'T', BDB: 'B' }[board]
+    with open( '/Users/akihiro/repos/Hermit/Hermit{}/Edge_Fill.txt'.format( board_type ) ) as fin:
         dist_data = fin.readlines()
         dist_w = int( dist_data[0] )
         dist_h = int( dist_data[1] )
@@ -374,34 +427,9 @@ def draw_top_bottom( board, sw_pos_angles ):
             vals = map( lambda v: float( v ), vals )
             dist.append( vals )
 
-    layer = 'F.Cu'
-    width = 1.0
-    ctr_angles = []
-    for idx, sw_pos_angle in enumerate( sw_pos_angles ):
-        # print( idx, sw_pos_angle )
-        if idx == 0:
-            continue
-        pos_a, angle_a = sw_pos_angles[idx-1]
-        pos_b, angle_b = sw_pos_angle
-        if abs( angle_a - angle_b ) > 1:
-            vec_a = vec2.rotate( angle_a + 90 )
-            vec_b = vec2.rotate( angle_b + 90 )
-            ctr, ka, kb = vec2.find_intersection( pos_a, vec_a, pos_b, vec_b )
-            if idx == 1:
-                angle_a += (angle_a - angle_b) * 1.0
-            elif idx + 1 == len( sw_pos_angles ):
-                angle_b += (angle_b - angle_a) * 1.0
-            ctr_angles.append( (ctr, angle_a, angle_b) )
-            if False:
-                print( ctr, ka, kb )
-                kad.add_line( ctr, pos_a, layer, width )
-                kad.add_line( ctr, pos_b, layer, width )
-        else:
-            ctr_angles.append( (None, pos_a, pos_b) )
-
     pos_dummy = [None, None]
     pitch = 2.0
-    nyrange = range( -186, 450, 16 )
+    nyrange = range( -545, 870, 16 )
     width0, width1 = 0.3, 1.3
     for ny in nyrange:
         y = ny * 0.1
@@ -412,29 +440,34 @@ def draw_top_bottom( board, sw_pos_angles ):
         ]
         curvs = []
         for dir in [-1, +1]:
-            idx = 1# base index
-            pos, _ = sw_pos_angles[idx]
-            pos = vec2.add( pos, (0, y) )
-            while True:#0 <= idx and idx < len( sw_pos_angles ):
+            idx = 2 # base index
+            anchor = anchors[idx]
+            pos, angle = sw_pos_angles[anchor[0]]
+            angle += anchor[1]
+            pos = vec2.mult( mat2.rotate( -angle ), (0, y), pos )
+            while True:#0 <= idx and idx < len( anchors ):
                 idx2 = idx + dir
                 if dir == -1:
                     if idx2 < 0:
                         break
-                    ctr, angle_b, angle_a = ctr_angles[idx2]
+                    ctr, _, angle_b, _, angle_a = ctr_pos_angle_vec[idx2]
                     vec_b = vec2.rotate( angle_b + 90 )
                     pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
-                    #kad.add_line( pos_a, pos_b, layer, width )
-                    #curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( 180 + angle_b ), 8 )
-                    curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( 180 + angle_b ), pitch )
-                    curvs.append( curv )
+                    if False:
+                        kad.add_line( pos, pos_b, layer, width )
+                    else:
+                        # curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a + 180 ), pos_b, vec2.rotate( angle_b ), 8 )
+                        curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a + 180 ), pos_b, vec2.rotate( angle_b ), pitch )
+                        curvs.append( curv )
                     pos = pos_b
                 elif dir == +1:
-                    if idx2 >= len( sw_pos_angles ):
+                    if idx >= len( ctr_pos_angle_vec ):
                         break
-                    ctr, angle_a, angle_b = ctr_angles[idx]
+                    ctr, _, angle_a, org_b, angle_b = ctr_pos_angle_vec[idx]
                     if ctr == None:# parallel lines
-                        pos_b = angle_b
-                        pos_b = vec2.add( pos_b, (0, y) )
+                        vec_a = vec2.rotate( angle_a )
+                        vec_b = vec2.rotate( angle_b + 90 )
+                        pos_b, _, _ = vec2.find_intersection( pos, vec_a, org_b, vec_b )
                         #kad.add_line( pos, pos_b, layer, width )
                         curv = divide_line( pos, pos_b, pitch )
                         curvs.append( curv )
@@ -442,38 +475,79 @@ def draw_top_bottom( board, sw_pos_angles ):
                     else:
                         vec_b = vec2.rotate( angle_b + 90 )
                         pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
-                        #kad.add_line( pos_a, pos_b, layer, width )
-                        #curv = kad.calc_bezier_round_points( pos, vec2.rotate( 180 + angle_a ), pos_b, vec2.rotate( angle_b ), 6 )
-                        curv = kad.calc_bezier_corner_points( pos, vec2.rotate( 180 + angle_a ), pos_b, vec2.rotate( angle_b ), pitch )
-                        curvs.append( curv )
+                        if False:
+                            kad.add_line( pos, pos_b, layer, width )
+                        else:
+                            # curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), 6 )
+                            curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), pitch )
+                            curvs.append( curv )
                         pos = pos_b
                 idx = idx2
+        # continue
 
         for curv in curvs:
             # kad.add_lines( curv, layer, width )
-            for idx, pnt in enumerate( curv ):
-                if idx == 0:
-                    continue
+            for idx in range( 1, len( curv ) ):
+                pnt_a = curv[idx-1]
+                pnt_b = curv[idx]
+                vec_ba = vec2.sub( pnt_b, pnt_a )
+                nrm_ba = vec2.normalize( (vec_ba[1], -vec_ba[0]) )[0]
                 for lidx, layer in enumerate( ['F.Cu', 'B.Cu'] ):
                     w = widths[lidx if board == BDT else 1 - lidx]
-                    thr = w / 2.0 + 0.5
-                    pnt_a = curv[idx-1]
-                    pnt_b = pnt
-                    dpt_a = None
-                    dpt_b = None
-                    div = 20
-                    for n in range( 0, div + 1 ):
+                    gap = 0.5
+                    div = 16
+                    ctrs = []
+                    for n in range( div + 1 ):
                         t = n / float( div )
-                        p = vec2.scale( t, vec2.sub( pnt_b, pnt_a ), pnt_a )
-                        d = get_distance( dist, (dist_w, dist_h), p )
-                        if d >= thr:
-                            if dpt_a == None:
-                                dpt_a = p
-                            dpt_b = p
-                    if dpt_a != None and vec2.distance( dpt_a, dpt_b ) > 0.1:
-                        kad.add_line( dpt_a, dpt_b, layer, w )
-                        if pos_dummy[lidx] == None and w > 1.1:
-                            pos_dummy[lidx] = pnt
+                        ctr = vec2.scale( t, vec_ba, pnt_a )
+                        ctrs.append( ctr )
+                    idx_deltas = []
+                    for n in range( div ):
+                        m = -1
+                        while True:
+                            m += 1
+                            delta = m * (w * 0.1)
+                            thick = w / 2.0 - delta
+                            if thick <= 0.1:# min width
+                                break
+                            found_sdelta = []
+                            for sign in [+1, -1]:
+                                sdelta = delta * sign
+                                q0 = vec2.scale( sdelta, nrm_ba, ctrs[n+0] )
+                                q1 = vec2.scale( sdelta, nrm_ba, ctrs[n+1] )
+                                d0 = get_distance( dist, (dist_w, dist_h), q0 )
+                                d1 = get_distance( dist, (dist_w, dist_h), q1 )
+                                if d0 >= thick + gap and d1 >= thick + gap:
+                                    found_sdelta.append( sdelta )
+                                    break
+                                if delta == 0:
+                                    break
+                            if len( found_sdelta ) > 0:
+                                for sdelta in found_sdelta:
+                                    idx_deltas.append( (n, n+1, sdelta) )
+                                break
+                    if True and len( idx_deltas ) > 0:# merge segments
+                        idx_deltas2 = []
+                        vals = idx_deltas[0]
+                        for n in range( 1, len( idx_deltas ) ):
+                            curr = idx_deltas[n]
+                            if vals[1] == curr[0] and vals[2] == curr[2]:# end == start and same delta
+                                vals = (vals[0], curr[1], vals[2])# extend
+                                continue
+                            else:
+                                idx_deltas2.append( vals )
+                                vals = curr
+                        idx_deltas2.append( vals )
+                        idx_deltas = idx_deltas2
+                    for i0, i1, delta in idx_deltas:
+                        if delta is None:
+                            continue
+                        q0 = vec2.scale( delta, nrm_ba, ctrs[i0] )
+                        q1 = vec2.scale( delta, nrm_ba, ctrs[i1] )
+                        ww = w - abs( delta ) * 2
+                        kad.add_line( q0, q1, layer, ww )
+                        if pos_dummy[lidx] == None and ww > 1.1:
+                            pos_dummy[lidx] = q0
     kad.set_mod_pos_angle( 'P1', pos_dummy[0], 0 )
     kad.set_mod_pos_angle( 'P2', pos_dummy[1], 0 )
 
@@ -492,114 +566,10 @@ def add_zone( net_name, layer_name, rect, zones ):
 def make_rect( size, offset = (0, 0) ):
     return map( lambda pt: vec2.add( (size[0] * pt[0], size[1] * pt[1]), offset ), FourCorners )
 
-
-def main():
-    # board type
-    filename = pcb.GetFileName()
-    m = re.search( r'/Hermit([^/])/', filename )
-    if not m:
-        return
-    boardname = m.group( 1 )
-    # print( filename, boardname )
-    for bname, btype in [('L', BDL), ('R', BDR), ('T', BDT), ('B', BDB), ('M', BDM), ('S', BDS)]:
-        if boardname == bname:
-            board = btype
-            if board in [BDL, BDR, BDM, BDS]:
-                kad.add_text( (86, 2.6), 0, 'Hermit{} by orihikarna 21/05/05'.format( bname ),
-                    'F.Cu' if board != BDR else 'B.Cu', (1.2, 1.2), 0.2,
-                    pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
-            break
-
-    for name in keys.keys():
-        col = int( name[0] )
-        row = int( name[1] )
-        if col == 8:
-            if board == BDL:
-                R2L.append( name )
-            elif board == BDR:
-                L2R.append( name )
-        else:
-            if row in [1, 3]:
-                L2R.append( name )
-            else:
-                R2L.append( name )
-
-    drawEdgeCuts( board )
-    # return
-
-    ### zones
-    zones = []
-    if board in [BDL, BDR, BDM, BDS]:
-        add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
-        add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height), (0, 0) ), zones )
-
-    ###
-    ### Set key positios
-    ###
-    sw_pos_angles = []
-    for name, key in keys.items():
-        px, py, w, h, angle = key
-        if board == BDR:
-            angle += 180# back side
-        sw_pos = (px, -py)
-        sw_pos_angles.append( (sw_pos, -angle) )
-        # col = int( name[0] )
-        row = int( name[1] )
-        # SW & LED & Diode
-        if board in [BDL, BDR]:
-            ## SW
-            kad.set_mod_pos_angle( 'SW' + name, sw_pos, angle )
-            # print( name )
-            if True:# SW rectangle
-                corners = []
-                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
-                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
-                    corners.append( [(pt, 0), Line, [0]] )
-                kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
-            if False:# SW rectangle
-                w += 2.5 * 2
-                h += 2.5 * 2
-                corners = []
-                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
-                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
-                    corners.append( [(pt, 0), Line, [0]] )
-                kad.draw_closed_corners( corners, 'F.Fab', 0.8 )
-            ## LED
-            sign = [+1, -1][board]
-            led_base_angle = 180 if name in [L2R, R2L][board] else 0
-            pos = vec2.scale( 4.93, vec2.rotate( - angle - 90 * sign ), sw_pos )
-            kad.set_mod_pos_angle( 'L' + name, pos, led_base_angle + angle )
-            if True:# LED holes
-                corners = []
-                for i in range( 4 ):
-                    deg = i * 90 - angle
-                    pt = vec2.scale( [3.6, 3.2][i % 2] / 2.0, vec2.rotate( deg ), pos )
-                    corners.append( [(pt, deg + 90), BezierRound, [0.2]] )
-                kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
-            # LED pass caps
-            pos = vec2.mult( mat2.rotate( angle ), (0, -7.5 * sign), sw_pos )
-            kad.set_mod_pos_angle( 'CL' + name, pos, led_base_angle + angle )
-            ## Diode
-            Dx = +5.8
-            Dy = -0.6 * sign
-            if board != BDL or name != '91':
-                pos = vec2.mult( mat2.rotate( angle ), (+Dx, +Dy), sw_pos )
-                kad.set_mod_pos_angle( 'D' + name, pos, angle - 90 * sign )
-                # wire to SW
-                kad.wire_mods( [('D' + name, '2', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
-            ## D0
-            if board == BDL and name == '82':
-                pos = vec2.mult( mat2.rotate( angle ), (-Dx, -Dy), sw_pos )
-                kad.set_mod_pos_angle( 'D0', pos, angle - 90 )
-                # wire to SW
-                kad.wire_mods( [('D0', '1', 'SW' + name, '3', 0.5, (Dird, 0, 0))])
-
-    if board in [BDT, BDS, BDB]:
-        draw_top_bottom( board, sw_pos_angles )
-
-    ###
-    ### Set mod positios
-    ###
+###
+### Set mod positios
+###
+def place_mods( board ):
     if board == BDL:
         kad.move_mods( (0, 0), 0, [
             # mcu
@@ -714,6 +684,13 @@ def main():
                 corners.append( [(pt, 0), Line, [0]] )
             kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
 
+    # dummy pads
+    if board in [BDM, BDS]:
+        for i in range( 2 ):
+            dmy = 'P{}'.format( i + 1 )
+            if kad.get_mod( dmy ):
+                kad.set_mod_pos_angle( dmy, (J1_x + 20, J1_y), 0 )
+
     # draw mouting holes
     if True:
         for idx, prm in enumerate( holes ):
@@ -733,12 +710,10 @@ def main():
                 #     corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
                 kad.draw_closed_corners( corners, 'Edge.Cuts', 0.2 )
 
-    if board not in [BDL, BDR]:
-         return
-
-    ###
-    ### Wire mods
-    ###
+###
+### Wire mods
+###
+def wire_mods( board ):
     layer1 = ['F.Cu', 'B.Cu'][board]
     layer2 = ['B.Cu', 'F.Cu'][board]
     GND = pcb.FindNet( 'GND' )
@@ -1683,11 +1658,12 @@ def main():
                 ('U1', via_exp_rdi, 'CL82', via_led_datTs['82'], w_dat, (Dird, via_exp_angle, ([(1, -45), (3.8, -90), (2.6, -135)], 0), r_dat), layer2),
             ] )
 
-    return
 
-    ###
-    ### Ref
-    ###
+
+###
+### Ref
+###
+def set_refs( board ):
     if board == BDL:
         refs = [
             (3,   135,   0, ['U1']),
@@ -1725,7 +1701,7 @@ def main():
             (13,  -90, -90, ['J3']),
         ]
     else:
-        refs = [ (0, 0, None, ['H1', 'H2', 'H3', 'H4', 'H5', 'H6']) ]
+        refs = [ (0, 0, None, ['H{}'.format( idx ) for idx in range( 1, 13 )]) ]
     for offset_length, offset_angle, text_angle, mod_names in refs:
         for mod_name in mod_names:
             mod = kad.get_mod( mod_name )
@@ -1754,6 +1730,122 @@ def main():
         pos = vec2.scale( 2, vec2.rotate( -90 ), pos )
         kad.add_text( pos, 0, text, ['F.SilkS', 'B.SilkS'][board], (0.9, 0.9), 0.15,
             pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
+
+
+
+def main():
+    # board type
+    filename = pcb.GetFileName()
+    m = re.search( r'/Hermit([^/])/', filename )
+    if not m:
+        return
+    boardname = m.group( 1 )
+    # print( filename, boardname )
+    for bname, btype in [('L', BDL), ('R', BDR), ('T', BDT), ('B', BDB), ('M', BDM), ('S', BDS)]:
+        if boardname == bname:
+            board = btype
+            if board in [BDL, BDR, BDM, BDS]:
+                kad.add_text( (86, 2.6), 0, 'Hermit{} by orihikarna 21/05/05'.format( bname ),
+                    'F.Cu' if board != BDR else 'B.Cu', (1.2, 1.2), 0.2,
+                    pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
+            break
+
+    for name in keys.keys():
+        col = int( name[0] )
+        row = int( name[1] )
+        if col == 8:
+            if board == BDL:
+                R2L.append( name )
+            elif board == BDR:
+                L2R.append( name )
+        else:
+            if row in [1, 3]:
+                L2R.append( name )
+            else:
+                R2L.append( name )
+
+    drawEdgeCuts( board )
+
+    ### zones
+    zones = []
+    if board in [BDL, BDR, BDM, BDS]:
+        add_zone( 'GND', 'F.Cu', make_rect( (PCB_Width, PCB_Height) ), zones )
+        add_zone( 'GND', 'B.Cu', make_rect( (PCB_Width, PCB_Height) ), zones )
+
+    ###
+    ### Set key positios
+    ###
+    sw_pos_angles = []
+    for name in sorted( keys.keys() ):
+        key = keys[name]
+        px, py, w, h, angle = key
+        if board == BDR:
+            angle += 180# back side
+        sw_pos = (px, -py)
+        sw_pos_angles.append( (sw_pos, -angle) )
+        # col = int( name[0] )
+        row = int( name[1] )
+        # SW & LED & Diode
+        if board in [BDL, BDR]:
+            ## SW
+            kad.set_mod_pos_angle( 'SW' + name, sw_pos, angle )
+            # print( name )
+            if True:# SW rectangle
+                corners = []
+                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
+                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
+                    corners.append( [(pt, 0), Line, [0]] )
+                kad.draw_closed_corners( corners, 'F.Fab', 0.1 )
+            if False:# SW rectangle
+                w += 2.5 * 2
+                h += 2.5 * 2
+                corners = []
+                for pnt in make_rect( (w, h), (-w/2, -h/2) ):
+                    pt = vec2.mult( mat2.rotate( angle ), pnt, sw_pos )
+                    corners.append( [(pt, 0), Line, [0]] )
+                kad.draw_closed_corners( corners, 'F.Fab', 0.8 )
+            ## LED
+            sign = [+1, -1][board]
+            led_base_angle = 180 if name in [L2R, R2L][board] else 0
+            pos = vec2.scale( 4.93, vec2.rotate( - angle - 90 * sign ), sw_pos )
+            kad.set_mod_pos_angle( 'L' + name, pos, led_base_angle + angle )
+            if True:# LED holes
+                corners = []
+                for i in range( 4 ):
+                    deg = i * 90 - angle
+                    pt = vec2.scale( [3.6, 3.2][i % 2] / 2.0, vec2.rotate( deg ), pos )
+                    corners.append( [(pt, deg + 90), BezierRound, [0.2]] )
+                kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
+            # LED pass caps
+            pos = vec2.mult( mat2.rotate( angle ), (0, -7.5 * sign), sw_pos )
+            kad.set_mod_pos_angle( 'CL' + name, pos, led_base_angle + angle )
+            ## Diode
+            Dx = +5.8
+            Dy = -0.6 * sign
+            if not (board == BDL and name == '91'):
+                pos = vec2.mult( mat2.rotate( angle ), (+Dx, +Dy), sw_pos )
+                kad.set_mod_pos_angle( 'D' + name, pos, angle - 90 * sign )
+                # wire to SW
+                kad.wire_mods( [('D' + name, '2', 'SW' + name, '2', 0.5, (Dird, 0, 0))])
+            ## D0
+            if board == BDL and name == '82':
+                pos = vec2.mult( mat2.rotate( angle ), (-Dx, -Dy), sw_pos )
+                kad.set_mod_pos_angle( 'D0', pos, angle - 90 )
+                # wire to SW
+                kad.wire_mods( [('D0', '1', 'SW' + name, '3', 0.5, (Dird, 0, 0))])
+
+    # draw top & bottom patterns
+    if board in [BDT, BDB]:
+        draw_top_bottom( board, sw_pos_angles )
+
+    set_refs( board )
+    return
+
+    # place & route
+    place_mods( board )
+    if board in [BDL, BDR]:
+        wire_mods( board )
+
 
 if __name__=='__main__':
     kad.removeDrawings()
