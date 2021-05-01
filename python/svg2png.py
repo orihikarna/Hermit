@@ -62,27 +62,55 @@ for y in range( y0, y1 ):
         v = 0 if a >= 64 else 255
         mask[y - y0, x - x0] = v
 
-retval, labels = cv2.connectedComponents( mask )
-label = labels[h >> 1, w >> 1]
-print( f'#labels = {retval}' )
+if False:
+    retval, labels = cv2.connectedComponents( mask )
+    label = labels[h >> 1, w >> 1]
+    print( f'#labels = {retval}, label = {label}' )
+else:
+    retval, labels, stats, centroids = cv2.connectedComponentsWithStats( mask )
+    total_area = w * h
+    max_area = -1
+    for idx, (x, y, _, _, area) in enumerate( stats ):
+        if area > total_area / 8:
+            print( f'idx = {idx}, area = {area} total = {total_area}' )
+        if max_area < area:
+            max_area = area
+            label = idx
+    print( f'#labels = {retval}, label = {label}, max_area = {max_area}' )
 #fill_mask = np.zeros( (h + 2, w + 2), np.uint8 )
 #cv2.floodFill( mask, fill_mask, (h >> 1, w >> 1), 255, 0, 128, 4 | cv2.FLOODFILL_FIXED_RANGE )
 
+mask1 = np.zeros( (h, w), np.uint8 )
+mask2 = np.zeros( (h, w), np.uint8 )
 for y in range( y0, y1 ):
     for x in range( x0, x1 ):
-        mask[y - y0, x - x0] = 255 if labels[y - y0, x - x0] == label else 0
+        inside = (labels[y - y0, x - x0] == label)
+        mask1[y - y0, x - x0] = 255 if inside else 0
+        mask2[y - y0, x - x0] = 0 if inside else 255
 print( 'done largest label mask' )
 
-dist = cv2.distanceTransform( mask, cv2.DIST_L2, cv2.DIST_MASK_PRECISE )
+dist1 = cv2.distanceTransform( mask1, cv2.DIST_L2, cv2.DIST_MASK_PRECISE )
+dist2 = cv2.distanceTransform( mask2, cv2.DIST_L2, cv2.DIST_MASK_PRECISE )
+dist1 = cv2.GaussianBlur( dist1, ksize = (7, 7), sigmaX = 0.7 )
+dist2 = cv2.GaussianBlur( dist2, ksize = (7, 7), sigmaX = 0.7 )
 print( 'done distance transform' )
 
-test = Image.new( 'RGB', (w, h) )
+# test = Image.new( 'RGB', (w, h) )
+test = np.empty((h, w, 3), np.uint8)
 for y in range( y0, y1 ):
     for x in range( x0, x1 ):
-        r = 0 if mask[y - y0, x - x0] == 0 else 255
-        g = min( int( round( dist[y - y0, x - x0] * 2 ) ), 255 )
-        b = 0
-        test.putpixel( (x - x0, y - y0), (r, g, b))
+        inside = True if mask1[y - y0, x - x0] != 0 else False
+        val = dist1[y - y0, x - x0] if inside else dist2[y - y0, x - x0]
+        val = int( round( val * 3 ) )
+        val = min( max( val, 0), 255 )
+        r = 255 if inside else 0
+        b = 0 if inside else 255
+        g = val
+        # test.putpixel( (x - x0, y - y0), (r, g, b))
+        test[y - y0, x - x0, 0] = r
+        test[y - y0, x - x0, 1] = g
+        test[y - y0, x - x0, 2] = b
+test = Image.fromarray( test )
 test.save( path_test )
 print( f'saved {path_test}' )
 
@@ -93,9 +121,8 @@ with open( path_txt, 'w' ) as fout:
     for y in range( y0, y1 ):
         line = ''
         for x in range( x0, x1 ):
-            # r, g, b, a = png.getpixel( (x, y) )
-            # a = 255 if a >= 128 and max( r, g, b ) < 128 else 0
-            v = dist[y - y0, x - x0]
-            line += '{:.0f},'.format( v )
+            inside = True if mask1[y - y0, x - x0] != 0 else False
+            val = dist1[y - y0, x - x0] if inside else -dist2[y - y0, x - x0]
+            line += '{:.0f},'.format( val * 10 )
         fout.write( line + '\n' )
 print( f'saved {path_txt}' )

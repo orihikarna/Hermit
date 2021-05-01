@@ -110,6 +110,9 @@ BDB = 3# Bottom plate
 BDM = 4# Middle plate
 BDS = 5# Second Top thin plate
 
+Edge_CX, Edge_CY = 0, 0
+Edge_W, Edge_H = 0, 0
+
 def make_corners( key_cnrs ):
     corners = []
     for mod, offset, dangle, cnr_type, prms in key_cnrs:
@@ -249,6 +252,22 @@ def drawEdgeCuts( board ):
         if board is not BDM:
             corners = make_corners( out_cnrs )
             kad.draw_closed_corners( corners, 'Edge.Cuts', width )
+            # PCB Size
+            x0, x1 = +1e6, -1e6
+            y0, y1 = +1e6, -1e6
+            for (pos, _), _, _ in corners:
+                x, y = pos
+                x0 = min( x0, x )
+                x1 = max( x1, x )
+                y0 = min( y0, y )
+                y1 = max( y1, y )
+            global Edge_CX, Edge_CY
+            global Edge_W, Edge_H
+            Edge_CX, Edge_CY = (x0 + x1) / 2, (y0 + y1) / 2
+            Edge_W, Edge_H = x1 - x0, y1 - y0
+            if False:
+                print( 'Edge: (CX, CY) = ({:.2f}, {:.2f})'.format( Edge_CX, Edge_CY ) )
+                print( 'Edge: (W, H) = ({:.2f}, {:.2f})'.format( Edge_W, Edge_H ) )
 
     if board in [BDL, BDR, BDM]:# J3
         off_y = -1
@@ -337,20 +356,79 @@ def divide_line( a, b, pitch ):
     pnts.append( b )
     return pnts
 
-def get_distance( dist, dist_size, pnt ):
-    x, y = vec2.scale( 10, vec2.sub( pnt, (PCB_Width/2.0, PCB_Height/2.0) ) )
-    x, y = vec2.add( (x, y), (dist_size[0] / 2.0, dist_size[1] / 2.0) )
+def load_distance_image( path ):
+    with open( path ) as fin:
+        data = fin.readlines()
+        w = int( data[0] )
+        h = int( data[1] )
+        # print( dist_w, dist_h )
+        dist = []
+        for y in range( h ):
+            vals = data[y+2].split( ',' )
+            del vals[-1]
+            if len( vals ) != w:
+                print( 'Error: len( vals )({}) != w({})'.format( len( vals ), w ) )
+                break
+            vals = map( lambda v: float( v ) / 100.0, vals )
+            dist.append( vals )
+    return (dist, w, h)
+
+def get_distance( dist_image, pnt ):
+    dist, w, h = dist_image
+    x, y = vec2.scale( 10, vec2.sub( pnt, (Edge_CX, Edge_CY) ) )
+    x, y = vec2.add( (x, y), (w / 2.0, h / 2.0) )
+    x = min( max( x, 0. ), w - 1.01 )
+    y = min( max( y, 0. ), h - 1.01 )
     nx = int( math.floor( x ) )
     ny = int( math.floor( y ) )
-    if nx < 0 or dist_size[0] <= nx + 1 or ny < 0 or dist_size[1] <= ny + 1:
-        return 0
+    # if nx < 0 or w <= nx + 1 or ny < 0 or h <= ny + 1:
+    #     return 0
     dx = x - nx
     dy = y - ny
-    d = dist[ny][nx] * (1 - dx) * (1 - dy)
-    d += dist[ny][nx+1] * dx * (1 - dy)
-    d += dist[ny+1][nx] * (1 - dx) * dy
-    d += dist[ny+1][nx+1] * dx * dy
-    return d / 10.0
+    d  = dist[ny][nx]     * (1 - dx) * (1 - dy)
+    d += dist[ny][nx+1]   * dx       * (1 - dy)
+    d += dist[ny+1][nx]   * (1 - dx) * dy
+    d += dist[ny+1][nx+1] * dx       * dy
+    return d
+
+LEFT, RIGHT = range( 2 )
+CIDX, POS, NIDX = range( 3 )
+
+def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer, width ):
+    # overwrite new line_end
+    if side == LEFT:
+        line_ends = line_lefts
+    else:# RIGHT
+        line_ends = line_rights
+    line_ends[idx] = (curv_idx, pos, 0)
+
+    # connect with up/down neighbors
+    for nidx in [idx-1, idx+1]:
+        if nidx < 0 or len( line_ends ) <= nidx:
+            continue
+        # up / down neighbor
+        neib = line_ends[nidx]
+        if not neib:# no neibor
+            continue
+        if (neib[NIDX] & (1 << idx)) != 0:# already connected with this index
+            continue
+            #    L1-----R1      L1----
+            #    C  ...---^^^ <-- cannot connect L1(right) and L2,
+            #     L2--------R2    because L2 is already connected with L1(left)
+        if side == RIGHT:
+            # The lines are drawn from left to right.
+            # For the right line ends, reject the neighbor if there is a left end after the neighbor right end.
+            if line_lefts[nidx] and line_lefts[nidx][CIDX] > neib[CIDX]:
+                continue
+                #    L1----------------------------R1
+                #    C             .....-----^^^^^    <-- cannot connect R1 and R2(right),
+                #     L2---------R2        L2---------R2  becuase L2(right) is on the right of R2(left)
+                #          neib[CIDX] left[CIDX]
+        # connect
+        curr = line_ends[idx]
+        line_ends[idx]  = (curr[CIDX], curr[POS], curr[NIDX] | (1 << nidx))
+        line_ends[nidx] = (neib[CIDX], neib[POS], neib[NIDX] | (1 << idx))
+        kad.add_line( curr[POS], neib[POS], layer, width )
 
 def draw_top_bottom( board, sw_pos_angles ):
     if board in [BDT, BDS]:# keysw holes
@@ -395,9 +473,9 @@ def draw_top_bottom( board, sw_pos_angles ):
             vec_b = vec2.rotate( angle_b + 90 )
             ctr, _, _ = vec2.find_intersection( pos_a, vec_a, pos_b, vec_b )
             if n == 1:
-                angle_a += (angle_a - angle_b) * 2.0
+                angle_a += (angle_a - angle_b) * 1.1
             elif n + 1 == len( anchors ):
-                angle_b += (angle_b - angle_a) * 2.0
+                angle_b += (angle_b - angle_a) * 1.5
             if False:
                 layer = 'F.Fab'
                 width = 1.0
@@ -412,142 +490,152 @@ def draw_top_bottom( board, sw_pos_angles ):
 
     # read distance data
     board_type = { BDT : 'T', BDB: 'B' }[board]
-    with open( '/Users/akihiro/repos/Hermit/Hermit{}/Edge_Fill.txt'.format( board_type ) ) as fin:
-        dist_data = fin.readlines()
-        dist_w = int( dist_data[0] )
-        dist_h = int( dist_data[1] )
-        # print( dist_w, dist_h )
-        dist = []
-        for y in range( dist_h ):
-            vals = dist_data[y+2].split( ',' )
-            del vals[-1]
-            if len( vals ) != dist_w:
-                print( 'Error: len( vals )({}) != dist_w({})'.format( len( vals ), dist_w ) )
-                break
-            vals = map( lambda v: float( v ), vals )
-            dist.append( vals )
+    dist_image = load_distance_image( '/Users/akihiro/repos/Hermit/Hermit{}/Edge_Fill.txt'.format( board_type ) )
 
+    # draw lines
     pos_dummy = [None, None]
     pitch = 2.0
-    nyrange = range( -545, 870, 16 )
+    nyrange = range( -548, 880, 16 )
+    # nyrange = range( -100, 100, 16 )
+    # nyrange = range( 100, 400, 16 )
     width0, width1 = 0.3, 1.3
     for ny in nyrange:
         y = ny * 0.1
         uy = float( ny - nyrange[0] ) / float( nyrange[-1] - nyrange[0] )
-        widths = [
-            width0 + (width1 - width0) * uy,
-            width1 + (width0 - width1) * uy,
-        ]
-        curvs = []
+        # base position
+        idx_base = 2
+        anchor_base = anchors[idx_base]
+        pos_base, angle_base = sw_pos_angles[anchor_base[0]]
+        angle_base += anchor_base[1]
+        pos_base = vec2.mult( mat2.rotate( -angle_base ), (0, y), pos_base )
+        # control points for one horizontal line
+        pos_angles = [(pos_base, angle_base)]
         for dir in [-1, +1]:
-            idx = 2 # base index
-            anchor = anchors[idx]
-            pos, angle = sw_pos_angles[anchor[0]]
-            angle += anchor[1]
-            pos = vec2.mult( mat2.rotate( -angle ), (0, y), pos )
-            while True:#0 <= idx and idx < len( anchors ):
+            idx = idx_base
+            pos_a, angle_a = pos_base, angle_base
+            while 0 < idx and idx < len( ctr_pos_angle_vec ):
                 idx2 = idx + dir
                 if dir == -1:
-                    if idx2 < 0:
-                        break
                     ctr, _, angle_b, _, angle_a = ctr_pos_angle_vec[idx2]
-                    vec_b = vec2.rotate( angle_b + 90 )
-                    pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
-                    if False:
-                        kad.add_line( pos, pos_b, layer, width )
-                    else:
-                        # curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a + 180 ), pos_b, vec2.rotate( angle_b ), 8 )
-                        curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a + 180 ), pos_b, vec2.rotate( angle_b ), pitch )
-                        curvs.append( curv )
-                    pos = pos_b
-                elif dir == +1:
-                    if idx >= len( ctr_pos_angle_vec ):
-                        break
-                    ctr, _, angle_a, org_b, angle_b = ctr_pos_angle_vec[idx]
-                    if ctr == None:# parallel lines
-                        vec_a = vec2.rotate( angle_a )
-                        vec_b = vec2.rotate( angle_b + 90 )
-                        pos_b, _, _ = vec2.find_intersection( pos, vec_a, org_b, vec_b )
-                        #kad.add_line( pos, pos_b, layer, width )
-                        curv = divide_line( pos, pos_b, pitch )
-                        curvs.append( curv )
-                        pos = pos_b
-                    else:
-                        vec_b = vec2.rotate( angle_b + 90 )
-                        pos_b = vec2.scale( -vec2.distance( pos, ctr ), vec_b, ctr )
-                        if False:
-                            kad.add_line( pos, pos_b, layer, width )
-                        else:
-                            # curv = kad.calc_bezier_round_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), 6 )
-                            curv = kad.calc_bezier_corner_points( pos, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), pitch )
-                            curvs.append( curv )
-                        pos = pos_b
+                else:# dir == +1:
+                    ctr, _, angle_a, _, angle_b = ctr_pos_angle_vec[idx]
                 idx = idx2
-        # continue
+                #
+                vec_b = vec2.rotate( angle_b + 90 )
+                pos_b = vec2.scale( -vec2.distance( pos_a, ctr ), vec_b, ctr )
+                pos_angles.append( (pos_b, angle_b) )
+                pos_a = pos_b
+            if dir == -1:
+                pos_angles.reverse()
 
-        for curv in curvs:
-            # kad.add_lines( curv, layer, width )
-            for idx in range( 1, len( curv ) ):
-                pnt_a = curv[idx-1]
-                pnt_b = curv[idx]
+        # one horizontal line with nearly constant pitch
+        curv = []
+        for idx, (pos_b, angle_b) in enumerate( pos_angles ):
+            if idx == 0:
+                curv.append( pos_b )
+                continue
+            if False:
+                curv.append( pos_b )
+            else:
+                pos_a, angle_a = pos_angles[idx-1]
+                # pnts = kad.calc_bezier_round_points( pos_a, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), 8 )
+                pnts = kad.calc_bezier_corner_points( pos_a, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), pitch )
+                for idx in range( 1, len( pnts ) ):
+                    curv.append( pnts[idx] )
+
+        gap = 0.5
+        if True:# divide if close to the edge
+            div = 10
+            thick = width1 / 2.0 + gap
+            curv2 = []
+            for idx, pnt in enumerate( curv ):
+                dist = get_distance( dist_image, pnt )
+                if idx == 0:
+                    prev_pnt = pnt
+                    prev_dist = dist
+                    curv2.append( pnt )
+                    continue
+                if max( dist, prev_dist ) > -pitch and min( dist, prev_dist ) < thick:
+                    vec = vec2.sub( pnt, prev_pnt )
+                    for i in range( 1, div ):
+                        curv2.append( vec2.scale( i / float( div ), vec, prev_pnt ) )
+                curv2.append( pnt )
+                prev_pnt = pnt
+                prev_dist = dist
+            curv = curv2
+
+        # draw horizontal line avoiding key / screw holes
+        w_thin = 0.25
+        thick_thin = w_thin / 2.0 + gap
+        for lidx, layer in enumerate( ['F.Cu', 'B.Cu'] ):
+            if lidx == 0:
+                w = width0 + (width1 - width0) * uy
+            else:
+                w = width1 + (width0 - width1) * uy
+            thick = w / 2.0 + gap
+            num_lines = int( math.ceil( w / (w_thin * 0.96) ) )
+            line_sep = (w - w_thin) / (num_lines - 1)
+            line_lefts = [None for _ in range( num_lines )]
+            line_rights = [None for _ in range( num_lines )]
+            last_pnt = [None for _ in range( num_lines )]
+            for cidx in range( 1, len( curv ) ):
+                pnt_a = curv[cidx-1]
+                pnt_b = curv[cidx]
+                if False:
+                    kad.add_line( pnt_a, pnt_b, layer, w )
+                    # kad.add_arc( pnt_a, vec2.add( pnt_a, (w / 2, 0) ), 360, layer, 0.1 )
+                    continue
                 vec_ba = vec2.sub( pnt_b, pnt_a )
-                nrm_ba = vec2.normalize( (vec_ba[1], -vec_ba[0]) )[0]
-                for lidx, layer in enumerate( ['F.Cu', 'B.Cu'] ):
-                    w = widths[lidx if board == BDT else 1 - lidx]
-                    gap = 0.5
-                    div = 16
-                    ctrs = []
-                    for n in range( div + 1 ):
-                        t = n / float( div )
-                        ctr = vec2.scale( t, vec_ba, pnt_a )
-                        ctrs.append( ctr )
-                    idx_deltas = []
-                    for n in range( div ):
-                        m = -1
-                        while True:
-                            m += 1
-                            delta = m * (w * 0.1)
-                            thick = w / 2.0 - delta
-                            if thick <= 0.1:# min width
-                                break
-                            found_sdelta = []
-                            for sign in [+1, -1]:
-                                sdelta = delta * sign
-                                q0 = vec2.scale( sdelta, nrm_ba, ctrs[n+0] )
-                                q1 = vec2.scale( sdelta, nrm_ba, ctrs[n+1] )
-                                d0 = get_distance( dist, (dist_w, dist_h), q0 )
-                                d1 = get_distance( dist, (dist_w, dist_h), q1 )
-                                if d0 >= thick + gap and d1 >= thick + gap:
-                                    found_sdelta.append( sdelta )
-                                    break
-                                if delta == 0:
-                                    break
-                            if len( found_sdelta ) > 0:
-                                for sdelta in found_sdelta:
-                                    idx_deltas.append( (n, n+1, sdelta) )
-                                break
-                    if True and len( idx_deltas ) > 0:# merge segments
-                        idx_deltas2 = []
-                        vals = idx_deltas[0]
-                        for n in range( 1, len( idx_deltas ) ):
-                            curr = idx_deltas[n]
-                            if vals[1] == curr[0] and vals[2] == curr[2]:# end == start and same delta
-                                vals = (vals[0], curr[1], vals[2])# extend
-                                continue
-                            else:
-                                idx_deltas2.append( vals )
-                                vals = curr
-                        idx_deltas2.append( vals )
-                        idx_deltas = idx_deltas2
-                    for i0, i1, delta in idx_deltas:
-                        if delta is None:
-                            continue
-                        q0 = vec2.scale( delta, nrm_ba, ctrs[i0] )
-                        q1 = vec2.scale( delta, nrm_ba, ctrs[i1] )
-                        ww = w - abs( delta ) * 2
-                        kad.add_line( q0, q1, layer, ww )
-                        if pos_dummy[lidx] == None and ww > 1.1:
-                            pos_dummy[lidx] = q0
+                unit_ba = vec2.normalize( vec_ba )[0]
+                norm_ba = (unit_ba[1], -unit_ba[0])
+                # multiple horizontal lines
+                single = True
+                lines = []
+                for m in range( num_lines ):
+                    delta = line_sep * m + w_thin / 2.0 - w / 2.0
+                    q0 = vec2.scale( delta, norm_ba, pnt_a )
+                    q1 = vec2.scale( delta, norm_ba, pnt_b )
+                    d0 = get_distance( dist_image, q0 )
+                    d1 = get_distance( dist_image, q1 )
+                    if min( d0, d1 ) < thick:
+                        single = False
+                    if d0 >= thick_thin and d1 >= thick_thin:# single line
+                        pass
+                    elif d0 >= thick_thin:
+                        while d1 < thick_thin - 0.01:
+                            diff = thick_thin - d1
+                            q1 = vec2.scale( -diff * 0.94, unit_ba, q1 )
+                            d1 = get_distance( dist_image, q1 )
+                        connect_line_ends( line_lefts, line_rights, RIGHT, cidx, q1, m, layer, w_thin )
+                    elif d1 >= thick_thin:
+                        while d0 < thick_thin - 0.01:
+                            diff = thick_thin - d0
+                            q0 = vec2.scale( +diff * 0.94, unit_ba, q0 )
+                            d0 = get_distance( dist_image, q0 )
+                        connect_line_ends( line_lefts, line_rights, LEFT, cidx, q0, m, layer, w_thin )
+                    else:# no line
+                        q0 = None
+                        q1 = None
+                    if q0 and q1:
+                        lines.append( (q0, q1) )
+                        if last_pnt[m]:
+                            d = vec2.distance( last_pnt[m], q0 )
+                            if 0.01 < d and d < 0.8:# close tiny gap
+                                kad.add_line( last_pnt[m], q0, layer, w_thin )
+                        last_pnt[m] = q1
+
+                if single:
+                    kad.add_line( pnt_a, pnt_b, layer, w )
+                    if not pos_dummy[lidx] and w > 1.1:
+                        pos_dummy[lidx] = pnt_a
+                else:
+                    for (q0, q1) in lines:
+                        kad.add_line( q0, q1, layer, w_thin )
+                # clear line_ends when single or no line
+                if single or len( lines ) == 0:
+                    for m in range( num_lines ):
+                        line_lefts[m] = None
+                        line_rights[m] = None
     kad.set_mod_pos_angle( 'P1', pos_dummy[0], 0 )
     kad.set_mod_pos_angle( 'P2', pos_dummy[1], 0 )
 
