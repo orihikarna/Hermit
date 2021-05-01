@@ -11,7 +11,7 @@ root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_svg = root + 'layer/{}-Edge_Cuts.svg'.format( board )
 path_png = root + 'svg.png'
 path_txt = root + 'Edge_Fill.txt'
-path_test = root + 'test.png'
+path_dist = root + 'dist.png'
 cairosvg.svg2png( url = path_svg, write_to = path_png, dpi = 254 )
 
 png = Image.open( path_png )
@@ -95,8 +95,8 @@ dist1 = cv2.GaussianBlur( dist1, ksize = (7, 7), sigmaX = 0.7 )
 dist2 = cv2.GaussianBlur( dist2, ksize = (7, 7), sigmaX = 0.7 )
 print( 'done distance transform' )
 
-# test = Image.new( 'RGB', (w, h) )
-test = np.empty((h, w, 3), np.uint8)
+# dist = Image.new( 'RGB', (w, h) )
+dist = np.empty((h, w, 3), np.uint8)
 for y in range( y0, y1 ):
     for x in range( x0, x1 ):
         inside = True if mask1[y - y0, x - x0] != 0 else False
@@ -106,13 +106,13 @@ for y in range( y0, y1 ):
         r = 255 if inside else 0
         b = 0 if inside else 255
         g = val
-        # test.putpixel( (x - x0, y - y0), (r, g, b))
-        test[y - y0, x - x0, 0] = r
-        test[y - y0, x - x0, 1] = g
-        test[y - y0, x - x0, 2] = b
-test = Image.fromarray( test )
-test.save( path_test )
-print( f'saved {path_test}' )
+        # dist.putpixel( (x - x0, y - y0), (r, g, b))
+        dist[y - y0, x - x0, 0] = r
+        dist[y - y0, x - x0, 1] = g
+        dist[y - y0, x - x0, 2] = b
+dist = Image.fromarray( dist )
+dist.save( path_dist )
+print( f'saved {path_dist}' )
 
 # dump to text file
 with open( path_txt, 'w' ) as fout:
