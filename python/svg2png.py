@@ -6,7 +6,7 @@ from PIL import Image
 board = 'ZoeaT'
 board = 'ZoeaB'
 board = 'HermitT'
-# board = 'HermitB'
+board = 'HermitB'
 root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_svg = root + 'layer/{}-Edge_Cuts.svg'.format( board )
 path_png = root + 'svg.png'

@@ -424,6 +424,10 @@ def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer,
                 #    C             .....-----^^^^^    <-- cannot connect R1 and R2(right),
                 #     L2---------R2        L2---------R2  becuase L2(right) is on the right of R2(left)
                 #          neib[CIDX] left[CIDX]
+        else:# LEFT
+            # For the left line ends, reject the neighbor if there is a right end after the neighbor left end.
+            if line_rights[nidx] and line_rights[nidx][CIDX] > neib[CIDX]:
+                continue
         # connect
         curr = line_ends[idx]
         line_ends[idx]  = (curr[CIDX], curr[POS], curr[NIDX] | (1 << nidx))
@@ -450,13 +454,12 @@ def draw_top_bottom( board, sw_pos_angles ):
 
     ctr_pos_angle_vec = []
     anchors = [
-        (28, 115),
-        (27, 105),
-        # (29, 0),
-        (1, 0),
-        (5, +2),
-        (9, -2),
-        (13, 0),
+        (28, 125),
+        (27, 110),
+        (1, -3),
+        (5, +3),
+        (9, -3),
+        (13, +3),
         (17, 24),
         (20, 26),
         (24, 28),
@@ -485,7 +488,6 @@ def draw_top_bottom( board, sw_pos_angles ):
         else:
             ctr = None
         ctr_pos_angle_vec.append( (ctr, pos_a, angle_a, pos_b, angle_b) )
-
     # return
 
     # read distance data
@@ -495,13 +497,16 @@ def draw_top_bottom( board, sw_pos_angles ):
     # draw lines
     pos_dummy = [None, None]
     pitch = 2.0
-    nyrange = range( -548, 880, 16 )
-    # nyrange = range( -100, 100, 16 )
-    # nyrange = range( 100, 400, 16 )
+    nyrange = range( -559, 888, 16 )
     width0, width1 = 0.3, 1.3
     for ny in nyrange:
         y = ny * 0.1
         uy = float( ny - nyrange[0] ) / float( nyrange[-1] - nyrange[0] )
+        if True:
+            if uy < 0.5:
+                uy = 2 * uy
+            else:
+                uy = 2 * (1 - uy)
         # base position
         idx_base = 2
         anchor_base = anchors[idx_base]
@@ -539,7 +544,7 @@ def draw_top_bottom( board, sw_pos_angles ):
             else:
                 pos_a, angle_a = pos_angles[idx-1]
                 # pnts = kad.calc_bezier_round_points( pos_a, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), 8 )
-                pnts = kad.calc_bezier_corner_points( pos_a, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), pitch )
+                pnts = kad.calc_bezier_corner_points( pos_a, vec2.rotate( angle_a ), pos_b, vec2.rotate( angle_b + 180 ), pitch, ratio = 0.8 )
                 for idx in range( 1, len( pnts ) ):
                     curv.append( pnts[idx] )
 
