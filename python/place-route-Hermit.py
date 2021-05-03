@@ -96,7 +96,7 @@ holes = [
     (68, 120, -65),
     (47, 136, -50),
     #
-    (60, 82, 0 + 9.6),
+    (65, 84, 90),
 ]
 
 L2R = []
@@ -344,17 +344,6 @@ def drawEdgeCuts( board ):
         w = width if board == BDM else width / 2
         for midcnrs in midcnrs_set:
             kad.draw_closed_corners( midcnrs, layer, w )
-
-def divide_line( a, b, pitch ):
-    v = vec2.sub( b, a )
-    l = vec2.length( v )
-    n = int( round( l / pitch ) )
-    dv = vec2.scale( 1.0 / n, v )
-    pnts = []
-    for i in range( n ):
-        pnts.append( vec2.scale( i, dv, a ) )
-    pnts.append( b )
-    return pnts
 
 def load_distance_image( path ):
     with open( path ) as fin:
@@ -659,9 +648,7 @@ def add_zone( net_name, layer_name, rect, zones ):
 def make_rect( size, offset = (0, 0) ):
     return map( lambda pt: vec2.add( (size[0] * pt[0], size[1] * pt[1]), offset ), FourCorners )
 
-###
 ### Set mod positios
-###
 def place_mods( board ):
     if board == BDL:
         kad.move_mods( (0, 0), 0, [
@@ -803,9 +790,7 @@ def place_mods( board ):
                 #     corners.append( [(pos, deg + 90), BezierRound, [0.7]] )
                 kad.draw_closed_corners( corners, 'Edge.Cuts', 0.2 )
 
-###
 ### Wire mods
-###
 def wire_mods( board ):
     layer1 = ['F.Cu', 'B.Cu'][board]
     layer2 = ['B.Cu', 'F.Cu'][board]
@@ -879,7 +864,7 @@ def wire_mods( board ):
         pos, angle = kad.get_mod_pos_angle( 'J1' )
         via_sda_j1 = kad.add_via( vec2.mult( mat2.rotate( angle ), (-3.0, -26), pos ), kad.get_pad_pos_net( 'J1', 'B7' )[1], VIA_Size[1] )
         via_scl_j1 = kad.add_via( vec2.mult( mat2.rotate( angle ), (-2.0, -26), pos ), kad.get_pad_pos_net( 'J1', 'B6' )[1], VIA_Size[1] )
-        via_rdi_j1 = kad.add_via( vec2.mult( mat2.rotate( angle ), (-1.0, -26), pos ), kad.get_pad_pos_net( 'J1', 'A8' )[1], VIA_Size[1] )
+        via_rdi_j1 = kad.add_via( vec2.mult( mat2.rotate( angle ), (-0.4, -26), pos ), kad.get_pad_pos_net( 'J1', 'A8' )[1], VIA_Size[1] )
         kad.wire_mods( [
             # pass caps
             ('C4', '1', 'C4', via_vcc_c4, w_pwr, (Dird, 0, 90, -0)),
@@ -892,7 +877,7 @@ def wire_mods( board ):
             ('U1', '5', 'C5', via_vcca5, w_mcu, (Dird, 0, 0, r_mcu)),
             ('C5', '1', 'C5', via_vcca1, w_pwr, (Strt)),
             ('C5', via_vcca1, 'C5', via_vcca5, w_pwr, (Strt), 'B.Cu'),
-            ('U1', via_vcc_mcu, 'U1', '5', w_mcu, (Dird, ([(0.6, 0)], 90), 0, r_mcu), 'F.Cu'),
+            ('U1', via_vcc_mcu, 'U1', '5', w_mcu, (Dird, ([(0.4, 0)], 90), 0, r_mcu), 'F.Cu'),
             # VCC
             ('U1', '1', 'U1', via_vcc_mcu, w_mcu, (Dird, ([(0.8, 0), (0.0, -45)], -45), 0, 0)),
             ('U1', via_vcc_mcu, 'U1', via_vcc_c4, w_pwr, (Dird, ([(1.2, 0)], 90), 0, r_mcu), 'B.Cu'),
@@ -964,11 +949,11 @@ def wire_mods( board ):
             ('U1', '7', 'R1', '1', w_mcu, (Dird, 0, 0, r_mcu)),
             ('R1', '2', 'R1', via_led_r1, w_mcu, (Dird, 0, 90, r_mcu)),
             ('D1', '2', 'D1', via_led_d1, w_mcu, (Strt)),
-            ('R1', via_led_r1, 'D1', via_led_d1, w_mcu, (Dird, 0, -45, r_mcu), 'B.Cu'),
+            ('R1', via_led_r1, 'D1', via_led_d1, w_mcu, (Dird, 0, -90, r_mcu), 'B.Cu'),
             # LED D1 J3
             ('J3', '1', 'D1', '1', w_mcu, (Dird, 0, 0, r_mcu)),
             # GND J3
-            ('C1', '2', 'J3', '1', w_pwr, (ZgZg, 0, 70, r_pwr)),
+            ('C1', '2', 'J3', '1', w_pwr, (ZgZg, 0, 70, -0)),
         ] )
     if board == BDR:# mcp23017
         kad.wire_mods( [
@@ -1160,6 +1145,107 @@ def wire_mods( board ):
             ('R82', via_col8_sw82, 'D82', '1', w_dbn, (Dird, ([(1.0, 180), (6.0, 90), (2.4, 135), (5.0, 180)], 45), ([(2.0, -90)], 0), r_dbn)),
         ] )
 
+    # COL lines
+    if board in [BDL, BDR]:# vertical wires
+        sign_LR = [+1, -1][board]
+        col_dio_offset = (1.6, 90)
+        for cidx in range( 1, 9 ):
+            col = str( cidx )
+            mod_dio = 'D' + col
+            for ridx in range( 1, 4 ):
+                row = str( ridx )
+                prm_col = None
+                if cidx == 8:# thumb's row
+                    if board == BDL:
+                        if ridx == 2:
+                            prm_col = (Dird, 0, ([col_dio_offset, (0, 0)], 0), r_col)
+                        elif ridx == 3:
+                            prm_col = (Dird, ([col_dio_offset, (0, 0)], 0), ([col_dio_offset], 0), r_col)
+                    else:# BDR
+                        if ridx == 2:
+                            prm_col = (Dird, ([col_dio_offset], 0), ([col_dio_offset, (0, 0)], 0), r_col)
+                        elif ridx == 3:
+                            prm_col = (Dird, ([col_dio_offset, (0, 0)], 0), ([col_dio_offset], 0), r_col)
+                else:
+                    # default
+                    idx_curr = col + str( ridx )
+                    idx_next = col + str( ridx + 1 )
+                    if idx_curr not in keys.keys() or idx_next not in keys.keys():
+                        continue
+                    pos_curr, angle_curr = kad.get_mod_pos_angle( 'SW' + idx_curr )
+                    pos_next, _          = kad.get_mod_pos_angle( 'SW' + idx_next )
+                    sign_col = +1 if vec2.dot( vec2.sub( pos_curr, pos_next ), vec2.rotate( -angle_curr ) ) > 1.6 else -1
+                    prm_col = (Dird, 180, ([col_dio_offset, (7.4, 0)], [None, 30, 45, 45][ridx] * sign_col), r_col)
+                    # overwrite
+                    if cidx == 5 and ridx == 1:
+                        prm_col = (Dird, [180, 90][board], ([col_dio_offset], 0), r_col)
+                    elif cidx == 7 and ridx == 1:
+                        prm_col = (Dird, 180, ([col_dio_offset, ([7.4, 6.0][board], 0), (4, - sign_LR * 45)], -90), r_col)
+                if prm_col:
+                    kad.wire_mods( [(mod_dio + row, '1', mod_dio + str( ridx + 1 ), '1', w_col, prm_col)] )
+    if board == BDL:# SW91
+        kad.wire_mods( [
+            ('R92', '2', 'SW91', '2', w_col, (Dird, 90, 0, r_col)),# 91
+            ('C91', '2', 'SW91', '1', w_col, (Dird, ([(1.6, 0)], 90), 0, r_col)),# 91
+        ] )
+    if board == BDL:# horizontal wires to mcu
+        # right col vias
+        via_col6_1 = kad.add_via_relative( 'U1', '20', (2.0, 0.2), VIA_Size[2] )
+        via_col7_1 = kad.add_via_relative( 'U1', '19', (3.0, 0.4), VIA_Size[2] )
+        via_col6_2 = kad.add_via_relative( 'U1', '20', (1.8 + 6.4, 0.2 - 6.4), VIA_Size[2] )
+        via_col7_2 = kad.add_via_relative( 'U1', '19', (2.6 + 6.4, 0.4 - 6.4), VIA_Size[2] )
+        # Thumb vias
+        via_col8_1 = kad.add_via_relative( 'U1', '6', (-3, 0), VIA_Size[2] )
+        via_col8_2 = kad.add_via_relative( 'C81', '1', (0, -3.6), VIA_Size[2] )
+        # wire to mcu
+        kad.wire_mods( [
+            ('C91', '1', 'U1', '31', w_mcu, (Dird, 90, ([(4.0, 90), (7.8, 180), (4.2, -150)], 0), r_col)),# BOOT0
+            ('C11', '1', 'U1', '30', w_mcu, (Dird, 90, ([(4.8, 90), (9.0, 180), (4.0, -150)], 0), r_col)),
+            ('C21', '1', 'U1', '29', w_mcu, (Dird, 90, ([(5.6, 90)], 0), r_col)),
+            ('C31', '1', 'U1', '27', w_mcu, (Dird, 90, ([(5.8, 90)], 0), r_col)),
+            ('C41', '1', 'U1', '26', w_mcu, (Dird, 90, ([(5.0, 90)], 0), r_col)),
+            ('C51', '1', 'U1', '25', w_mcu, (Dird, ([(4.4, 90), (12.2, 0)], -45), ([(4.2, 90)], 0), r_col)),
+            # right cols
+            ('U1', '20', 'U1', via_col6_1, w_mcu, (Dird, 0, -45, r_col)),
+            ('U1', '19', 'U1', via_col7_1, w_mcu, (Dird, ([(1.1, 0)], -45), 0, r_col)),
+            ('U1', via_col6_1, 'U1', via_col6_2, w_mcu, (Strt), 'B.Cu'),
+            ('U1', via_col7_1, 'U1', via_col7_2, w_mcu, (Strt), 'B.Cu'),
+            ('C61', '1', 'U1', via_col6_2, w_mcu, (Dird, ([(4.4, 90), (8, 0), (1.2, 45), (12.6, 0), (3.2, -45)], 0), 45, r_col)),
+            ('C71', '1', 'U1', via_col7_2, w_mcu, (Dird, ([(4.4, 90), (16.6, 0), (1.2, 45), (7.4, 0), (1.2, 45), (13.6, 0), (3.2, -45)], 0), 45, r_col)),
+            # Thumb
+            ('C81', '1', 'U1', via_col8_2, w_col, (Dird, 90, 90)),
+            ('U1', via_col8_1, 'U1', via_col8_2, w_col, (Dird, 0, 90, r_col), 'B.Cu'),
+            ('U1', '6', 'U1', via_col8_1, w_mcu, (Strt)),
+        ] )
+    elif board == BDR:# horizontal wires to expander
+        pos, angle, _, _ = kad.get_pad_pos_angle_layer_net( 'SW41', '1' )
+        via_col5_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -2.8), pos ), kad.get_pad_pos_net( 'U1', '26' )[1], VIA_Size[2] )
+        via_col6_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -3.6), pos ), kad.get_pad_pos_net( 'U1', '27' )[1], VIA_Size[2] )
+        via_col7_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -4.4), pos ), kad.get_pad_pos_net( 'U1', '28' )[1], VIA_Size[2] )
+        # Thumb vias
+        via_col8_1 = kad.add_via_relative( 'U1', '21', (+1.6, 0.2), VIA_Size[2] )
+        via_col8_2 = kad.add_via_relative( 'C81', '1', (0, -6.0), VIA_Size[2] )
+        # wire to expander
+        kad.wire_mods( [
+            ('C11', '1', 'U1', '22', w_exp, (Dird, 90, ([(3.0, 0)], 90), r_col)),
+            ('C21', '1', 'U1', '23', w_exp, (Dird, 90, ([(3.8, 0)], 90), r_col)),
+            ('C31', '1', 'U1', '24', w_exp, (Dird, ([(4.6, 90)], 0), 0, r_col)),
+            ('C41', '1', 'U1', '25', w_exp, (Dird, ([(4.6, 90)], 135), 0, r_col)),
+            ('C41', via_col5_tmp, 'U1', '26', w_exp, (Dird, 0, ([(6.8, 0)], 45), r_col)),
+            ('C41', via_col6_tmp, 'U1', '27', w_exp, (Dird, 0, ([(6.2, 0)], 45), r_col)),
+            ('C41', via_col7_tmp, 'U1', '28', w_exp, (Dird, 0, ([(5.6, 0)], 45), r_col)),
+            ('R51', '1', 'C41', via_col5_tmp, w_exp, (Dird, ([(1.2, 180)], 45), 0, r_col)),
+            ('C61', '1', 'C41', via_col6_tmp, w_exp, (Dird, ([(4.6, 90), (16.0, 180)], 45), 0, r_col)),
+            ('C71', '1', 'C41', via_col7_tmp, w_exp, (Dird, ([(5.4, 90), (25.0, 180)], 45), 0, r_col)),
+            # Thumb
+            ('U1', '21', 'U1', via_col8_1, w_exp, (Dird, 0, 90, r_exp)),
+            ('C81', '1', 'U1', via_col8_2, w_col, (Dird, 90, 90)),
+            ('U1', via_col8_1, 'C81', via_col8_2, w_col, (Dird, ([(0.2, -90), (6.6, 180)], 60), ([(2, 90)], 90 + 19.6), r_col), 'F.Cu'),
+        ] )
+        pcb.Delete( via_col5_tmp )
+        pcb.Delete( via_col6_tmp )
+        pcb.Delete( via_col7_tmp )
+
     # ROW lines
     if board in [BDL, BDR]:# horizontal wires
         for ridx in range( 1, 5 ):
@@ -1267,107 +1353,6 @@ def wire_mods( board ):
         pcb.Delete( via_row2_mid )
         pcb.Delete( via_row3_mid )
         pcb.Delete( via_row4_mid )
-
-    # COL lines
-    if board in [BDL, BDR]:# vertical wires
-        sign_LR = [+1, -1][board]
-        col_dio_offset = (1.6, 90)
-        for cidx in range( 1, 9 ):
-            col = str( cidx )
-            mod_dio = 'D' + col
-            for ridx in range( 1, 4 ):
-                row = str( ridx )
-                prm_col = None
-                if cidx == 8:# thumb's row
-                    if board == BDL:
-                        if ridx == 2:
-                            prm_col = (Dird, 0, ([col_dio_offset, (0, 0)], 0), r_col)
-                        elif ridx == 3:
-                            prm_col = (Dird, ([col_dio_offset, (0, 0)], 0), ([col_dio_offset], 0), r_col)
-                    else:# BDR
-                        if ridx == 2:
-                            prm_col = (Dird, ([col_dio_offset], 0), ([col_dio_offset, (0, 0)], 0), r_col)
-                        elif ridx == 3:
-                            prm_col = (Dird, ([col_dio_offset, (0, 0)], 0), ([col_dio_offset], 0), r_col)
-                else:
-                    # default
-                    idx_curr = col + str( ridx )
-                    idx_next = col + str( ridx + 1 )
-                    if idx_curr not in keys.keys() or idx_next not in keys.keys():
-                        continue
-                    pos_curr, angle_curr = kad.get_mod_pos_angle( 'SW' + idx_curr )
-                    pos_next, _          = kad.get_mod_pos_angle( 'SW' + idx_next )
-                    sign_col = +1 if vec2.dot( vec2.sub( pos_curr, pos_next ), vec2.rotate( -angle_curr ) ) > 1.6 else -1
-                    prm_col = (Dird, 180, ([col_dio_offset, (7.4, 0)], [None, 30, 45, 45][ridx] * sign_col), r_col)
-                    # overwrite
-                    if cidx == 5 and ridx == 1:
-                        prm_col = (Dird, [180, 90][board], ([col_dio_offset], 0), r_col)
-                    elif cidx == 7 and ridx == 1:
-                        prm_col = (Dird, 180, ([col_dio_offset, ([7.4, 6.0][board], 0), (4, - sign_LR * 45)], -90), r_col)
-                if prm_col:
-                    kad.wire_mods( [(mod_dio + row, '1', mod_dio + str( ridx + 1 ), '1', w_col, prm_col)] )
-    if board == BDL:# SW91
-        kad.wire_mods( [
-            ('R92', '2', 'SW91', '2', w_col, (Dird, 90, 0, r_col)),# 91
-            ('C91', '2', 'SW91', '1', w_col, (Dird, ([(1.6, 0)], 90), 0, r_col)),# 91
-        ] )
-    if board == BDL:# horizontal wires to mcu
-        # right col vias
-        via_col6_1 = kad.add_via_relative( 'U1', '20', (2.0, 0.2), VIA_Size[1] )
-        via_col7_1 = kad.add_via_relative( 'U1', '19', (3.0, 0.4), VIA_Size[1] )
-        via_col6_2 = kad.add_via_relative( 'U1', '20', (1.8 + 6, 0.2 - 6), VIA_Size[1] )
-        via_col7_2 = kad.add_via_relative( 'U1', '19', (2.6 + 6, 0.4 - 6), VIA_Size[1] )
-        # Thumb vias
-        via_col8_1 = kad.add_via_relative( 'U1', '6', (-3, 0), VIA_Size[2] )
-        via_col8_2 = kad.add_via_relative( 'C81', '1', (0, -3.6), VIA_Size[2] )
-        # wire to mcu
-        kad.wire_mods( [
-            ('C91', '1', 'U1', '31', w_mcu, (Dird, 90, ([(4.0, 90)], 0), -1.6)),# BOOT0
-            ('C11', '1', 'U1', '30', w_mcu, (Dird, 90, ([(4.8, 90)], 0), -2.2)),
-            ('C21', '1', 'U1', '29', w_mcu, (Dird, 90, ([(5.6, 90)], 0), -2.8)),
-            ('C31', '1', 'U1', '27', w_mcu, (Dird, 90, ([(8.2, 90)], 0), -2.8)),
-            ('C41', '1', 'U1', '26', w_mcu, (Dird, 90, ([(7.4, 90)], 0), -2.2)),
-            ('C51', '1', 'U1', '25', w_mcu, (Dird, ([(4.4, 90), (12.2, 0)], -45), ([(6.6, 90)], 0), -1.6)),
-            # right cols
-            ('U1', '20', 'U1', via_col6_1, w_mcu, (Dird, 0, -45, r_col)),
-            ('U1', '19', 'U1', via_col7_1, w_mcu, (Dird, ([(1.1, 0)], -45), 0, r_col)),
-            ('U1', via_col6_1, 'U1', via_col6_2, w_col, (Strt), 'B.Cu'),
-            ('U1', via_col7_1, 'U1', via_col7_2, w_col, (Strt), 'B.Cu'),
-            ('C61', '1', 'U1', via_col6_2, w_col, (Dird, ([(4.4, 90), (8, 0), (1.2, 45), (12.6, 0), (6.8, -45)], 0), 45, -1.6)),
-            ('C71', '1', 'U1', via_col7_2, w_col, (Dird, ([(4.4, 90), (17, 0), (1.2, 45), (7, 0), (1.2, 45), (13.6, 0), (6.8, -45)], 0), 45, -1.6)),
-            # Thumb
-            ('C81', '1', 'U1', via_col8_2, w_col, (Dird, 90, 90)),
-            ('U1', via_col8_1, 'U1', via_col8_2, w_col, (Dird, 0, 90, r_col), 'B.Cu'),
-            ('U1', '6', 'U1', via_col8_1, w_mcu, (Strt)),
-        ] )
-    elif board == BDR:# horizontal wires to expander
-        pos, angle, _, _ = kad.get_pad_pos_angle_layer_net( 'SW41', '1' )
-        via_col5_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -2.8), pos ), kad.get_pad_pos_net( 'U1', '26' )[1], VIA_Size[2] )
-        via_col6_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -3.6), pos ), kad.get_pad_pos_net( 'U1', '27' )[1], VIA_Size[2] )
-        via_col7_tmp = kad.add_via( vec2.mult( mat2.rotate( angle ), (0, -4.4), pos ), kad.get_pad_pos_net( 'U1', '28' )[1], VIA_Size[2] )
-        # Thumb vias
-        via_col8_1 = kad.add_via_relative( 'U1', '21', (+1.6, 0.2), VIA_Size[2] )
-        via_col8_2 = kad.add_via_relative( 'C81', '1', (0, -6.0), VIA_Size[2] )
-        # wire to expander
-        kad.wire_mods( [
-            ('C11', '1', 'U1', '22', w_exp, (Dird, 90, ([(3.0, 0)], 90), r_col)),
-            ('C21', '1', 'U1', '23', w_exp, (Dird, 90, ([(3.8, 0)], 90), r_col)),
-            ('C31', '1', 'U1', '24', w_exp, (Dird, ([(4.6, 90)], 0), 0, r_col)),
-            ('C41', '1', 'U1', '25', w_exp, (Dird, ([(4.6, 90)], 135), 0, r_col)),
-            ('C41', via_col5_tmp, 'U1', '26', w_exp, (Dird, 0, ([(6.8, 0)], 45), r_col)),
-            ('C41', via_col6_tmp, 'U1', '27', w_exp, (Dird, 0, ([(6.2, 0)], 45), r_col)),
-            ('C41', via_col7_tmp, 'U1', '28', w_exp, (Dird, 0, ([(5.6, 0)], 45), r_col)),
-            ('R51', '1', 'C41', via_col5_tmp, w_exp, (Dird, ([(1.2, 180)], 45), 0, r_col)),
-            ('C61', '1', 'C41', via_col6_tmp, w_exp, (Dird, ([(4.6, 90), (16.0, 180)], 45), 0, r_col)),
-            ('C71', '1', 'C41', via_col7_tmp, w_exp, (Dird, ([(5.4, 90), (25.0, 180)], 45), 0, r_col)),
-            # Thumb
-            ('U1', '21', 'U1', via_col8_1, w_exp, (Dird, 0, 90, r_exp)),
-            ('C81', '1', 'U1', via_col8_2, w_col, (Dird, 90, 90)),
-            ('U1', via_col8_1, 'C81', via_col8_2, w_col, (Dird, ([(0.2, -90), (6.6, 180)], 60), ([(2, 90)], 90 + 19.6), r_col), 'F.Cu'),
-        ] )
-        pcb.Delete( via_col5_tmp )
-        pcb.Delete( via_col6_tmp )
-        pcb.Delete( via_col7_tmp )
 
     # J2: USB (PC) connector
     w_delta = 0.0
@@ -1751,32 +1736,19 @@ def wire_mods( board ):
                 ('U1', via_exp_rdi, 'CL82', via_led_datTs['82'], w_dat, (Dird, via_exp_angle, ([(1, -45), (3.8, -90), (2.6, -135)], 0), r_dat), layer2),
             ] )
 
-
-
-###
 ### Ref
-###
 def set_refs( board ):
     if board == BDL:
         refs = [
+            (6.4, 90, 0, ['J1']),
+            (6.4, 90, 0, ['J2']),
+            (15,  -90, -90, ['J3']),
             (3,   135,   0, ['U1']),
             (2.8,   0,  90, ['U2']),
-            (2.5,   0,  90, ['C1', 'C2', 'C4']),
-            (1.8,  90,   0, ['C3', 'C5']),
-            (3,     0, 180, ['C6', 'R1', 'D1']),
-            (3.3,   0, 180, ['C11', 'R11', 'R12']),
-            (3.3, 180,   0, ['CB1', 'RB1', 'RB2']),
-            (1.8, -90,   0, ['R2']),
-            (1.8, +90, 180, ['R3']),
-            (3,   180, 180, ['R4', 'R5', 'R6', 'R7']),
-            (3,   180,   0, ['R8', 'R9', 'L1', 'F1']),
-            (4.0, 145,   0, ['LB1', 'L11', 'L12', 'L13', 'L14']),
-            (4,     0,   0, ['CLB1', 'CL11', 'CL12', 'CL13', 'CL14']),
-            (4.5,   0, 180, ['D0']),
-            (4.5,   0,   0, ['D11', 'D12', 'D13', 'D14']),
-            (7,     0, +90, ['J1']),
-            (7,   180, -90, ['J2']),
-            (15,  -90, -90, ['J3']),
+            (2.5,   0, +90, ['C1', 'C2', 'C6', 'C3', 'C5', 'R1']),
+            (2.5, 180, -90, ['C4', 'R4', 'R5', 'L1', 'F1']),
+            (1.8, +90,   0, ['R2', 'R6', 'R8', 'D0']),
+            (1.8, -90, 180, ['R3', 'R7', 'R9', 'D1']),
         ]
     elif board == BDR:
         refs = [
@@ -1793,8 +1765,23 @@ def set_refs( board ):
             (7,     0, -90, ['J1']),
             (13,  -90, -90, ['J3']),
         ]
-    else:
+    else:# key holes
         refs = [ (0, 0, None, ['H{}'.format( idx ) for idx in range( 1, 13 )]) ]
+    # sw
+    for name in keys:
+        refs.append( (1.6, -90, 180, ['D' + name]) )
+        if name in R2L:
+            refs.append( (4.0, 180, 0, ['CL' + name]) )
+            refs.append( (4.3, 0, -90, ['L' + name]) )
+        else:
+            refs.append( (4.0, 0, 180, ['CL' + name]) )
+            refs.append( (4.3, 180, +90, ['L' + name]) )
+    # debounce
+    for idx in range( 1, 10 ):
+        name = str( idx )
+        refs.append( (3.3, 180, 180, ['C' + name + '1']) )
+        refs.append( (3.3, 180, 180, ['R{}1'.format( idx )]) )
+        refs.append( (3.3, 180, 180, ['R{}2'.format( idx )]) )
     for offset_length, offset_angle, text_angle, mod_names in refs:
         for mod_name in mod_names:
             mod = kad.get_mod( mod_name )
@@ -1820,8 +1807,8 @@ def set_refs( board ):
         pads = []
     for idx, text in enumerate( pads ):
         pos = kad.get_pad_pos( 'J3', '{}'.format( idx + 1 ) )
-        pos = vec2.scale( 2, vec2.rotate( -90 ), pos )
-        kad.add_text( pos, 0, text, ['F.SilkS', 'B.SilkS'][board], (0.9, 0.9), 0.15,
+        pos = vec2.scale( 1.6, vec2.rotate( -90 - J3_angle ), pos )
+        kad.add_text( pos, J3_angle, text, ['F.SilkS', 'B.SilkS'][board], (0.8, 0.8), 0.15,
             pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER  )
 
 
@@ -1838,7 +1825,7 @@ def main():
         if boardname == bname:
             board = btype
             if board in [BDL, BDR, BDM, BDS]:
-                kad.add_text( (86, 2.6), 0, 'Hermit{} by orihikarna 21/05/05'.format( bname ),
+                kad.add_text( (86, 2.6), 0, '  Hermit{} by orihikarna 21/05/05  '.format( bname ),
                     'F.Cu' if board != BDR else 'B.Cu', (1.2, 1.2), 0.2,
                     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
             break
@@ -1868,6 +1855,7 @@ def main():
     ###
     ### Set key positios
     ###
+    GND = pcb.FindNet( 'GND' )
     sw_pos_angles = []
     for name in sorted( keys.keys() ):
         key = keys[name]
@@ -1926,13 +1914,17 @@ def main():
                 kad.set_mod_pos_angle( 'D0', pos, angle - 90 )
                 # wire to SW
                 kad.wire_mods( [('D0', '1', 'SW' + name, '3', 0.5, (Dird, 0, 0))])
+            ## GND Vias
+            if name[0] not in ['1', '8', '9'] and name[1] not in ['1']:
+                pos = vec2.mult( mat2.rotate( angle ), (-5, 0), sw_pos )
+                kad.add_via( pos, GND, VIA_Size[1] )
 
     # draw top & bottom patterns
     if board in [BDT, BDB]:
         draw_top_bottom( board, sw_pos_angles )
 
     set_refs( board )
-    return
+    # return
 
     # place & route
     place_mods( board )
