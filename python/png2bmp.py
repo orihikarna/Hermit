@@ -5,7 +5,8 @@ import sys
 from PIL import Image
 
 board = 'stm32tiny'
-layer = 'B_Paste'
+layer = 'F_Paste'
+# layer = 'B_Paste'
 root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_png = root + 'layer/{}-{}.png'.format( board, layer )
 path_bmp = root + 'layer/{}-{}.bmp'.format( board, layer )
