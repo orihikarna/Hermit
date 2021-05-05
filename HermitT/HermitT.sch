@@ -146,17 +146,6 @@ F 3 "~" H 2125 2600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H12
-U 1 1 6086F91A
-P 2125 2775
-F 0 "H12" H 2225 2821 50  0000 L CNN
-F 1 "MountingHole" H 2225 2730 50  0000 L CNN
-F 2 "MountingHole:MountingHole_2.2mm_M2" H 2125 2775 50  0001 C CNN
-F 3 "~" H 2125 2775 50  0001 C CNN
-	1    2125 2775
-	1    0    0    -1  
-$EndComp
-$Comp
 L Mechanical:MountingHole H8
 U 1 1 6086F26A
 P 2125 2425
