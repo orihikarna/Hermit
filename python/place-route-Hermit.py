@@ -372,15 +372,10 @@ def get_distance( dist_image, pnt ):
     d += dist[ny+1][nx+1] * dx       * dy
     return d
 
-LEFT, RIGHT = range( 2 )
 CIDX, POS, NIDX = range( 3 )
 
-def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer, width ):
+def connect_line_ends( line_ends, other_ends, curv_idx, pos, idx, layer, width ):
     # overwrite new line_end
-    if side == LEFT:
-        line_ends = line_lefts
-    else:# RIGHT
-        line_ends = line_rights
     line_ends[idx] = (curv_idx, pos, 0)
 
     # connect with up/down neighbors
@@ -392,23 +387,21 @@ def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer,
         if not neib:# no neibor
             continue
         if (neib[NIDX] & (1 << idx)) != 0:# already connected with this index
-            continue
             #    L1-----R1      L1----
             #    C  ...---^^^ <-- cannot connect L1(right) and L2,
             #     L2--------R2    because L2 is already connected with L1(left)
-        if side == RIGHT:
-            # The lines are drawn from left to right.
-            # For the right line ends, reject the neighbor if there is a left end after the neighbor right end.
-            if line_lefts[nidx] and line_lefts[nidx][CIDX] > neib[CIDX]:
-                continue
-                #    L1----------------------------R1
-                #    C             .....-----^^^^^    <-- cannot connect R1 and R2(right),
-                #     L2---------R2        L2---------R2  becuase L2(right) is on the right of R2(left)
-                #          neib[CIDX] left[CIDX]
-        else:# LEFT
-            # For the left line ends, reject the neighbor if there is a right end after the neighbor left end.
-            if line_rights[nidx] and line_rights[nidx][CIDX] > neib[CIDX]:
-                continue
+            continue
+
+        # The lines are drawn from left to right.
+        # For the right line ends, reject the neighbor if there is a left end after the neighbor right end.
+        # For the left line ends, reject the neighbor if there is a right end after the neighbor left end.
+        if other_ends[nidx] and other_ends[nidx][CIDX] > neib[CIDX]:
+            #    L1----------------------------R1
+            #    C             .....-----^^^^^    <-- cannot connect R1 and R2(right),
+            #     L2---------R2        L2---------R2  becuase L2(right) is on the right of R2(left)
+            #          neib[CIDX] left[CIDX]
+            continue
+            pass
         # connect
         curr = line_ends[idx]
         line_ends[idx]  = (curr[CIDX], curr[POS], curr[NIDX] | (1 << nidx))
@@ -417,7 +410,7 @@ def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer,
 
 def draw_top_bottom( board, sw_pos_angles ):
     if board in [BDT, BDS]:# keysw holes
-        length = 13.94 if board == BDT else 14.70
+        length = 13.94 if board == BDT else 14.80
         for sw_pos, angle in sw_pos_angles:
             corners = []
             for i in range( 4 ):
@@ -595,13 +588,13 @@ def draw_top_bottom( board, sw_pos_angles ):
                             diff = thick_thin - d1
                             q1 = vec2.scale( -diff * 0.94, unit_ba, q1 )
                             d1 = get_distance( dist_image, q1 )
-                        connect_line_ends( line_lefts, line_rights, RIGHT, cidx, q1, m, layer, w_thin )
+                        connect_line_ends( line_lefts, line_rights, cidx, q1, m, layer, w_thin )
                     elif d1 >= thick_thin:
                         while d0 < thick_thin - 0.01:
                             diff = thick_thin - d0
                             q0 = vec2.scale( +diff * 0.94, unit_ba, q0 )
                             d0 = get_distance( dist_image, q0 )
-                        connect_line_ends( line_lefts, line_rights, LEFT, cidx, q0, m, layer, w_thin )
+                        connect_line_ends( line_rights, line_lefts, cidx, q0, m, layer, w_thin )
                     else:# no line
                         q0 = None
                         q1 = None
