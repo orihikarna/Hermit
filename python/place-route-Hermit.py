@@ -84,17 +84,17 @@ angle_PB = 9.6
 angle_M = 16
 
 holes = [
-    ( 13, 149, 90 - 26),
+    ( 16.8, 150, 90 - 16),
     ( 4.4, J1_y - 11, 90),
     ( 4.4, J1_y + 11, 90),
     ( 14, 35, -30),
     ( 66, 5, 90),
     (106, 5, 90),
-    (151, 27.6, 40),
+    (154, 31, 36),
     (163, 84, -40),
     (J2_x - 1.6, J2_y + 10, 90),
     (68, 119.6, -64),
-    (47, 136, -46),
+    # (47, 136, -46),
     #
     (65, 84.6, 90),
 ]
@@ -165,7 +165,7 @@ def drawEdgeCuts( board ):
                 # LED
                 (J3_mod, (-1.5,   0), 270, BezierRound, [0.5]),
                 (J3_mod, (-4, -2.27), 180, BezierRound, [0.5]),
-                (J3_mod, (-5.5,   0),  90, BezierRound, [0.5]),
+                (J3_mod, (-5.8,   0),  90, BezierRound, [0.5]),
                 (J3_mod, (-7, +1.27), 180, BezierRound, [0.5]),
             ]
             for cnr in cnrs:
@@ -180,7 +180,7 @@ def drawEdgeCuts( board ):
             out_cnrs.append( cnr )
             mid_cnrs.append( cnr )
         # J1: Split
-        if board in [BDL, BDR, BDS]:
+        if board in [BDL, BDR]:
             cnrs = [
                 (J1_mod, (0, +USBC_Width+1), 270, Round, [0.5]),
                 (J1_mod, (3, +USBC_Width  ),   0, Round, [0.5]),
@@ -212,7 +212,7 @@ def drawEdgeCuts( board ):
             out_cnrs.append( cnr )
             mid_cnrs.append( cnr )
         # J2: USB PC
-        if board in [BDL, BDS]:
+        if board in [BDL]:
             cnrs = [
                 (J2_mod, (2.62, -USBC_Width-1),  90, Round, [0.5]),
                 (J2_mod, (2.62-3, -USBC_Width), 180, Round, [0.5]),
@@ -262,8 +262,8 @@ def drawEdgeCuts( board ):
                 global Edge_W, Edge_H
                 Edge_CX, Edge_CY = (x0 + x1) / 2, (y0 + y1) / 2
                 Edge_W, Edge_H = x1 - x0, y1 - y0
-                if False:
-                    print( 'Edge: (CX, CY) = ({:.2f}, {:.2f})'.format( Edge_CX, Edge_CY ) )
+                if True:
+                    # print( 'Edge: (CX, CY) = ({:.2f}, {:.2f})'.format( Edge_CX, Edge_CY ) )
                     print( 'Edge: (W, H) = ({:.2f}, {:.2f})'.format( Edge_W, Edge_H ) )
 
     if board in [BDL, BDR, BDM]:# J3
@@ -417,7 +417,7 @@ def connect_line_ends( line_lefts, line_rights, side, curv_idx, pos, idx, layer,
 
 def draw_top_bottom( board, sw_pos_angles ):
     if board in [BDT, BDS]:# keysw holes
-        length = 13.94 if board == BDT else 14.80
+        length = 13.94 if board == BDT else 14.70
         for sw_pos, angle in sw_pos_angles:
             corners = []
             for i in range( 4 ):
@@ -778,9 +778,10 @@ def place_mods( board ):
             else:
                 corners = []
                 if True:
+                    hsize = [4.2, 4.86] if board in [BDL, BDR] else [4.4, 5.0]
                     for i in range( 4 ):
                         deg = i * 90 - angle
-                        pos = vec2.scale( [4.2, 4.86][i % 2] / 2.0, vec2.rotate( deg ), ctr )
+                        pos = vec2.scale( hsize[i % 2] / 2.0, vec2.rotate( deg ), ctr )
                         corners.append( [(pos, deg + 90), BezierRound, [1.2]] )
                 else:
                     for i in range( 6 ):
