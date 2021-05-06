@@ -1064,7 +1064,7 @@ def wire_mods( board ):
                     prm_vcc = (Dird, ([prm_vcc_offset, (1, 180)], 0), ([prm_vcc_offset, (1, 180)], 45), r_pwr)
             # GND
             if board == BDL:
-                if cidx in [0, 1, 2, 6]:
+                if cidx in [0, 1, 2]:
                     prm_gnd = (Dird, 90, prm_gnd_right, r_pwr)
                 elif cidx in [3]:
                     prm_gnd = (Dird, 90, ([(8.4, 0), (2.8, 40)], 0), r_pwr)
@@ -1072,6 +1072,8 @@ def wire_mods( board ):
                     prm_gnd = (Dird, ([(2.6, 90)], -45 + angle_M - angle_PB), prm_gnd_right, r_pwr)
                 elif cidx in [5]:
                     prm_gnd = (Dird, ([(4, 90)], 0), 90, -0)
+                elif cidx in [6]:
+                    prm_gnd = (Dird, 90, ([(4, 90), (6.8, 0), (2.8, 40)], 0), r_pwr)
             else:# BDR
                 if cidx in [1, 2, 3]:
                     prm_gnd = (Dird, prm_gnd_right, 90, r_pwr)
@@ -1461,7 +1463,12 @@ def wire_mods( board ):
                         dx = +2.4
                     elif idx in ['41', '43']:
                         dx = -1.6
-                via_led_pwrSs[idx] = kad.add_via_relative( mod_cap, cap_pwrS, (dx, +sign * 1.9), VIA_Size[0] )
+                else:# BDR
+                    if idx in ['53', '63']:
+                        dx = +1.6
+                    elif idx in ['33', '52', '54', '62', '64', '72']:
+                        dx = -1.6
+                via_led_pwrSs[idx] = kad.add_via_relative( mod_cap, cap_pwrS, (dx, +sign * 1.85), VIA_Size[0] )
                 # datT via
                 if (board == BDL and idx not in ['64', '71', '72', '73']) or (board == BDR and idx not in ['14']):
                     via_led_datTs[idx] = kad.add_via_relative( mod_led, led_datT, (-sign * 1.5, 0), VIA_Size[1] )
@@ -1511,8 +1518,8 @@ def wire_mods( board ):
                 continue
             sign_led = +1 if idx in [L2R, R2L][board] else -1
             one_row1 = 1 if ridx == 1 else 0
-            pwrS_offset = (sign_led * 0.2, 90)
-            pwrT_offset = (sign_led * 0.5, 90)
+            pwrS_offset = (sign_led * 0.20, 90)
+            pwrT_offset = (sign_led * 0.55, 90)
             data_offset_via = (sign_led * 0.25, 90)
             data_offset_vert = (sign_led * 2.8, 90)
             if cidx in [1, 3] or (cidx in [5] and ridx == 1):
@@ -1530,26 +1537,26 @@ def wire_mods( board ):
                     prm_pwrT = (Dird, ([pwrT_offset, (0, 0)], 0), ([pwrT_offset, (0, 0), (sign_led * 8.2, 0)], -120 - dangle), r_pwr)
                     prm_data = (Dird, 0, ([data_offset_via, (sign_led * 3.8, 0)], -120 - dangle), r_dat)
                 else:# BDR
-                    prm_pwrS = (Dird, 0, ([(-sign_led * (5.0 + 3.0 * one_row1), 0)], -110 - dangle), r_pwr)
-                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (-sign_led * (2.2 + 2.8 * one_row1), 0)], 110 + dangle), r_pwr)
+                    prm_pwrS = (Dird, ([pwrS_offset], 0), ([pwrS_offset, (-sign_led * (3.4 + 4.6 * one_row1), 0)], -110 - dangle), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset, (0, 0)], 0), ([pwrT_offset, (0, 0), (-sign_led * (2.2 + 2.8 * one_row1), 0)], 110 + dangle), r_pwr)
                     prm_data = (Dird, ([data_offset_vert], 0), ([data_offset_via, (sign_led * 4.0, 0)], 110 + angle_M), r_dat)
             elif cidx in [9]:
                 if board == BDL:
                     prm_pwrS = (Dird, 0, ([pwrS_offset, (+sign_led * 1.5, 0)], -45), r_pwr)
-                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (0, 0), (sign_led * 8.2, 0)], 45), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (0, 0), (+sign_led * 8.2, 0)], 45), r_pwr)
                     prm_data = (Dird, 0, ([data_offset_via, (sign_led * 3.8, 0)], 45), r_dat)
                 else:# BDR
-                    prm_pwrS = (Dird, 0, ([(-sign_led * 7.4, 0)], -125), r_pwr)
-                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (-sign_led * 4.4, 0)], 125), r_pwr)
+                    prm_pwrS = (Dird, 0, ([pwrS_offset, (-sign_led * 7.4, 0)], -125), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset], 0), ([pwrT_offset, (0, 0), (-sign_led * 4.4, 0)], 125), r_pwr)
                     prm_data = (Dird, ([data_offset_vert], 0), ([data_offset_via, (sign_led * 4.0, 0)], 125 - 8.5), r_dat)
             elif cidx in [5, 6]:
                 if board == BDL:
                     prm_pwrS = (Dird, ([pwrS_offset, (sign_led * 7.0, 180)], 150), ([pwrS_offset], 0), r_pwr)
-                    prm_pwrT = (Dird, ([pwrT_offset, (0, 0), (sign_led * 3.2, 180)], 30), ([pwrT_offset, (0, 0)], 0), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset, (0, 0), (+sign_led * 3.0, 180)], +30), ([pwrT_offset, (0, 0)], 0), r_pwr)
                     prm_data = (Dird, 90, ([data_offset_via], 0), r_dat)
                 else:# BDR
-                    prm_pwrS = (Dird, ([(-sign_led * 6.4, 180)], -150), 0, r_pwr)
-                    prm_pwrT = (Dird, ([pwrT_offset, (-sign_led * 9.2, 180)], -30), ([pwrT_offset], 0), r_pwr)
+                    prm_pwrS = (Dird, ([pwrS_offset, (-sign_led * 7.8, 180)], -150), ([pwrS_offset], 0), r_pwr)
+                    prm_pwrT = (Dird, ([pwrT_offset, (0, 0), (-sign_led * 9.2, 180)], -30), ([pwrT_offset, (0, 0)], 0), r_pwr)
                     prm_data = (Dird, ([data_offset_vert], 0), ([data_offset_via, (sign_led * 3.6, 0)], -30), r_dat)
             kad.wire_mods( [
                 # pwrT
@@ -1576,7 +1583,7 @@ def wire_mods( board ):
                 ('L71', '2', 'L72', '4', w_dat, prm_data, 'F.Cu'),# data
             ] )
         else:# BDR
-            prm_pwrS = (Dird, 0, ([(5, +90), (2, 135), (2.2, +90), (2, 45)], +90), r_pwr)
+            prm_pwrS = (Dird, ([(-0.20, 90)], 0), ([(5, +90), (2, 135), (2.2, +90), (2, 45)], +90), r_pwr)
             prm_pwrT = (Dird, ([(2.4, +45)], 90), ([(6.4, 90), (4.0, 45), (3.6, 0)], 45), r_pwr)
             prm_data = (Dird, 90, ([(2.4, -90), (2.0, -45), (11.0, -90)], 0), r_dat)
             kad.wire_mods( [
