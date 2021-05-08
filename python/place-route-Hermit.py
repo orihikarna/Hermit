@@ -332,7 +332,7 @@ def drawEdgeCuts( board ):
         ]
         midcnrs_set.append( make_corners( cnrs ) )
     if board in [BDL, BDR, BDM]:# draw BDM
-        layers = ['Edge.Cuts'] if board == BDM else ['F.SilkS', 'B.SilkS']
+        layers = ['Edge.Cuts'] if board == BDM else ['F.Fab']#['F.SilkS', 'B.SilkS']
         w = width if board == BDM else width * 2
         for midcnrs in midcnrs_set:
             for layer in layers:
@@ -1830,7 +1830,7 @@ def main():
         if boardname == bname:
             board = btype
             if board in [BDL, BDR, BDM, BDS]:
-                kad.add_text( (86, 2.6), 0, '  Hermit{} by orihikarna 21/05/05  '.format( bname ),
+                kad.add_text( (86, 2.6), 0, '  Hermit{} by orihikarna 21/05/08  '.format( bname ),
                     'F.Cu' if board != BDR else 'B.Cu', (1.2, 1.2), 0.2,
                     pcbnew.GR_TEXT_HJUSTIFY_CENTER, pcbnew.GR_TEXT_VJUSTIFY_CENTER )
             break
