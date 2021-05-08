@@ -6,7 +6,7 @@ from PIL import Image
 board = 'ZoeaT'
 board = 'ZoeaB'
 board = 'HermitT'
-board = 'HermitB'
+# board = 'HermitB'
 layer = 'Edge_Cuts'
 root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_svg = root + 'layer/{}-{}.svg'.format( board, layer )
@@ -32,8 +32,8 @@ for ix in range( png.size[0] ):
             ix0 = min( ix0, ix )
             ix1 = max( ix1, ix )
             break
-ix0 -= 1
-ix1 += 1
+# ix0 -= 1
+# ix1 += 1
 w = ix1 - ix0 + 1
 print( "ix = ({}, {}), width = {}".format( ix0, ix1, w ) )
 
@@ -48,8 +48,8 @@ for iy in range( png.size[1] ):
             iy0 = min( iy0, iy )
             iy1 = max( iy1, iy )
             break
-iy0 -= 1
-iy1 += 1
+# iy0 -= 1
+# iy1 += 1
 h = iy1 - iy0 + 1
 print( "iy = ({}, {}), height = {}".format( iy0, iy1, h ) )
 

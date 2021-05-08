@@ -343,7 +343,7 @@ def load_distance_image( path ):
         data = fin.readlines()
         w = int( data[0] )
         h = int( data[1] )
-        # print( dist_w, dist_h )
+        print( w, h )
         dist = []
         for y in range( h ):
             vals = data[y+2].split( ',' )

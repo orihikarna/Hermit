@@ -6,6 +6,12 @@ fp-info-cache
 *.drl
 *.zip
 
+*-gerbers/
+# svg.svg
+# Edge_Fill.txt
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
