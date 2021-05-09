@@ -628,15 +628,19 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width, dump = False ):
         add_lines( curv, layer, width )
     elif cnr_type == Round:
         radius = cnr_data[0]
-        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
         # print( 'Round: radius = {}'.format( radius ) )
+        # print( apos, avec, bpos, bvec )
+        xpos, alen, blen = vec2.find_intersection( apos, avec, bpos, bvec )
+        # print( xpos, alen, blen )
         debug = False
         if not is_supported_round_angle( aangle ):
-            print( 'Round: warning aangle = {}'.format( aangle ) )
-            debug = True
+            pass
+            #print( 'Round: warning aangle = {}'.format( aangle ) )
+            #debug = True
         if not is_supported_round_angle( bangle ):
-            print( 'Round: warning bangle = {}'.format( bangle ) )
-            debug = True
+            pass
+            #print( 'Round: warning bangle = {}'.format( bangle ) )
+            #debug = True
         if alen < radius:
             print( 'Round: alen < radius, {} < {}'.format( alen, radius ) )
             debug = True
@@ -645,7 +649,7 @@ def draw_corner( cnr_type, a, cnr_data, b, layer, width, dump = False ):
             debug = True
         if debug:
             add_arc( xpos, vec2.add( xpos, (10, 0) ), 360, layer, width )
-            return b
+            return b, curv
         angle = vec2.angle( avec, bvec )
         angle = math.ceil( angle * 10 ) / 10
         tangent = math.tan( abs( angle ) / 2 / 180 * math.pi )

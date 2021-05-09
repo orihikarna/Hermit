@@ -337,6 +337,27 @@ def drawEdgeCuts( board ):
         for midcnrs in midcnrs_set:
             for layer in layers:
                 kad.draw_closed_corners( midcnrs, layer, w )
+    if board in [BDL, BDR, BDS]:# Second top
+        stpcnrs_set = []
+        USBWS = 3.2
+        USBYS = 5.4
+        USBHS = 0.9
+        for idx in range( 2 ):
+            mod = [J2_mod, J1_mod][idx]
+            USBXS = [1.65, -4.27][idx]
+            for sign in [+1, -1]:
+                cnrs = [
+                    (mod, (-USBXS, - USBHS -USBYS * sign),   0, Round, [0.8]),
+                    (mod, (-USBXS + USBWS, -USBYS * sign),  90, Round, [0.8]),
+                    (mod, (-USBXS, + USBHS -USBYS * sign), 180, Round, [0.8]),
+                    (mod, (-USBXS - USBWS, -USBYS * sign), 270, Round, [0.8]),
+                ]
+                stpcnrs_set.append( make_corners( cnrs ) )
+        layers = ['Edge.Cuts'] if board == BDS else ['F.Fab']#['F.SilkS', 'B.SilkS']
+        w = width if board == BDS else width * 2
+        for stpcnrs in stpcnrs_set:
+            for layer in layers:
+                kad.draw_closed_corners( stpcnrs, layer, w )
 
 def load_distance_image( path ):
     with open( path ) as fin:
@@ -417,7 +438,7 @@ def draw_top_bottom( board, sw_pos_angles ):
             for i in range( 4 ):
                 deg = i * 90 + angle
                 pos = vec2.scale( length / 2.0, vec2.rotate( deg ), sw_pos )
-                corners.append( [(pos, deg + 90), BezierRound, [1]] )
+                corners.append( [(pos, deg + 90), Round, [0.9]] )
             kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
 
     if board == BDS:
