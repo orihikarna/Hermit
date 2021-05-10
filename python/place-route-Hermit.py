@@ -438,7 +438,8 @@ def draw_top_bottom( board, sw_pos_angles ):
             for i in range( 4 ):
                 deg = i * 90 + angle
                 pos = vec2.scale( length / 2.0, vec2.rotate( deg ), sw_pos )
-                corners.append( [(pos, deg + 90), Round, [0.9]] )
+                # corners.append( [(pos, deg + 90), Round, [0.9]] )
+                corners.append( [(pos, deg + 90), BezierRound, [0.9]] )
             kad.draw_closed_corners( corners, 'Edge.Cuts', 0.1 )
 
     if board == BDS:
