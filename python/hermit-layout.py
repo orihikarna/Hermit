@@ -249,6 +249,35 @@ class keyboard_layout:
             fout.write( '    \'{}\' : [{:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.1f}], # {}\n'.format( keyidx, t[0], -t[1], w, h, -r, key.name[0] ) )
         fout.write( '}\n' )
 
+    def write_firmware( self, fout, unit_w: float ):
+        key_pos_name = []
+        s = (0, 0)
+        for key in self.keys:
+            (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
+            px = x - rx + w / 2
+            py = y - ry + h / 2
+            t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
+            t *= unit_w
+            key_pos_name.append( (t, key.name) )
+            s += t
+        ctr = s / len( self.keys )
+
+        indices = [26, 27, 28, 29,
+             0,  4,  8, 12, 16,     23,
+            24, 20, 17, 13,  9,  5,  1,
+             2,  6, 10, 14, 18, 21, 25,
+                22, 19, 15, 11,  7,  3,
+        ]
+        # indices = range( 30 )
+        fout.write( 'constexpr int8_t sw_pos[30][2] = {\n' )
+        for idx in indices:
+            pos, name = key_pos_name[idx]
+            name = name.replace( '\n', '/' )
+            pos -= ctr
+            pos *= 1.6
+            fout.write( f'  {{ {pos[0]: 4.0f}, {-pos[1]: 4.0f}}},// {name}, {idx}\n' )
+        fout.write( '};\n' )
+
     def save( self, path: str ):
         data = []
         data.append( self.meta )
@@ -307,7 +336,8 @@ class key_layout_maker:
         if keyh < 0:
             keyh = self.keyh
         for idx, names in enumerate( [names1, names2]):
-            if idx in [1]:
+            # if idx in [1]:# right
+            if idx in [0]:# left
                 continue
             xsign = [+1, -1][idx]
             prop = collections.OrderedDict()
@@ -521,7 +551,8 @@ if __name__=='__main__':
         # kbd.print()
         kbd.write_png( dst_png_fmt.format( i ), unit_w, thickness, paper_size )
         if i == N and ratio == 1:
-            kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
-            kbd.write_scad( dst_scad, unit_w )
-            kbd.write_kicad( sys.stdout, unit_w )
+            # kbd.write_pdf( dst_pdf, unit_w, thickness, paper_size )
+            # kbd.write_scad( dst_scad, unit_w )
+            kbd.write_firmware( sys.stdout, unit_w )
+            # kbd.write_kicad( sys.stdout, unit_w )
         # break
