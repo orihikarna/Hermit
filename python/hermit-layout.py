@@ -258,6 +258,7 @@ class keyboard_layout:
             py = y - ry + h / 2
             t = vec2( rx, ry ) + vec2( px, py ) @ mat2_rot( r )
             t *= unit_w
+            t *= 1.6
             key_pos_name.append( (t, key.name) )
             s += t
         ctr = s / len( self.keys )
@@ -269,13 +270,16 @@ class keyboard_layout:
                 22, 19, 15, 11,  7,  3,
         ]
         # indices = range( 30 )
-        fout.write( 'constexpr int8_t sw_pos[30][2] = {\n' )
+        org = key_pos_name[29][0] + (10, 0)
+        fout.write( 'constexpr int8_t sw_pos[30][4] = {\n' )
         for idx in indices:
             pos, name = key_pos_name[idx]
             name = name.replace( '\n', '/' )
+            vec = pos - org
+            rad = np.linalg.norm( vec ) / 4
+            angle = np.rad2deg( np.arctan2( vec[1], -vec[0] ) )
             pos -= ctr
-            pos *= 1.6
-            fout.write( f'  {{ {pos[0]: 4.0f}, {-pos[1]: 4.0f}}},// {name}, {idx}\n' )
+            fout.write( f'  {{ {pos[0]: 4.0f}, {-pos[1]: 4.0f}, {rad:3.0f}, {angle: 4.0f} }},// {name}, {idx}\n' )
         fout.write( '};\n' )
 
     def save( self, path: str ):
