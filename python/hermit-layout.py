@@ -251,7 +251,8 @@ class keyboard_layout:
 
     def write_firmware( self, fout, unit_w: float ):
         key_pos_name = []
-        s = (0, 0)
+        tmax = (-1000, -1000)
+        tmin = (+1000, +1000)
         for key in self.keys:
             (x, y, r, rx, ry, w, h) = (key.x, key.y, key.r, key.rx, key.ry, key.w, key.h)
             px = x - rx + w / 2
@@ -260,8 +261,10 @@ class keyboard_layout:
             t *= unit_w
             t *= 1.6
             key_pos_name.append( (t, key.name) )
-            s += t
-        ctr = s / len( self.keys )
+            tmax = np.fmax( tmax, t )
+            tmin = np.fmin( tmin, t )
+        ctr = (tmax + tmin) / 2
+        scale = np.min( 127 / np.abs( tmax - tmin ) ) * 2
 
         indices = [26, 27, 28, 29,
              0,  4,  8, 12, 16,     23,
@@ -270,15 +273,15 @@ class keyboard_layout:
                 22, 19, 15, 11,  7,  3,
         ]
         # indices = range( 30 )
-        org = key_pos_name[29][0] + (10, 0)
+        org = key_pos_name[28][0] + (10, 0)
         fout.write( 'constexpr int8_t sw_pos[30][4] = {\n' )
         for idx in indices:
             pos, name = key_pos_name[idx]
             name = name.replace( '\n', '/' )
             vec = pos - org
-            rad = np.linalg.norm( vec ) / 4
-            angle = np.rad2deg( np.arctan2( vec[1], -vec[0] ) )
-            pos -= ctr
+            rad = np.linalg.norm( vec ) * 0.488
+            angle = np.rad2deg( np.arctan2( vec[1], -vec[0] ) ) * 256 / 360
+            pos = scale * (pos - ctr)
             fout.write( f'  {{ {pos[0]: 4.0f}, {-pos[1]: 4.0f}, {rad:3.0f}, {angle: 4.0f} }},// {name}, {idx}\n' )
         fout.write( '};\n' )
 

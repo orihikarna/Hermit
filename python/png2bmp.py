@@ -4,9 +4,12 @@ import numpy as np
 import sys
 from PIL import Image
 
-board = 'stm32tiny'
+# board = 'stm32tiny'
+board = 'HermitL'
+board = 'HermitR'
+board = 'ZoeaR'
 layer = 'F_Paste'
-# layer = 'B_Paste'
+layer = 'B_Paste'
 root = '/Users/akihiro/repos/Hermit/{}/'.format( board )
 path_png = root + 'layer/{}-{}.png'.format( board, layer )
 path_bmp = root + 'layer/{}-{}.bmp'.format( board, layer )
