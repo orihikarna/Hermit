@@ -1,0 +1,10 @@
+(module DummyPad (layer F.Cu) (tedit 5F4BA295)
+  (fp_text reference REF** (at 0 -1.5) (layer F.SilkS) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value DummyPad (at 0 1.4) (layer F.Fab) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (pad 1 smd circle (at 0 0) (size 0.4 0.4) (layers F.Cu)
+    (zone_connect 2))
+)
