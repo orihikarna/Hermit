@@ -1,6 +1,6 @@
 # Hermit - An Ergonomic Narrow-Pitch Split Keyboard
 
-<img src="images/hermit.png" width="512"></img>
+<img src="images/hermit.png" width="640"></img>
 
 ## Introduction
 This is a personal hobby project on DIY keyboard.
@@ -251,7 +251,7 @@ They need to be printed for each connector shape, but fit well and the cables ar
 
 <img src="images/usb-holder.png" width="400"></img>
 
-## Finally
-Rainbow shaped Rainbow effect
+## Finally, a short video
+[Rainbow shaped Rainbow effect](https://twitter.com/orihikarna/status/1439446049446264836)
 
-[![thumbnail](https://pbs.twimg.com/ext_tw_video_thumb/1439446011735203842/pu/img/mCkmwGIeRHzzOWs7.jpg)](https://twitter.com/orihikarna/status/1439446049446264836)
+<a href="https://twitter.com/orihikarna/status/1439446049446264836"><img src="https://pbs.twimg.com/ext_tw_video_thumb/1439446011735203842/pu/img/mCkmwGIeRHzzOWs7.jpg" width="512"/></a>
