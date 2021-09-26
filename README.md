@@ -1,6 +1,6 @@
 # Hermit - An Ergonomic Narrow-Pitch Split Keyboard
 
-<img src="images/hermit.png" width="768"></img>
+<img src="images/hermit.png" width="512"></img>
 
 ## Introduction
 This is a personal hobby project on DIY keyboard.
@@ -8,7 +8,7 @@ The name *Hermit* comes from its key switch layout: it looked like a hermit crab
 
 Before working on this "full" keyboard, I made a test split keypad with 10 keys as a proof of concept model, which was named *Zoea*.
 
-<img src="images/zoea.png" width="384"></img>
+<img src="images/zoea.png" width="400"></img>
 
 ### Features
 - Symmetric split with 60 keys
@@ -37,7 +37,7 @@ I thought this is the answer for me and I should follow this design.
 To begin with, I placed keycaps on a cardboard with lines of double sided tapes on it, and try tapping on it.
 Sometimes added more keys, and other times removed some of them to find one that suits my fingers.
 
-<img src="images/cardboards.png" width="384"></img>
+<img src="images/cardboards.png" width="400"></img>
 
 ### 3D printer prototyping
 After I purchased a 3D printer, I continued the seek for the layout using the actual Choc V2 key switches on 3D printed frames.
@@ -49,7 +49,7 @@ It enabled me to more finely adjust:
 I usually use Japanese key layouts, and I found that 60 keys is the minimum that I can accept.
 I wanted to keep most of the symbol keys on the board (without layers).
 
-<img src="images/3dprinter.png" width="384"></img>
+<img src="images/3dprinter.png" width="400"></img>
 
 ### Parametric model
 When the layout was roughly determined, I tried to parametrize the layout to adjust the degree of ergonomic-ness.
@@ -71,7 +71,7 @@ This keyboard is composed of 6 PCB layers and is 8mm thick in total.
 - Mid layer (1.2mm x2)
 - Bottom layer (1.6mm)
 
-<img src="images/pcb-stack.png" width="512"></img>
+<img src="images/pcb-stack.png" width="400"></img>
 
 I used KiCad v5.1.5 for the PCB design.
 
@@ -127,7 +127,7 @@ This means that:
 - the intersection of the two lines will automatically be found
 - make corners round by radius r_col
 
-<img src="images/routing.png" width="512"></img>
+<img src="images/routing.png" width="400"></img>
 
 This way, the wiring is parallel to each part and looks roundy at corners.
 
@@ -139,7 +139,7 @@ However, for the last two years, I experienced a couple of keys of my ErgoDash e
 I guess the software debounce might not be enough when it is very hot and super humid.
 I've therefore added debounce RC for each column lines:
 
-<img src="images/debounce-rc.png" width="512"></img>
+<img src="images/debounce-rc.png" width="400"></img>
 
 - When a key switch is released,
   - the Col lines are pulled down to GND.
@@ -161,7 +161,7 @@ In Zoea PCB, it was useful to use hexagonal hole for spacers to keep them fixed:
 However, I needed to carefully choose the hexagon radius and the radius of the hexagon corners taking into account the endmill diameter.
 So, this time, I used rectangular holes for the same purpose. I didn't have to consider much about the radius of the rectangle corners because any value would be fine with hexagon.
 
-<img src="images/hex-spacers.png" width="512"></img>
+<img src="images/hex-spacers.png" width="400"></img>
 
 ## Boundary avoidance using distance transform
 I wanted to fill the surface of the top and the bottom plates with some design other than just nothing.
@@ -182,20 +182,20 @@ It would be easier to end lines nicely at the boundaries: if it is near the boun
 
 The following figures are from Zoea top layer. First, the distance transform.
 
-<img src="images/distance.png" width="512"></img>
+<img src="images/distance.png" width="400"></img>
 
 The final stripes on PCB. The thickness is reversed on its front and back.
 
-<img src="images/lines-zoea.png" width="512"></img>
+<img src="images/lines-zoea.png" width="400"></img>
 
 It looked ok that time, however, I wanted to get closer to the edge this time...
 So, divided thick lines into a multiple of thin lines:
 
-<img src="images/lines-hermit1.png" width="512"></img>
+<img src="images/lines-hermit1.png" width="400"></img>
 
 and then, drew vertical / slant lines that connect the ends of thin horizontal lines:
 
-<img src="images/lines-hermit2.png" width="512"></img>
+<img src="images/lines-hermit2.png" width="400"></img>
 
 ## Firmware
 For my studying of embedded programming, I wrote the firmware from scratch instead of using qmk.
@@ -221,7 +221,7 @@ It has only one line for both data and clock, so it needs strict timing to send 
 There are 60 keys on Hermit, so that it takes 2ms to send series of data for all of them at once.
 As 2ms felt too long, I split them to left and right half, and reduced the duration of interrupt-disabled periods to 1ms each.
 
-<img src="images/rgb-led.png" width="512"></img>
+<img src="images/rgb-led.png" width="400"></img>
 
 ### Emacs translation
 I have been using Emacs key-binding for years.
@@ -249,7 +249,7 @@ They are thick in general and their stiffness gives strong forces on USB connect
 So, I printed a simple-extrusion-work cable connector holder for them.
 They need to be printed for each connector shape, but fit well and the cables are firmly attached to the keyboard.
 
-<img src="images/usb-holder.png" width="512"></img>
+<img src="images/usb-holder.png" width="400"></img>
 
 ## Finally
 Rainbow shaped Rainbow effect
