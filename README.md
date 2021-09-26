@@ -240,6 +240,18 @@ even after implemented RGB effects and Emacs translations, the current code size
 - data+bss: 2.5KB
 
 namely, only the half of STM32F042 capacity (32KB/6KB) is used.
-More RGB effects can be coded, yay!
+
+## USB connector holders
+For USB Type-C connectors, I gave up using the full 24-pin type due to the lack of my ability to solder them on PCB.
+Instead, 16-pin type is used, where I2C is sent over D+/D- and LED signal is sent over SBU1/2.
+Although other USB3.0 signal lines are not used at all, only because SBU1/2 is used, "full spec" Type-C cable is required to connect left and right.
+They are thick in general and their stiffness gives strong forces on USB connectors.
+So, I printed a simple-extrusion-work cable connector holder for them.
+They need to be printed for each connector shape, but fit well and the cables are firmly attached to the keyboard.
+
+<img src="images/usb-holder.png" width="512"></img>
+
+## Finally
+Rainbow shaped Rainbow effect
 
 [![thumbnail](https://pbs.twimg.com/ext_tw_video_thumb/1439446011735203842/pu/img/mCkmwGIeRHzzOWs7.jpg)](https://twitter.com/orihikarna/status/1439446049446264836)
