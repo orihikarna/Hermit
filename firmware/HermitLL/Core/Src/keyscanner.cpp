@@ -233,11 +233,13 @@ void KeyScanner::scan( KeyEventBuffer* fifo )
   write_left_row_pin( curr_row, RESET );// reset left row line
   write_left_row_pin( next_row, SET   );// set left row line
   //_LL_GPIO_SetOutputPinValue( LED_GPIO_Port, LED_Pin, (m_led_RL & ELED::LALL) == 0 );// set left LED
+  _LL_GPIO_SetOutputPinValue( LED_GPIO_Port, LED_Pin, get_led_state( LED_LEFT ) );// set left LED
 
   ////////
   // right I2C
   const uint8_t right_cols = read_right_col_port();// read right columns
-  write_right_row_port( next_row, (m_led_RL & ELED::RALL) != 0 );// reset & set right row line, set right LED
+  //write_right_row_port( next_row, (m_led_RL & ELED::RALL) != 0 );// reset & set right row line, set right LED
+  write_right_row_port( next_row, get_led_state( LED_RIGHT ) );// reset & set right row line, set right LED
 
   ////////
   // scan
@@ -251,17 +253,17 @@ void KeyScanner::scan( KeyEventBuffer* fifo )
       if (keysw_L < 255) {
         //update_key_state( fifo, keysw_L, read_left_col_pin( col ) );
         update_key_state( fifo, keysw_L, get_left_col_bit( left_cols, col ) );
-        if (is_pressed( keysw_L )) m_led_RL |= ELED::L0 << curr_row;
+        //if (is_pressed( keysw_L )) m_led_RL |= ELED::L0 << curr_row;
       }
       if (keysw_R < 255) {
         update_key_state( fifo, keysw_R, get_right_col_bit( right_cols, col ) );
-        if (is_pressed( keysw_R )) m_led_RL |= ELED::R0 << curr_row;
+        //if (is_pressed( keysw_R )) m_led_RL |= ELED::R0 << curr_row;
       }
     }
     if (curr_row == NUM_ROWS - 1) {// BOOT0
       //update_key_state( fifo, EKeySW::L91, read_left_col_pin( COLB ) );
       update_key_state( fifo, EKeySW::L91, get_left_col_bit( left_cols, COLB ) );
-      if (is_pressed( EKeySW::L91 )) m_led_RL |= ELED::L0 << curr_row;
+      //if (is_pressed( EKeySW::L91 )) m_led_RL |= ELED::L0 << curr_row;
     }
   }
   LOG_DEBUG( "elapsed = %ld us", et.getElapsedMicroSec() );

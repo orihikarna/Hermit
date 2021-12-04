@@ -1,6 +1,7 @@
 #include <qmk/keycode_jp.h>
 #include "keyproc.hpp"
 #include "log.h"
+#include "main.h"
 
 #define USE_JP
 
@@ -285,8 +286,10 @@ void KeyEmacsProc::on_enter_map_table( uint8_t table_index )
     case EMTI_None:
       swap_mods( m_pressed_mods, m_registered_mods );
       m_registered_mods = m_pressed_mods;
+      set_led_state( LED_RIGHT, 1 );
       break;
     case EMTI_Default:
+      set_led_state( LED_RIGHT, 0 );
       break;
     case EMTI_CxPrefix:
       break;
@@ -511,7 +514,7 @@ bool KeyEmacsProc::process( KeyEventBuffer& kevb_in, KeyEventBuffer& kevb_out )
         }
         on_search_map_table( m_map_table_index, index );
         if (m_next_map_table_index != m_map_table_index) {
-          on_enter_map_table( m_map_table_index );
+          on_enter_map_table( m_next_map_table_index );
           m_map_table_index = m_next_map_table_index;
         }
       }

@@ -45,6 +45,14 @@
 /* USER CODE BEGIN PV */
 volatile uint8_t g_timer_flag = 0;
 volatile int16_t g_timer_counter = 0;
+uint8_t s_led_state[2] = { 0, 0 };
+
+void set_led_state( uint8_t index, uint8_t state ) {
+  s_led_state[index] = state;
+}
+uint8_t get_led_state( uint8_t index ) {
+  return s_led_state[index];
+}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

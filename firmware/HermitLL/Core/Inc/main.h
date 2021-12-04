@@ -123,6 +123,14 @@ extern volatile int16_t g_timer_counter;
 extern uint16_t debug_cnt1, debug_cnt2, debug_cnt3;
 
 __STATIC_INLINE int16_t _LL_GetTick() { return g_timer_counter; }
+
+enum {
+  LED_LEFT  = 0,
+  LED_RIGHT = 1,
+};
+
+void set_led_state( uint8_t index, uint8_t state );
+uint8_t get_led_state( uint8_t index );
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

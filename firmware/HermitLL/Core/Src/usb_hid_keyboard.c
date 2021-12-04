@@ -255,11 +255,7 @@ static usbd_respond hid_control(usbd_device *dev, usbd_ctlreq *req, usbd_rqc_cal
         case USB_HID_SETREPORT:// 0x09
             LOG_DEBUG( "control CLASS SetReport: cnt = %d, ptr = %p, [0] = %d, [1] = %d", dev->status.data_count, dev->status.data_ptr,
                 ((uint8_t*)dev->status.data_ptr)[0], ((uint8_t*)dev->status.data_ptr)[1] );
-            if (((uint8_t*)dev->status.data_ptr)[0]) {
-              LL_GPIO_SetOutputPin( LED_GPIO_Port, LED_Pin );
-            } else {
-              LL_GPIO_ResetOutputPin( LED_GPIO_Port, LED_Pin );
-            }
+            set_led_state( LED_LEFT, ((uint8_t*)dev->status.data_ptr)[0] );
             return usbd_ack;
         default:
             return usbd_fail;
