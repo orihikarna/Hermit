@@ -159,23 +159,31 @@ namespace {// maps
     { 0             , KC_H,    MOD_C,     KC_A    },// All
   };
 
+#define MARKSEL_MOVE_TO_DEFAULT_INDEX 8
+
   constexpr uint8_t map_table_marksel[][MAP_ENTRY_SIZE] = {
     { MOD_C         , KC_Q,    MOD_TABLE, EMTI_None },
     { MOD_C         , KC_G,    MOD_MACRO, EMM_MarkCancel },
     { MOD_C         , KC_W,    MOD_MACRO, EMM_MarkCut },// cut
     { MOD_M         , KC_W,    MOD_MACRO, EMM_MarkCopy },// copy
-    { MOD_C         , KC_A,    MOD_S,     KC_HOME },
-    { MOD_C         , KC_E,    MOD_S,     KC_END  },
-    { MOD_C         , KC_F,    MOD_S,     KC_RGHT },
-    { MOD_C         , KC_B,    MOD_S,     KC_LEFT },
-    { MOD_C         , KC_P,    MOD_S,     KC_UP   },
-    { MOD_C         , KC_N,    MOD_S,     KC_DOWN },
-    { MOD_CS        , KC_V,    MOD_S,     KC_PGUP },
-    { MOD_C         , KC_V,    MOD_S,     KC_PGDN },
+    { MOD_C         , KC_Y,    MOD_C,     KC_V    },// paste
+    // mac style
+    { MOD_M         , KC_X,    MOD_MACRO, EMM_MarkCut },// cut
+    { MOD_M         , KC_C,    MOD_MACRO, EMM_MarkCopy },// copy
+    { MOD_M         , KC_V,    MOD_C,     KC_V    },// paste
+    // go to the default mapping after the above
+    { MOD_C         , KC_A,    MOD_S,     KC_HOME },// Home
+    { MOD_C         , KC_E,    MOD_S,     KC_END  },// End
+    { MOD_C         , KC_F,    MOD_S,     KC_RGHT },// Right
+    { MOD_C         , KC_B,    MOD_S,     KC_LEFT },// Left
+    { MOD_C         , KC_P,    MOD_S,     KC_UP   },// Up
+    { MOD_C         , KC_N,    MOD_S,     KC_DOWN },// Down
+    { MOD_CS        , KC_V,    MOD_S,     KC_PGUP },// Page Up
+    { MOD_C         , KC_V,    MOD_S,     KC_PGDN },// Page Down
     { MOD_M         , KC_F,    MOD_CS,    KC_RGHT },// next word
     { MOD_M         , KC_B,    MOD_CS,    KC_LEFT },// prev word
-    { MOD_SM        , UKC_COMM,MOD_CS,    KC_HOME },
-    { MOD_SM        , UKC_DOT, MOD_CS,    KC_END  },
+    { MOD_SM        , UKC_COMM,MOD_CS,    KC_HOME },// top
+    { MOD_SM        , UKC_DOT, MOD_CS,    KC_END  },// bottom
     { 0             , KC_LEFT, MOD_S,     KC_LEFT },
     { 0             , KC_RGHT, MOD_S,     KC_RGHT },
     { 0             , KC_UP,   MOD_S,     KC_UP   },
@@ -310,7 +318,7 @@ void KeyEmacsProc::on_search_map_table( uint8_t table_index, uint8_t entry_index
       m_next_map_table_index = EMTI_Default;
       break;
     case EMTI_MarkSel:
-      if (entry_index < 4 || MAP_COUNT_MARKSEL <= entry_index) {
+      if (entry_index < MARKSEL_MOVE_TO_DEFAULT_INDEX || MAP_COUNT_MARKSEL <= entry_index) {
         m_next_map_table_index = EMTI_Default;
         //backlight_disable();
       }
